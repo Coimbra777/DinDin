@@ -10,6 +10,12 @@ Na raiz do repositório:
 docker compose up -d --build
 ```
 
+### Copie o arquivo .env
+
+```bash
+cp .env.example .env
+```
+
 ### 2. Entrar no container da aplicação
 
 ```bash
@@ -23,8 +29,6 @@ composer install
 ```
 
 ### 4. Laravel (Artisan) — dentro do container
-
-Garanta que existe `.env` (ex.: copie de `.env.example`) com as credenciais alinhadas ao `docker-compose.yml`.
 
 Exemplos usuais após o primeiro setup:
 
