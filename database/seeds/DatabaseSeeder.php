@@ -1,9 +1,6 @@
 <?php
 
-use App\Sections;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,5 +15,16 @@ class DatabaseSeeder extends Seeder
         $this->call(UsersSeeder::class);
         $this->call(FinanceCategorySeeder::class);
         $this->call(ConfigSeeder::class);
+
+        $this->call([
+            FinanceSeeder::class,
+            GoalsSeeder::class,
+            CreditCardSeeder::class,
+            PlanningSeeder::class,
+        ]);
+
+        if (filter_var(env('SEED_FINANCIAL_TEST_DATA', false), FILTER_VALIDATE_BOOLEAN)) {
+            $this->call(FinancialTestDataSeeder::class);
+        }
     }
 }

@@ -4,14 +4,22 @@ namespace App\Models;
 
 use App\Models\Finance\Category;
 use App\Models\Finance\Transaction;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
+    use HasFactory;
     use Notifiable;
     use SoftDeletes;
+
+    protected static function newFactory()
+    {
+        return UserFactory::new();
+    }
 
     public $timestamps = true;
 

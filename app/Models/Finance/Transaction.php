@@ -6,7 +6,9 @@ namespace App\Models\Finance;
 
 use App\Models\Finance\CreditCard;
 use App\Models\User;
+use Database\Factories\Finance\TransactionFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +16,13 @@ use InvalidArgumentException;
 
 class Transaction extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory()
+    {
+        return TransactionFactory::new();
+    }
+
     public const TYPE_INCOME = 'income';
 
     public const TYPE_EXPENSE = 'expense';

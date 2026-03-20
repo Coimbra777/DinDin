@@ -5,12 +5,21 @@ declare(strict_types=1);
 namespace App\Models\Finance;
 
 use App\Models\User;
+use Database\Factories\Finance\FinanceMonthlyPlanFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FinanceMonthlyPlan extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory()
+    {
+        return FinanceMonthlyPlanFactory::new();
+    }
+
     protected $table = 'finance_monthly_plans';
 
     protected $fillable = [

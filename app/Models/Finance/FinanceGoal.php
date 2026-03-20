@@ -6,12 +6,21 @@ namespace App\Models\Finance;
 
 use App\Models\User;
 use App\Models\Finance\Category;
+use Database\Factories\Finance\FinanceGoalFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FinanceGoal extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory()
+    {
+        return FinanceGoalFactory::new();
+    }
+
     protected $table = 'finance_goals';
 
     protected $fillable = [

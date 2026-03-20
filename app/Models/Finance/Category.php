@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Models\Finance;
 
 use App\Models\User;
+use Database\Factories\Finance\CategoryFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,6 +15,13 @@ use Illuminate\Support\Str;
 
 class Category extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory()
+    {
+        return CategoryFactory::new();
+    }
+
     public const TYPE_INCOME = 'income';
 
     public const TYPE_EXPENSE = 'expense';

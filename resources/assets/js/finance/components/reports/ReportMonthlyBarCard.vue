@@ -108,14 +108,14 @@ export default {
         const n = Math.max(6, Math.min(12, Number(this.localMonths) || 6))
         const { data } = await axios.get(`${base}/reports/trend`, { params: { months: n } })
         this.series = data.series || []
-        await this.$nextTick()
-        this.renderChart()
       } catch (e) {
         this.series = []
         this.$emit('error', 'Não foi possível carregar a série mensal.')
       } finally {
         this.loading = false
       }
+      await this.$nextTick()
+      this.renderChart()
     },
     renderChart() {
       const canvas = this.$refs.barCanvas
@@ -125,6 +125,7 @@ export default {
       const receitas = this.series.map((r) => Number(r.receitas) || 0)
       const despesas = this.series.map((r) => (Number(r.despesas_caixa) || 0) + (Number(r.despesas_cartao) || 0))
       const isNarrow = typeof window !== 'undefined' && window.innerWidth < 600
+      const tc = this.chartThemeColors()
       const ctx = canvas.getContext('2d')
       this.chartInstance = new Chart(ctx, {
         type: 'bar',

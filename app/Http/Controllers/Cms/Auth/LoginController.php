@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Cms\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 
 class LoginController extends Controller
 {
@@ -50,5 +52,14 @@ class LoginController extends Controller
     {
         return 'username';
 
+    }
+
+    /**
+     * Após logout: ir para o login do CMS (evita redirect('/') do trait).
+     * Caminho relativo: no Docker (ex.: localhost:8004) mantém host e porta.
+     */
+    protected function loggedOut(Request $request): RedirectResponse
+    {
+        return redirect()->route('login');
     }
 }

@@ -6,13 +6,22 @@ namespace App\Models\Finance;
 
 use App\Models\Finance\Transaction;
 use App\Models\User;
+use Database\Factories\Finance\CreditCardFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CreditCard extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory()
+    {
+        return CreditCardFactory::new();
+    }
+
     protected $table = 'finance_credit_cards';
 
     protected $fillable = [

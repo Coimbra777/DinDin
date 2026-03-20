@@ -40,7 +40,25 @@ php artisan storage:link
 php artisan jwt:secret
 ```
 
+**Reset completo com dados de demonstração (finanças):**
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+Após o seed: utilizador **`test@test.com`** / **`123456`** (grupo administrador, categorias e transações de exemplo). Também existe **`admin@example.com`** / **`123456`**.
+
 Outros comandos do Artisan, quando precisar: `php artisan <comando>`.
+
+### Testes automatizados (PHPUnit)
+
+```bash
+./vendor/bin/phpunit
+./vendor/bin/phpunit tests/Unit
+./vendor/bin/phpunit tests/Feature/Finance
+```
+
+Requisitos e `.env.testing`: ver [docs/testing.md](docs/testing.md).
 
 ### 5. Front-end (fora do container)
 
