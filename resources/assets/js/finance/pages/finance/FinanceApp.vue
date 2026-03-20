@@ -59,6 +59,17 @@
       <span v-if="userName" class="text-caption finance-text-muted mr-2 d-none d-sm-inline text-truncate" style="max-width: 140px">
         {{ userName }}
       </span>
+      <v-btn
+        text
+        small
+        color="secondary"
+        class="mr-1 finance-help-toolbar-btn"
+        aria-label="Como funciona?"
+        @click="helpDialog = true"
+      >
+        <v-icon left small>mdi-help-circle-outline</v-icon>
+        <span class="d-none d-sm-inline text-none">Como funciona?</span>
+      </v-btn>
       <finance-theme-toggle />
       <v-btn icon aria-label="Sair" @click="logout">
         <v-icon>mdi-logout-variant</v-icon>
@@ -312,6 +323,8 @@
       </v-card>
     </v-dialog>
 
+    <finance-help-modal v-model="helpDialog" />
+
     <v-dialog v-model="deleteCatDialog.open" max-width="400" persistent>
       <v-card class="rounded-lg">
         <v-card-title class="headline">Excluir categoria?</v-card-title>
@@ -340,6 +353,7 @@ import InsightsPage from '../insights/InsightsPage.vue'
 import CreditSimulatorPage from '../simulator/CreditSimulatorPage.vue'
 import PlanningPage from '../planning/PlanningPage.vue'
 import FinanceThemeToggle from '../../components/FinanceThemeToggle.vue'
+import FinanceHelpModal from '../../components/FinanceHelpModal.vue'
 import { monthChoices, normalizeMonth } from '../../format'
 import { applyBodyThemeClass, getStoredTheme } from '../../financeTheme'
 
@@ -371,6 +385,7 @@ export default {
     CreditSimulatorPage,
     PlanningPage,
     FinanceThemeToggle,
+    FinanceHelpModal,
   },
   props: {
     initialView: { type: String, default: 'dashboard' },
@@ -420,6 +435,7 @@ export default {
       categoryDialog: false,
       editCategory: null,
       deleteCatDialog: { open: false, loading: false, item: null },
+      helpDialog: false,
     }
   },
   computed: {

@@ -20,6 +20,11 @@
         <v-form ref="form" v-model="valid" lazy-validation @submit.prevent="submit">
           <div class="mb-2 d-flex align-center flex-wrap">
             <span class="text-subtitle-2 font-weight-bold">Tipo de transação</span>
+            <help-tooltip
+              class="ml-1"
+              text="Receitas são entradas de dinheiro; despesas são saídas. O tipo define quais categorias você pode escolher."
+              aria-label="Ajuda: tipo de transação"
+            />
             <v-chip small dark class="ml-2" :color="form.type === TX_INCOME ? 'success' : 'error'">
               <v-icon left x-small>mdi-check-bold</v-icon>
               {{ typeChoiceLabel }}
@@ -116,7 +121,11 @@
             :rules="[rules.requiredAmount]"
             @input="onAmountInput"
             @blur="normalizeAmountDisplay"
-          />
+          >
+            <template slot="append-outer">
+              <help-tooltip text="Informe o valor da transação" aria-label="Ajuda: valor" />
+            </template>
+          </v-text-field>
 
           <v-select
             v-model="form.category_id"
@@ -130,7 +139,14 @@
             item-value="id"
             hide-details="auto"
             class="mb-2"
-          />
+          >
+            <template slot="append-outer">
+              <help-tooltip
+                text="A categoria define se é receita ou despesa"
+                aria-label="Ajuda: categoria"
+              />
+            </template>
+          </v-select>
 
           <v-select
             v-if="form.type === TX_EXPENSE && creditCardItems.length"
@@ -143,11 +159,13 @@
             prepend-inner-icon="mdi-credit-card-outline"
             item-text="name"
             item-value="id"
-            hint="Se escolher um cartão, esta despesa entra na fatura e não no caixa imediato."
-            persistent-hint
             hide-details="auto"
             class="mb-2"
-          />
+          >
+            <template slot="append-outer">
+              <help-tooltip text="Use para compras parceladas ou fatura" aria-label="Ajuda: cartão de crédito" />
+            </template>
+          </v-select>
 
           <v-menu
             ref="menu"
@@ -247,6 +265,7 @@ import {
   TRANSACTION_TYPE_INCOME,
   normalizeTransactionType,
 } from '../transactionTypes'
+import HelpTooltip from './HelpTooltip.vue'
 
 const emptyForm = () => ({
   title: '',
@@ -262,6 +281,7 @@ const emptyForm = () => ({
 
 export default {
   name: 'TransactionForm',
+  components: { HelpTooltip },
   props: {
     value: { type: Boolean, default: false },
     apiBase: { type: String, required: true },
@@ -514,5 +534,11 @@ export default {
   position: absolute;
   top: 8px;
   right: 8px;
+}
+
+/* Alinha ícone de ajuda com campos outlined densos */
+::v-deep .v-input__append-outer {
+  align-self: center;
+  margin-top: 2px;
 }
 </style>
