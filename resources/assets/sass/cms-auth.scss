@@ -1,0 +1,143 @@
+/**
+ * Auth CMS — layout minimalista (sem card), campos transparentes.
+ */
+
+html.cms-auth-html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+html.cms-auth-html body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+body.cms-auth--light {
+  background: linear-gradient(165deg, #e8eaed 0%, #f5f6f8 40%, #fafafa 100%);
+  color: #2c2f36;
+}
+
+body.cms-auth--dark {
+  background: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(255, 0, 0, 0.12), transparent 50%),
+    linear-gradient(180deg, #2c2f36 0%, #252830 50%, #1a1c21 100%);
+  color: #ffffff;
+}
+
+body.cms-auth--light,
+body.cms-auth--dark {
+  transition: background 0.4s ease, color 0.3s ease;
+}
+
+.cms-auth-v-app.v-application {
+  background: transparent !important;
+}
+
+.cms-auth-v-app .v-application--wrap {
+  flex: 1 1 auto;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 28px 20px 40px !important;
+  box-sizing: border-box !important;
+}
+
+.cms-auth-inner {
+  width: 100%;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  flex: 0 0 auto;
+  padding-top: 8px;
+}
+
+.cms-auth-inner--wide {
+  max-width: 440px;
+}
+
+/* Logo: leve destaque no escuro */
+.theme--dark .cms-auth-logo-wrap {
+  filter: drop-shadow(0 2px 20px rgba(255, 0, 0, 0.08));
+}
+
+/* Transição suave */
+.cms-auth-fade-enter-active {
+  transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cms-auth-fade-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.cms-auth-fade-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Campos solo/flat: sem caixa branca — só linha inferior */
+.cms-auth-fields .v-text-field.v-text-field--solo > .v-input__control > .v-input__slot {
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+  border-radius: 0 !important;
+  border-bottom: 1px solid rgba(44, 47, 54, 0.2) !important;
+  min-height: 48px !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  transition: border-color 0.2s ease, border-width 0.15s ease;
+}
+
+/* Linha Material padrão (::before/::after) + ripple geram “sombra” por baixo do texto */
+.cms-auth-fields .v-text-field > .v-input__control > .v-input__slot::before,
+.cms-auth-fields .v-text-field > .v-input__control > .v-input__slot::after {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.theme--light .cms-auth-fields .v-text-field.v-text-field--solo > .v-input__control > .v-input__slot,
+.theme--dark .cms-auth-fields .v-text-field.v-text-field--solo > .v-input__control > .v-input__slot {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.theme--dark .cms-auth-fields .v-text-field.v-text-field--solo > .v-input__control > .v-input__slot {
+  border-bottom-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+.cms-auth-fields .v-text-field.v-text-field--solo.v-input--is-focused > .v-input__control > .v-input__slot {
+  border-bottom-color: #ff0000 !important;
+  border-bottom-width: 2px !important;
+}
+
+.cms-auth-fields .v-text-field.v-text-field--solo:not(.v-input--is-focused):hover > .v-input__control > .v-input__slot {
+  border-bottom-color: rgba(255, 0, 0, 0.45) !important;
+}
+
+.theme--dark .cms-auth-fields .v-text-field.v-text-field--solo:not(.v-input--is-focused):hover > .v-input__control > .v-input__slot {
+  border-bottom-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Mensagens de erro / hints sem “card” */
+.cms-auth-fields .v-messages {
+  padding-left: 4px;
+  margin-top: 4px;
+}
+
+/* Barra força senha — trilho discreto */
+.cms-auth-strength.v-progress-linear {
+  background: rgba(44, 47, 54, 0.08) !important;
+  border-radius: 4px;
+}
+
+.theme--dark .cms-auth-strength.v-progress-linear {
+  background: rgba(255, 255, 255, 0.08) !important;
+}

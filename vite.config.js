@@ -22,6 +22,7 @@ export default defineConfig({
       input: [
         'resources/assets/sass/app.scss',
         'resources/assets/js/cms/app.js',
+        'resources/assets/js/cms/auth-app.js',
         'resources/assets/js/app.js',
         'resources/assets/sass/website/app.scss',
         'resources/assets/js/front/app.js',

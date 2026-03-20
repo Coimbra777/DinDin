@@ -45,6 +45,8 @@ Route::post('login', [LoginController::class, 'login']);
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('register', [RegisterController::class, 'register']);
 
+Route::view('password/forgot', 'cms.auth.forgot-password')->name('cms.password.forgot');
+
 Route::middleware(['auth'])->group(function () {
   if (config('finance.redirect_cms_dashboard_to_finance')) {
     Route::get('dashboard', function () {
