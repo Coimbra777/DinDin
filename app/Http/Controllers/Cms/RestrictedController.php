@@ -7,11 +7,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use App\Http\Controllers\Controller;
 
-use App\Group;
+use App\Models\Group;
 
 class RestrictedController extends Controller
 {
-    function __construct() {
+    public function __construct()
+    {
         $this->middleware(function ($request, $next) {
             $this->user = Auth::user();
             if (!$this->checkModule($request)) {

@@ -8,7 +8,6 @@ use Laravel\Passport\Passport;
 use View;
 
 use Auth;
-use App\Configurations;
 
 class AppServiceProvider extends ServiceProvider
 {

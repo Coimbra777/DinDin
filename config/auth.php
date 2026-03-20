@@ -1,7 +1,5 @@
 <?php
 
-use App\AssociatesAuth;
-
 return [
 
     /*
@@ -69,11 +67,11 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\User::class,
+            'model' => App\Models\User::class,
         ],
         'JWTuser' => [
             'driver' => 'eloquent',
-            'model' => App\JWTauth::class
+            'model' => App\Models\JWTauth::class
         ]
         // 'users' => [
         //     'driver' => 'database',

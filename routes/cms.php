@@ -2,14 +2,33 @@
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| CMS Routes (prefix /cms via RouteServiceProvider)
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
- */
+*/
+
+use App\Http\Controllers\Cms\Auth\LoginController;
+use App\Http\Controllers\Cms\BlogCategoriesController;
+use App\Http\Controllers\Cms\BlogGalleryController;
+use App\Http\Controllers\Cms\BlogPostsController;
+use App\Http\Controllers\Cms\ClientsController;
+use App\Http\Controllers\Cms\ConfigurationController;
+use App\Http\Controllers\Cms\DashboardController;
+use App\Http\Controllers\Cms\GroupsController;
+use App\Http\Controllers\Cms\PageController;
+use App\Http\Controllers\Cms\UploadImageController;
+use App\Http\Controllers\Cms\UsersController;
+use App\Modules\CreditCard\Http\Controllers\Api\CreditCardApiController;
+use App\Modules\Finance\Http\Controllers\Api\CategoryApiController;
+use App\Modules\Finance\Http\Controllers\Api\DashboardApiController;
+use App\Modules\Finance\Http\Controllers\Api\SummaryApiController;
+use App\Modules\Finance\Http\Controllers\Api\TransactionApiController;
+use App\Modules\Finance\Http\Controllers\CategoryController;
+use App\Modules\Finance\Http\Controllers\FinanceDashboardController;
+use App\Modules\Finance\Http\Controllers\TransactionController;
+use App\Modules\Projection\Http\Controllers\Api\ProjectionApiController;
+use App\Modules\Reports\Http\Controllers\Api\ReportApiController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
   if (Auth::check()) {
@@ -19,8 +38,8 @@ Route::get('/', function () {
   return redirect('/cms/login');
 });
 
-Route::get('login', 'Cms\Auth\LoginController@showLoginForm')->name('login');
-Route::post('login', 'Cms\Auth\LoginController@login');
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('login', [LoginController::class, 'login']);
 
 Route::middleware(['auth'])->group(function () {
   if (config('finance.redirect_cms_dashboard_to_finance')) {
@@ -28,61 +47,53 @@ Route::middleware(['auth'])->group(function () {
       return redirect()->route('finance_dashboard.index');
     })->name('dashboard.index');
   } else {
-    Route::get('dashboard', 'Cms\DashboardController@index')->name('dashboard.index');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
   }
-  Route::resource('configurations', 'Cms\ConfigurationController');
-  Route::resource('pages', 'Cms\PageController');
-  Route::resource('clients', 'Cms\ClientsController');
+  Route::resource('configurations', ConfigurationController::class);
+  Route::resource('pages', PageController::class);
+  Route::resource('clients', ClientsController::class);
 
   Route::prefix('blog')->group(function () {
-    Route::resource('blog_categories', 'Cms\BlogCategoriesController');
-    Route::resource('blog_posts', 'Cms\BlogPostsController');
-    Route::resource('blog_posts.gallery', 'Cms\BlogGalleryController');
-    Route::post('upload-images', 'Cms\UploadImageController@editorUpload')->name('upload-images');
-    Route::get('/preview/{slug}', 'Cms\BlogPostsController@preview')->name('blog.preview');
+    Route::resource('blog_categories', BlogCategoriesController::class);
+    Route::resource('blog_posts', BlogPostsController::class);
+    Route::resource('blog_posts.gallery', BlogGalleryController::class);
+    Route::post('upload-images', [UploadImageController::class, 'editorUpload'])->name('upload-images');
+    Route::get('/preview/{slug}', [BlogPostsController::class, 'preview'])->name('blog.preview');
   });
 
   Route::prefix('finance')->group(function () {
-    $dash = '\\'.\App\Modules\Finance\Http\Controllers\Api\DashboardApiController::class;
-    $sum = '\\'.\App\Modules\Finance\Http\Controllers\Api\SummaryApiController::class;
-    $tx = '\\'.\App\Modules\Finance\Http\Controllers\Api\TransactionApiController::class;
-    $cat = '\\'.\App\Modules\Finance\Http\Controllers\Api\CategoryApiController::class;
-    $proj = '\\'.\App\Modules\Projection\Http\Controllers\Api\ProjectionApiController::class;
-    $card = '\\'.\App\Modules\CreditCard\Http\Controllers\Api\CreditCardApiController::class;
-    $rep = '\\'.\App\Modules\Reports\Http\Controllers\Api\ReportApiController::class;
-    Route::prefix('api')->group(function () use ($dash, $sum, $tx, $cat, $proj, $card, $rep) {
-      Route::get('dashboard', [$dash, 'show'])->name('finance.api.dashboard');
-      Route::get('projection', [$proj, 'show'])->name('finance.api.projection');
-      Route::get('summary', [$sum, 'show'])->name('finance.api.summary');
-      Route::get('transactions', [$tx, 'index'])->name('finance.api.transactions');
-      Route::get('transactions/recent', [$tx, 'recent'])->name('finance.api.transactions.recent');
-      Route::get('categories', [$cat, 'index'])->name('finance.api.categories');
-      Route::post('categories', [$cat, 'store'])->name('finance.api.categories.store');
-      Route::put('categories/{category}', [$cat, 'update'])->name('finance.api.categories.update');
-      Route::delete('categories/{category}', [$cat, 'destroy'])->name('finance.api.categories.destroy');
-      Route::post('transactions', [$tx, 'store'])->name('finance.api.transactions.store');
-      Route::put('transactions/{transaction}', [$tx, 'update'])->name('finance.api.transactions.update');
-      Route::delete('transactions/{transaction}', [$tx, 'destroy'])->name('finance.api.transactions.destroy');
-      Route::get('credit-cards', [$card, 'index'])->name('finance.api.credit-cards.index');
-      Route::post('credit-cards', [$card, 'store'])->name('finance.api.credit-cards.store');
-      Route::put('credit-cards/{finance_credit_card}', [$card, 'update'])->name('finance.api.credit-cards.update');
-      Route::delete('credit-cards/{finance_credit_card}', [$card, 'destroy'])->name('finance.api.credit-cards.destroy');
-      Route::get('credit-cards/{finance_credit_card}/bill', [$card, 'bill'])->name('finance.api.credit-cards.bill');
-      Route::get('reports/categories', [$rep, 'categories'])->name('finance.api.reports.categories');
-      Route::get('reports/trend', [$rep, 'trend'])->name('finance.api.reports.trend');
+    Route::prefix('api')->group(function () {
+      Route::get('dashboard', [DashboardApiController::class, 'show'])->name('finance.api.dashboard');
+      Route::get('projection', [ProjectionApiController::class, 'show'])->name('finance.api.projection');
+      Route::get('summary', [SummaryApiController::class, 'show'])->name('finance.api.summary');
+      Route::get('transactions', [TransactionApiController::class, 'index'])->name('finance.api.transactions');
+      Route::get('transactions/recent', [TransactionApiController::class, 'recent'])->name('finance.api.transactions.recent');
+      Route::get('categories', [CategoryApiController::class, 'index'])->name('finance.api.categories');
+      Route::post('categories', [CategoryApiController::class, 'store'])->name('finance.api.categories.store');
+      Route::put('categories/{category}', [CategoryApiController::class, 'update'])->name('finance.api.categories.update');
+      Route::delete('categories/{category}', [CategoryApiController::class, 'destroy'])->name('finance.api.categories.destroy');
+      Route::post('transactions', [TransactionApiController::class, 'store'])->name('finance.api.transactions.store');
+      Route::put('transactions/{transaction}', [TransactionApiController::class, 'update'])->name('finance.api.transactions.update');
+      Route::delete('transactions/{transaction}', [TransactionApiController::class, 'destroy'])->name('finance.api.transactions.destroy');
+      Route::get('credit-cards', [CreditCardApiController::class, 'index'])->name('finance.api.credit-cards.index');
+      Route::post('credit-cards', [CreditCardApiController::class, 'store'])->name('finance.api.credit-cards.store');
+      Route::put('credit-cards/{finance_credit_card}', [CreditCardApiController::class, 'update'])->name('finance.api.credit-cards.update');
+      Route::delete('credit-cards/{finance_credit_card}', [CreditCardApiController::class, 'destroy'])->name('finance.api.credit-cards.destroy');
+      Route::get('credit-cards/{finance_credit_card}/bill', [CreditCardApiController::class, 'bill'])->name('finance.api.credit-cards.bill');
+      Route::get('reports/categories', [ReportApiController::class, 'categories'])->name('finance.api.reports.categories');
+      Route::get('reports/trend', [ReportApiController::class, 'trend'])->name('finance.api.reports.trend');
     });
 
-    // Controladores fora de App\Http\Controllers: prefixo \ obrigatório (senão o namespace do grupo duplica o path)
-    Route::get('finance_dashboard', ['\\'.\App\Modules\Finance\Http\Controllers\FinanceDashboardController::class, 'index'])
+    Route::get('finance_dashboard', [FinanceDashboardController::class, 'index'])
       ->name('finance_dashboard.index');
-    Route::resource('finance_transactions', '\\'.\App\Modules\Finance\Http\Controllers\TransactionController::class)->except(['show']);
-    Route::resource('finance_categories', '\\'.\App\Modules\Finance\Http\Controllers\CategoryController::class)->except(['show']);
+    Route::resource('finance_transactions', TransactionController::class)->except(['show']);
+    Route::resource('finance_categories', CategoryController::class)->except(['show']);
   });
 
-  Route::post('logout', 'Cms\Auth\LoginController@logout')->name('logout');
+  Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
   Route::prefix('admin')->group(function () {
-    Route::resource('groups', 'Cms\GroupsController');
-    Route::resource('users', 'Cms\UsersController');
+    Route::resource('groups', GroupsController::class);
+    Route::resource('users', UsersController::class);
   });
 });

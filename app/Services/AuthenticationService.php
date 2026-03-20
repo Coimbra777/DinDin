@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Clients;
-use App\JWTauth;
+use App\Models\Clients;
+use App\Models\JWTauth;
 use Illuminate\Support\Facades\DB;
 
 class AuthenticationService

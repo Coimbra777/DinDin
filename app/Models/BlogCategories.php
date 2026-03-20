@@ -1,12 +1,12 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class BlogCategories extends Model
 {
-    protected $table = "blog_categories";
+    protected $table = 'blog_categories';
     protected $fillable = [
         'active',
         'name',

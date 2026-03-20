@@ -1,23 +1,19 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Configurations extends Model
+class Clients extends Model
 {
-    protected $table = "configurations";
+    use HasFactory;
+
+    protected $table = 'clients';
     protected $fillable = [
-        'keywords',
-        'description',
-        'title',
-        'whatsapp',
-        'form_email',
+        'active',
         'email',
-        'phone',
-        'instagram',
-        'linkedin',
-        'facebook'
+        'name',
     ];
     /**
      * The attributes that should be hidden for arrays.

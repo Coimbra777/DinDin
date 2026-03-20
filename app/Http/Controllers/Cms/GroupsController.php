@@ -2,153 +2,114 @@
 
 namespace App\Http\Controllers\Cms;
 
+use App\Http\Requests\Cms\StoreGroupRequest;
+use App\Http\Requests\Cms\UpdateGroupRequest;
+use App\Models\Group;
+use App\Models\Module;
+use App\Services\Cms\GroupsService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
-
-use App\Group;
-use App\Module;
+use Illuminate\View\View;
 
 class GroupsController extends RestrictedController
 {
-	/**
-	 * Display a listing of the resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-	public function index(Request $request)
-	{
-		#PAGE TITLE E BREADCRUMBS
-		$headers = parent::headers(
-			"Grupos de Usuários",
-			[["icon" => "", "title" => "Grupo de Usuários", "url" => ""]]
-		);
+    public function __construct(
+        private readonly GroupsService $groupsService,
+    ) {
+        parent::__construct();
+    }
 
-		$actions = json_encode([
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): View
+    {
+        $headers = parent::headers(
+            "Grupos de Usuários",
+            [["icon" => "", "title" => "Grupo de Usuários", "url" => ""]]
+        );
+
+        $actions = json_encode([
             [
-              'path' => '{item}/edit',
-              'icon' => 'fa fa-pencil',
-              'label' => 'Editar',
-              'color' => 'primary',
+                'path' => '{item}/edit',
+                'icon' => 'fa fa-pencil',
+                'label' => 'Editar',
+                'color' => 'primary',
             ],
-          ]);
+        ]);
 
-        #LISTA DE ITENS
-        $items_per_page = config('constants.options.items_per_page');
-        $titles = json_encode(["#", "Nome"]);
+        $titles = json_encode(['#', 'Nome']);
 
-        if(!empty($request->busca)){
-			$busca = $request->busca;
-			$items = Group::listItems($items_per_page, $busca);
+        $itemsPerPage = (int) config('constants.options.items_per_page', 15);
+
+        if (!empty($request->busca)) {
+            $busca = $request->busca;
+            $items = Group::listItems($busca, $itemsPerPage);
         } else {
-			$busca = "";
-			$items = Group::listItems($items_per_page);
+            $busca = '';
+            $items = Group::listItems(null, $itemsPerPage);
         }
 
         $modules = Module::getModules();
 
-        return view('cms.groups.index', compact('headers', 'titles', 'items', 'modules', 'busca','actions'));
-	}
+        return view('cms.groups.index', compact('headers', 'titles', 'items', 'modules', 'busca', 'actions'));
+    }
 
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @return \Illuminate\Http\Response
-	 */
-	public function store(Request $request)
-	{
-        $data = $request->all();
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreGroupRequest $request): RedirectResponse
+    {
+        $this->groupsService->store($request->validated());
 
-		if($this->validation($data)->fails())
-			return redirect()->back()->withErrors($validation)->withInput();
+        return redirect()->back()->with('message', 'Registro gravado com sucesso!');
+    }
 
-		$group = Group::create($data);
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Group $group): View|RedirectResponse
+    {
+        $headers = parent::headers(
+            'Grupos de Usuários',
+            [
+                ['icon' => '', 'title' => 'Grupos de Usuários', 'url' => route('groups.index')],
+                ['icon' => '', 'title' => 'Editar', 'url' => ''],
+            ]
+        );
 
-		if(!empty($data['module_id'])){
-			$group->modules()->attach($data['module_id']);
-		}
+        $item = $group;
 
-		return redirect()->back()->with('message', 'Registro gravado com sucesso!');
-	}
+        $modules = Module::getModules();
 
-	/**
-	 * Show the form for editing the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-	public function edit($id)
-	{
-		#PAGE TITLE E BREADCRUMBS
-		$headers = parent::headers(
-			"Grupos de Usuários",
-			[
-				["icon" => "", "title" => "Grupos de Usuários", "url" => route('groups.index')],
-				["icon" => "", "title" => "Editar", "url" => ""]
-			]
-		);
+        $group_modules = $item->modules()->get();
 
-        $item = group::find($id);
-
-		if(empty($item))
-			return redirect()->back();
-
-		$modules = Module::getModules();
-
-		$group_modules = $item->modules()->get();
-
-		$group_modules_ids = [];
-		foreach ($group_modules as $key => $value) {
-			array_push($group_modules_ids, $value->id);
-		}
-
-		return view('cms.groups.edit', compact('headers', 'item', 'modules', 'group_modules_ids'));
-	}
-
-	/**
-	 * Update the specified resource in storage.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-	public function update(Request $request, Group $group)
-	{
-        $data = $request->all();
-
-        if($this->validation($data)->fails()) {
-        return redirect()->back()->withErrors($validation)->withInput();
+        $group_modules_ids = [];
+        foreach ($group_modules as $value) {
+            $group_modules_ids[] = $value->id;
         }
 
-        $group->update($data);
+        return view('cms.groups.edit', compact('headers', 'item', 'modules', 'group_modules_ids'));
+    }
 
-		$group->modules()->sync($data['module_id']);
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
+    {
+        $this->groupsService->update($group, $request->validated());
 
-		return redirect()->route('groups.index')->with('message', 'Registro atualizado com sucesso!');
-	}
+        return redirect()->route('groups.index')->with('message', 'Registro atualizado com sucesso!');
+    }
 
-	/**
-	 * Remove the specified resource from storage.
-	 *
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-	public function destroy(Request $req)
-	{
-		$data = $req->all();
-		$groups = Group::whereIn('id',$data['registro'])->get();
-        foreach ($groups as $group) {
-            $group->modules()->detach();
-            $group->delete();
-        }
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        $data = $request->all();
+        $this->groupsService->deleteMany($data['registro'] ?? []);
 
         return redirect()->back()->with('message', 'Itens excluídos com sucesso!');
-	}
-
-	private function validation(array $data){
-		return Validator::make($data, [
-            'name' => 'required|string|max:255',
-		]);
-	}
+    }
 }

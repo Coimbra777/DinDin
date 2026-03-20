@@ -2,105 +2,87 @@
 
 namespace App\Http\Controllers\Cms;
 
+use App\Http\Requests\Cms\StoreUserRequest;
+use App\Http\Requests\Cms\UpdateUserRequest;
+use App\Models\Group;
+use App\Models\User;
+use App\Services\Cms\UsersService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-
-use App\User;
-use App\Group;
-
-use App\Traits\UploadTrait;
+use Illuminate\View\View;
+use RuntimeException;
 
 class UsersController extends RestrictedController
 {
-    use UploadTrait;
+    public function __construct(
+        private readonly UsersService $usersService,
+    ) {
+        parent::__construct();
+    }
+
     /**
-	 * Display a listing of the resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-    public function index(Request $request)
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): View
     {
-        #PAGE TITLE E BREADCRUMBS
         $headers = parent::headers(
-            "Usuários",
-            [["icon" => "", "title" => "Usuários", "url" => ""]]
+            'Usuários',
+            [['icon' => '', 'title' => 'Usuários', 'url' => '']]
         );
 
         $actions = json_encode([
             [
-              'path' => '{item}/edit',
-              'icon' => 'fa fa-pencil',
-              'label' => 'Editar',
-              'color' => 'primary',
+                'path' => '{item}/edit',
+                'icon' => 'fa fa-pencil',
+                'label' => 'Editar',
+                'color' => 'primary',
             ],
-          ]);
+        ]);
 
-        #LISTA DE ITENS
-        $titles = json_encode(["#", "Nome", "E-mail", "Usuário"]);
+        $titles = json_encode(['#', 'Nome', 'E-mail', 'Usuário']);
 
-        $busca = "";
+        $busca = '';
         $items = User::select('id', 'name', 'email', 'username');
         if (!empty($request->busca)) {
             $busca = $request->busca;
-            $items->where(function($query) use ($busca){
-              $query->orWhere('id','like','%'.$busca.'%')
-                ->orWhere('name','like','%'.$busca.'%')
-                ->orWhere('email','like','%'.$busca.'%')
-                ->orWhere('username','like','%'.$busca.'%');
+            $items->where(function ($query) use ($busca) {
+                $query->orWhere('id', 'like', '%' . $busca . '%')
+                    ->orWhere('name', 'like', '%' . $busca . '%')
+                    ->orWhere('email', 'like', '%' . $busca . '%')
+                    ->orWhere('username', 'like', '%' . $busca . '%');
             });
         }
-        $items = $items->orderBy('id','DESC')->orderBy('id', 'desc')->paginate();
+        $items = $items->orderBy('id', 'DESC')->orderBy('id', 'desc')->paginate();
 
         $groups = json_encode(Group::select('id AS value', 'name AS label')->get());
 
-        return view('cms.users.index', compact('headers', 'titles', 'items', 'groups', 'busca','actions'));
+        return view('cms.users.index', compact('headers', 'titles', 'items', 'groups', 'busca', 'actions'));
     }
 
     /**
-	 * Store a newly created resource in storage.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @return \Illuminate\Http\Response
-	 */
-    public function store(Request $request)
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreUserRequest $request): RedirectResponse
     {
-        $data = $request->all();
-
-        $validation = $this->validation($data, 'store');
-        if ($validation->fails()) {
-            return redirect()->back()->withErrors($validation)->withInput();
+        try {
+            $this->usersService->store($request->validated(), $request->file('image'));
+        } catch (RuntimeException $e) {
+            return redirect()->back()->withErrors(['errors' => 'image cannot be uploaded'])->withInput();
         }
-
-				$data['password'] = bcrypt($data['password']);
-
-        $image = null;
-        if (!empty($data['image'])) {
-            if (!$image = $this->uploadValidFile('users', $data['image'])) {
-                return response()->json(['errors' => 'image cannot be uploaded'], 406);
-            }
-        }
-        $data['image'] = $image;
-
-        $newUser = User::create($data);
 
         return redirect()->back()->with('message', 'Registro cadastrado com sucesso!');
     }
 
     /**
-	 * Show the form for editing the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-    public function edit(User $user)
+     * Show the form for editing the specified resource.
+     */
+    public function edit(User $user): View
     {
-        #PAGE TITLE E BREADCRUMBS
         $headers = parent::headers(
-            "Usuários",
+            'Usuários',
             [
-                ["icon" => "", "title" => "Usuários", "url" => route('users.index')],
-                ["icon" => "", "title" => "Editar", "url" => ""]
+                ['icon' => '', 'title' => 'Usuários', 'url' => route('users.index')],
+                ['icon' => '', 'title' => 'Editar', 'url' => ''],
             ]
         );
 
@@ -114,88 +96,23 @@ class UsersController extends RestrictedController
     }
 
     /**
-	 * Update the specified resource in storage.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-    public function update(Request $request, User $user)
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
-        $data = $request->all();
-        $data['id'] = $user->id;
-        $validation = $this->validation($data, 'update');
-        if ($validation->fails()) {
-            return redirect()->back()->withErrors($validation)->withInput();
-        }
-
-        $image = $user->image;
-        if ($request->hasFile('image')) {
-            if ($uploadedImage = $this->uploadValidFile('users', $data['image'])) {
-                $image = $uploadedImage;
-                if (!empty($user->image)) {
-                    $this->deleteFile($user->image);
-                }
-            }
-        }
-        $data['image'] = $image;
-
-        if (!empty($data['password'])) {
-            $data['password'] = bcrypt($data['password']);
-        } else {
-            unset($data['password']);
-        }
-
-        $user->update($data);
+        $file = $request->hasFile('image') ? $request->file('image') : null;
+        $this->usersService->update($user, $request->validated(), $file);
 
         return redirect()->route('users.index')->with('message', 'Registro atualizado com sucesso!');
     }
 
     /**
-	 * Remove the specified resource from storage.
-	 *
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-    public function destroy(Request $req)
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Request $req): RedirectResponse
     {
-        $data = $req->all();
-        $users = User::whereIn('id', $data['registro'])->get();
-        foreach ($users as $user) {
-            if (!empty($user->image)) {
-                $this->deleteFile($user->image);
-            }
-            $user->delete();
-        }
+        $this->usersService->deleteMany($req->input('registro', []));
 
         return redirect()->back()->with('message', 'Itens excluídos com sucesso!');
-    }
-
-    /**
-	 * Get a validator for an incoming registration request.
-	 *
-	 * @param  array  $data
-	 * @return \Illuminate\Contracts\Validation\Validator
-	 */
-    private function validation(array $data, $action)
-    {
-        $validation = [
-            'name' => 'required|string|max:200',
-            'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
-            'username' => 'required|string|max:255|unique:users',
-            'group_id' => 'required|integer|exists:groups,id',
-            'image' => 'required|image',
-            'description' => 'nullable|string',
-        ];
-
-        if ($action == 'update') {
-            $validation['email'] = ['required', 'email', 'max:255', Rule::unique('users')->ignore($data['id'])];
-            $validation['username'] = ['required', 'string', 'max:255', Rule::unique('users')->ignore($data['id'])];
-            $validation['password'] = 'nullable|string|min:6';
-            $validation['image'] = 'nullable|image';
-        }
-
-        return Validator::make($data, $validation);
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Page extends Model
 {
-    protected $table = "pages";
+    protected $table = 'pages';
     protected $fillable = [
         'location',
         'name',

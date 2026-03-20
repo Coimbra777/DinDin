@@ -1,12 +1,12 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class BlogGallery extends Model
 {
-    protected $table = "blog_gallery";
+    protected $table = 'blog_gallery';
     protected $fillable = [
         'blog_id',
         'image'
@@ -23,7 +23,6 @@ class BlogGallery extends Model
 
     public function blog()
     {
-        return $this->belongsTo('App\BlogPosts', 'blog_id');
+        return $this->belongsTo(BlogPosts::class, 'blog_id');
     }
-
 }
