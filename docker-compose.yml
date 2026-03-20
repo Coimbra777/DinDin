@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: ./devops/Dockerfile.local
     ports:
-      - 8003:8000
+      - 8004:8000
       - 5173:5173
     volumes:
       - ./:/var/www/html

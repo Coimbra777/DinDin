@@ -4,7 +4,7 @@
       <div class="d-flex align-center flex-wrap mb-4">
         <v-icon color="secondary" class="mr-2">mdi-chart-line-variant</v-icon>
         <span class="text-h6 font-weight-bold">Projeção</span>
-        <v-chip x-small outlined class="ml-2" color="secondary">3 meses</v-chip>
+        <v-chip x-small outlined class="ml-2" color="secondary">12 meses</v-chip>
         <v-spacer />
         <v-tooltip bottom max-width="280">
           <template #activator="{ on, attrs }">
@@ -29,7 +29,7 @@
 
     <template v-if="loading">
       <v-row dense class="px-3 px-sm-4 pb-5">
-        <v-col v-for="n in 3" :key="n" cols="12" md="4">
+        <v-col v-for="n in 12" :key="n" cols="12" md="4">
           <v-skeleton-loader type="card" height="140" class="rounded-xl" boilerplate />
         </v-col>
       </v-row>
@@ -97,9 +97,9 @@ export default {
     }
   },
   computed: {
-    /** Próximos 3 meses (API já envia 3; garantimos no máximo 3). */
+    /** Meses projetados retornados pela API. */
     displayRows() {
-      return (this.rows || []).slice(0, 3)
+      return this.rows || []
     },
     metaReferenciaLabel() {
       if (!this.meta || !this.meta.meses_referencia || !this.meta.meses_referencia.length) return '—'

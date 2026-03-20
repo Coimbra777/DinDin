@@ -1,7 +1,7 @@
 <template>
   <div class="projection-page px-1">
     <p class="text-caption secondary--text mb-4">
-      Estimativa dos próximos três meses com base na sua média recente e parcelas cadastradas.
+      Estimativa dos próximos doze meses com base na sua média recente e parcelas cadastradas.
     </p>
     <projection-card
       :api-base="apiBase"
@@ -26,7 +26,7 @@ export default {
 
 <style scoped>
 .projection-page {
-  max-width: 900px;
+  max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
 }

@@ -13,7 +13,7 @@ use Illuminate\Support\Collection;
  */
 final class FinanceProjectionService
 {
-    private const MONTHS_AHEAD = 3;
+    private const MONTHS_AHEAD = 12;
 
     private const REFERENCE_MONTHS = 3;
 

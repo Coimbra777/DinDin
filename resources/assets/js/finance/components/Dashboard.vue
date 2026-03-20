@@ -333,14 +333,9 @@ export default {
 <style scoped>
 .finance-dashboard {
   position: relative;
-  max-width: 720px;
+  max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
-}
-@media (min-width: 960px) {
-  .finance-dashboard {
-    max-width: 840px;
-  }
 }
 
 .hero-balance {

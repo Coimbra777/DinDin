@@ -428,7 +428,7 @@ export default {
 
 <style scoped>
 .cc-panel {
-  max-width: 960px;
+  max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
 }

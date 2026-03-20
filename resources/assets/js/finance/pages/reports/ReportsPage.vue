@@ -64,7 +64,7 @@ export default {
 
 <style scoped>
 .reports-page {
-  max-width: 900px;
+  max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
 }
