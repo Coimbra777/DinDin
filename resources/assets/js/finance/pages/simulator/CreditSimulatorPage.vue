@@ -14,28 +14,31 @@
           <v-divider />
           <v-card-text>
             <v-text-field
-              v-model.number="form.amount"
+              :value="amountStr"
               label="Valor total (R$)"
-              type="number"
-              step="0.01"
-              min="0.01"
               outlined
               dense
               hide-details="auto"
               prepend-inner-icon="mdi-cash"
+              placeholder="0,00"
+              hint="Máscara moeda: só números (2 últimos = centavos)"
+              persistent-hint
+              inputmode="decimal"
               class="mb-3"
+              @input="onAmountInput"
             />
             <v-text-field
-              v-model.number="form.installments"
+              :value="installmentStr"
               label="Número de parcelas"
-              type="number"
-              min="2"
-              max="60"
               outlined
               dense
               hide-details="auto"
               prepend-inner-icon="mdi-numeric"
+              hint="2 a 60"
+              persistent-hint
+              inputmode="numeric"
               class="mb-3"
+              @input="onInstallmentInput"
             />
             <v-text-field
               v-model.number="form.interest_percent_total"
@@ -110,6 +113,7 @@
 
 <script>
 import axios from 'axios'
+import { formatBRLDigitsAsTyping, parseBRLDigitsToNumber, parseCurrencyBRLInput } from '../../currency'
 
 export default {
   name: 'CreditSimulatorPage',
@@ -120,9 +124,9 @@ export default {
   data() {
     return {
       loading: false,
+      amountStr: '',
+      installmentStr: '12',
       form: {
-        amount: null,
-        installments: 12,
         interest_percent_total: 0,
       },
       result: null,
@@ -137,11 +141,20 @@ export default {
     formatBRL(v) {
       return this.$formatCurrencyBRL(v)
     },
+    onAmountInput(v) {
+      this.amountStr = formatBRLDigitsAsTyping(v)
+    },
+    onInstallmentInput(v) {
+      this.installmentStr = String(v ?? '')
+        .replace(/\D/g, '')
+        .slice(0, 2)
+    },
     async simulate() {
       const base = (this.apiBase || '').replace(/\/$/, '')
       if (!base) return
-      const amount = Number(this.form.amount)
-      const inst = parseInt(this.form.installments, 10)
+      let amount = parseBRLDigitsToNumber(this.amountStr)
+      if (Number.isNaN(amount)) amount = parseCurrencyBRLInput(this.amountStr)
+      const inst = parseInt(this.installmentStr, 10)
       if (!amount || amount < 0.01) {
         this.$emit('error', 'Informe um valor válido.')
         return

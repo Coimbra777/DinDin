@@ -13,7 +13,9 @@ class CreditSimulatorApiController extends RestrictedController
 {
     public function __construct(
         private readonly CreditInstallmentSimulatorService $simulator,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     public function simulate(SimulateCreditInstallmentRequest $request): JsonResponse
     {

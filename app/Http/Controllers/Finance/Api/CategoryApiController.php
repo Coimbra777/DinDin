@@ -13,7 +13,9 @@ class CategoryApiController extends RestrictedController
 {
     public function __construct(
         private readonly CategoryApiService $categories,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     public function index(Request $request): JsonResponse
     {

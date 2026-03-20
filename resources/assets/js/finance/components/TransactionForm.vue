@@ -104,15 +104,17 @@
           />
 
           <v-text-field
-            v-model="amountDisplay"
+            :value="amountDisplay"
             label="Valor (R$)"
             outlined
             dense
             placeholder="0,00"
             prepend-inner-icon="mdi-currency-brl"
-            hint="Formato: 1.250,50"
+            hint="Digite só números — os centavos são os 2 últimos dígitos (ex.: 1500 → 15,00)"
             persistent-hint
+            inputmode="decimal"
             :rules="[rules.requiredAmount]"
+            @input="onAmountInput"
             @blur="normalizeAmountDisplay"
           />
 
@@ -179,25 +181,23 @@
           <v-row dense class="mt-2">
             <v-col cols="6">
               <v-text-field
-                v-model.number="form.installment_number"
+                :value="installmentNumberStr"
                 label="Parcela atual (opc.)"
-                type="number"
-                min="1"
                 outlined
                 dense
                 clearable
-                hint="ex.: 3 em 3/12"
+                hint="ex.: 3"
                 persistent-hint
                 prepend-inner-icon="mdi-numeric"
                 hide-details="auto"
+                inputmode="numeric"
+                @input="onInstallmentNumberInput"
               />
             </v-col>
             <v-col cols="6">
               <v-text-field
-                v-model.number="form.installment_of"
+                :value="installmentOfStr"
                 label="Total parcelas (opc.)"
-                type="number"
-                min="2"
                 outlined
                 dense
                 clearable
@@ -205,6 +205,8 @@
                 persistent-hint
                 prepend-inner-icon="mdi-counter"
                 hide-details="auto"
+                inputmode="numeric"
+                @input="onInstallmentOfInput"
               />
             </v-col>
           </v-row>
@@ -235,7 +237,11 @@
 
 <script>
 import axios from 'axios'
-import { parseCurrencyBRLInput } from '../currency'
+import {
+  formatBRLDigitsAsTyping,
+  parseBRLDigitsToNumber,
+  parseCurrencyBRLInput,
+} from '../currency'
 import {
   TRANSACTION_TYPE_EXPENSE,
   TRANSACTION_TYPE_INCOME,
@@ -271,12 +277,15 @@ export default {
       saving: false,
       dateMenu: false,
       amountDisplay: '',
+      installmentNumberStr: '',
+      installmentOfStr: '',
       form: emptyForm(),
       rules: {
         required: (v) => (v !== null && v !== undefined && String(v).trim() !== '') || 'Obrigatório',
         requiredAmount: (v) => {
-          const n = parseCurrencyBRLInput(v)
-          return (!Number.isNaN(n) && n > 0) || 'Valor inválido (use ex.: 1.250,50)'
+          const n = parseBRLDigitsToNumber(v)
+          const m = Number.isNaN(n) ? parseCurrencyBRLInput(v) : n
+          return (!Number.isNaN(m) && m > 0) || 'Valor inválido (digite números, ex.: 125050 → 1.250,50)'
         },
       },
     }
@@ -347,6 +356,25 @@ export default {
         maximumFractionDigits: 2,
       }).format(Number(num))
     },
+    digitsOnly(str, maxLen) {
+      return String(str ?? '')
+        .replace(/\D/g, '')
+        .slice(0, maxLen)
+    },
+    onInstallmentNumberInput(v) {
+      this.installmentNumberStr = this.digitsOnly(v, 3)
+      this.syncInstallments()
+    },
+    onInstallmentOfInput(v) {
+      this.installmentOfStr = this.digitsOnly(v, 4)
+      this.syncInstallments()
+    },
+    syncInstallments() {
+      const n = this.installmentNumberStr === '' ? null : parseInt(this.installmentNumberStr, 10)
+      const o = this.installmentOfStr === '' ? null : parseInt(this.installmentOfStr, 10)
+      this.form.installment_number = Number.isFinite(n) ? n : null
+      this.form.installment_of = Number.isFinite(o) ? o : null
+    },
     hydrate() {
       if (this.transaction && this.transaction.id) {
         this.form = {
@@ -361,14 +389,26 @@ export default {
           installment_of: this.transaction.installment_of ?? null,
         }
         this.amountDisplay = this.formatAmountBR(this.transaction.amount)
+        this.installmentNumberStr =
+          this.transaction.installment_number != null ? String(this.transaction.installment_number) : ''
+        this.installmentOfStr =
+          this.transaction.installment_of != null ? String(this.transaction.installment_of) : ''
       } else {
         this.form = emptyForm()
         this.amountDisplay = ''
+        this.installmentNumberStr = ''
+        this.installmentOfStr = ''
       }
       this.$nextTick(() => this.$refs.form && this.$refs.form.resetValidation())
     },
+    onAmountInput(val) {
+      this.amountDisplay = formatBRLDigitsAsTyping(val)
+      const n = parseBRLDigitsToNumber(this.amountDisplay)
+      this.form.amount = Number.isNaN(n) ? null : n
+    },
     normalizeAmountDisplay() {
-      const n = parseCurrencyBRLInput(this.amountDisplay)
+      let n = parseBRLDigitsToNumber(this.amountDisplay)
+      if (Number.isNaN(n)) n = parseCurrencyBRLInput(this.amountDisplay)
       if (!Number.isNaN(n) && n >= 0) {
         this.amountDisplay = this.formatAmountBR(n)
         this.form.amount = n
@@ -381,7 +421,8 @@ export default {
       this.normalizeAmountDisplay()
       if (!this.$refs.form.validate()) return
 
-      const n = parseCurrencyBRLInput(this.amountDisplay)
+      let n = parseBRLDigitsToNumber(this.amountDisplay)
+      if (Number.isNaN(n)) n = parseCurrencyBRLInput(this.amountDisplay)
       if (Number.isNaN(n) || n <= 0) return
 
       this.saving = true

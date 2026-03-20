@@ -14,7 +14,9 @@ class TransactionApiController extends RestrictedController
 {
     public function __construct(
         private readonly TransactionApiService $transactions,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     public function index(Request $request): JsonResponse
     {

@@ -80,25 +80,31 @@
             class="mb-3"
           />
           <v-text-field
-            v-model.number="dialog.form.planned_expense"
+            :value="dialog.form.plannedExpenseStr"
             label="Meta de despesas (R$)"
-            type="number"
-            min="0"
-            step="0.01"
             outlined
             dense
             hide-details="auto"
             class="mb-3"
+            placeholder="0,00"
+            prepend-inner-icon="mdi-currency-brl"
+            hint="Digite só números (centavos nos 2 últimos dígitos)"
+            persistent-hint
+            inputmode="decimal"
+            @input="onPlannedExpenseInput"
           />
           <v-text-field
-            v-model.number="dialog.form.planned_saving"
+            :value="dialog.form.plannedSavingStr"
             label="Meta de economia (R$)"
-            type="number"
-            min="0"
-            step="0.01"
             outlined
             dense
             hide-details="auto"
+            placeholder="0,00"
+            prepend-inner-icon="mdi-piggy-bank-outline"
+            hint="Mesma máscara de moeda"
+            persistent-hint
+            inputmode="decimal"
+            @input="onPlannedSavingInput"
           />
         </v-card-text>
         <v-card-actions>
@@ -127,6 +133,11 @@
 
 <script>
 import axios from 'axios'
+import {
+  formatBRLDigitsAsTyping,
+  parseBRLDigitsToNumber,
+  parseCurrencyBRLInput,
+} from '../../currency'
 import { monthChoices } from '../../format'
 
 export default {
@@ -152,7 +163,7 @@ export default {
         open: false,
         id: null,
         saving: false,
-        form: { year_month: '', planned_expense: 0, planned_saving: 0 },
+        form: { year_month: '', plannedExpenseStr: '', plannedSavingStr: '' },
       },
       deleteDlg: { open: false, loading: false, item: null },
     }
@@ -173,6 +184,24 @@ export default {
       if (!ym) return '—'
       const [y, m] = String(ym).split('-')
       return m && y ? `${m}/${y}` : ym
+    },
+    formatAmountBR(num) {
+      if (num == null || num === '' || Number.isNaN(Number(num))) return ''
+      return new Intl.NumberFormat('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(Number(num))
+    },
+    onPlannedExpenseInput(v) {
+      this.dialog.form.plannedExpenseStr = formatBRLDigitsAsTyping(v)
+    },
+    onPlannedSavingInput(v) {
+      this.dialog.form.plannedSavingStr = formatBRLDigitsAsTyping(v)
+    },
+    parsePlanMoney(str) {
+      let n = parseBRLDigitsToNumber(str)
+      if (Number.isNaN(n)) n = parseCurrencyBRLInput(str)
+      return Number.isNaN(n) ? 0 : n
     },
     formatDelta(v) {
       const n = Number(v)
@@ -206,7 +235,7 @@ export default {
         open: true,
         id: null,
         saving: false,
-        form: { year_month: ym, planned_expense: 0, planned_saving: 0 },
+        form: { year_month: ym, plannedExpenseStr: '', plannedSavingStr: '' },
       }
     },
     openEdit(item) {
@@ -216,19 +245,21 @@ export default {
         saving: false,
         form: {
           year_month: item.year_month,
-          planned_expense: Number(item.planned_expense),
-          planned_saving: Number(item.planned_saving),
+          plannedExpenseStr: this.formatAmountBR(item.planned_expense),
+          plannedSavingStr: this.formatAmountBR(item.planned_saving),
         },
       }
     },
     async save() {
       const base = (this.apiBase || '').replace(/\/$/, '')
       if (!base) return
-      const { year_month, planned_expense, planned_saving } = this.dialog.form
+      const { year_month, plannedExpenseStr, plannedSavingStr } = this.dialog.form
       if (!year_month) {
         this.$emit('error', 'Escolha o mês.')
         return
       }
+      const planned_expense = this.parsePlanMoney(plannedExpenseStr)
+      const planned_saving = this.parsePlanMoney(plannedSavingStr)
       this.dialog.saving = true
       try {
         if (this.dialog.id) {

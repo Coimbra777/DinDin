@@ -15,7 +15,9 @@ class CreditCardApiController extends RestrictedController
 {
     public function __construct(
         private readonly CreditCardService $creditCards,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     public function index(Request $request): JsonResponse
     {

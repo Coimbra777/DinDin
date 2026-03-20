@@ -1,7 +1,8 @@
 <template>
   <div class="projection-page px-1">
     <p class="text-caption secondary--text mb-4">
-      Estimativa dos próximos doze meses com base na sua média recente e parcelas cadastradas.
+      Projeção dos próximos 12 meses: <strong>acumulado de receitas</strong> (e despesas) repetindo o último mês com
+      movimento real — sem média nem simulação de parcelas.
     </p>
     <projection-card
       :api-base="apiBase"

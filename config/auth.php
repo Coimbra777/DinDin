@@ -116,4 +116,16 @@ return [
     //10800 => UMA SEMANA
     'password_timeout' => 10800,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Registo público JWT (/api/auth/register)
+    |--------------------------------------------------------------------------
+    |
+    | Por defeito desligado em produção. Ative só se necessário (ex.: local).
+    |
+    */
+
+    'allow_jwt_registration' => (bool) env('ALLOW_JWT_REGISTRATION', false),
+
 ];
+

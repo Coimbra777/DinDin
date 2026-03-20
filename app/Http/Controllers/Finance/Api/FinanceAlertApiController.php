@@ -14,7 +14,9 @@ class FinanceAlertApiController extends RestrictedController
 {
     public function __construct(
         private readonly FinanceAlertService $alerts,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     public function index(Request $request): JsonResponse
     {

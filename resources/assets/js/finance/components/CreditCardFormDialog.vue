@@ -10,14 +10,16 @@
       <v-card-text class="pt-4">
         <v-text-field v-model="name" label="Nome do cartão" outlined dense :rules="[rules.required]" />
         <v-text-field
-          v-model="limitStr"
+          :value="limitStr"
           label="Limite total (R$)"
           outlined
           dense
           placeholder="0,00"
-          hint="Formato: 5.000,00"
+          hint="Digite números; centavos = 2 últimos dígitos"
           persistent-hint
+          inputmode="decimal"
           :rules="[rules.requiredAmount]"
+          @input="onLimitInput"
           @blur="normalizeLimit"
         />
         <v-row dense>
@@ -58,7 +60,11 @@
 
 <script>
 import axios from 'axios'
-import { parseCurrencyBRLInput } from '../currency'
+import {
+  formatBRLDigitsAsTyping,
+  parseBRLDigitsToNumber,
+  parseCurrencyBRLInput,
+} from '../currency'
 
 export default {
   name: 'CreditCardFormDialog',
@@ -77,8 +83,9 @@ export default {
       rules: {
         required: (v) => (v && String(v).trim() !== '') || 'Obrigatório',
         requiredAmount: (v) => {
-          const n = parseCurrencyBRLInput(v)
-          return (!Number.isNaN(n) && n > 0) || 'Valor inválido'
+          const n = parseBRLDigitsToNumber(v)
+          const m = Number.isNaN(n) ? parseCurrencyBRLInput(v) : n
+          return (!Number.isNaN(m) && m > 0) || 'Valor inválido'
         },
         day: (v) => {
           const n = Number(v)
@@ -115,8 +122,12 @@ export default {
         this.dueDay = 17
       }
     },
+    onLimitInput(val) {
+      this.limitStr = formatBRLDigitsAsTyping(val)
+    },
     normalizeLimit() {
-      const n = parseCurrencyBRLInput(this.limitStr)
+      let n = parseBRLDigitsToNumber(this.limitStr)
+      if (Number.isNaN(n)) n = parseCurrencyBRLInput(this.limitStr)
       if (!Number.isNaN(n) && n > 0) this.limitStr = this.formatAmountBR(n)
     },
     close() {
@@ -124,7 +135,8 @@ export default {
     },
     async save() {
       this.normalizeLimit()
-      const n = parseCurrencyBRLInput(this.limitStr)
+      let n = parseBRLDigitsToNumber(this.limitStr)
+      if (Number.isNaN(n)) n = parseCurrencyBRLInput(this.limitStr)
       if (!this.name.trim() || Number.isNaN(n) || n <= 0) return
       if (this.closingDay < 1 || this.closingDay > 31 || this.dueDay < 1 || this.dueDay > 31) return
 

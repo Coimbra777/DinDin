@@ -13,7 +13,9 @@ class FinanceInsightApiController extends RestrictedController
 {
     public function __construct(
         private readonly FinanceInsightService $insights,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     public function index(Request $request): JsonResponse
     {

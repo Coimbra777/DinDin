@@ -17,9 +17,11 @@ Route::middleware('cors')->group(function () {
     Route::get('/', function () {
         return response(['API' => 'Works'], 200);
     });
+});
 
-    Route::post('/upload', [TinyMceController::class, 'uploadImage']);
-    Route::post('/remove_media', [TinyMceController::class, 'removeImage']);
+Route::middleware(['cors', 'web', 'auth'])->group(function () {
+    Route::post('/upload', [TinyMceController::class, 'uploadImage'])->name('api.tinymce.upload');
+    Route::post('/remove_media', [TinyMceController::class, 'removeImage'])->name('api.tinymce.remove');
 });
 
 Route::group([
@@ -29,7 +31,9 @@ Route::group([
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('me', [AuthController::class, 'me']);
-    Route::post('register', [AuthController::class, 'register']);
+    if (config('auth.allow_jwt_registration')) {
+        Route::post('register', [AuthController::class, 'register']);
+    }
 });
 
 /*

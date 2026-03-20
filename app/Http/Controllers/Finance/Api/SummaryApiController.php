@@ -13,7 +13,9 @@ class SummaryApiController extends RestrictedController
 {
     public function __construct(
         private readonly SummaryService $summary,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     public function show(Request $request): JsonResponse
     {

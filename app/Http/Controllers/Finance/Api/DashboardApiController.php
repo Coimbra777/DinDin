@@ -13,7 +13,9 @@ class DashboardApiController extends RestrictedController
 {
     public function __construct(
         private readonly DashboardService $dashboard,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     public function show(Request $request): JsonResponse
     {

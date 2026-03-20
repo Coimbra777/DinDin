@@ -14,7 +14,9 @@ class ReportApiController extends RestrictedController
 {
     public function __construct(
         private readonly ReportService $reports,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     public function categories(Request $request): JsonResponse
     {

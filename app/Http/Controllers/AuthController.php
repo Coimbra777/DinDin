@@ -2,21 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AuthenticationService;
+use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
-    /**
-     * Create a new AuthController instance.
-     *
-     * @return void
-     */
-    public function __construct(AuthenticationService $authenticationService)
-    {
-        $this->authenticationService = $authenticationService;
-        $this->middleware('auth:api', ['except' => ['login','register']]);
+    public function __construct(
+        protected AuthenticationService $authenticationService,
+    ) {
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
     /**
@@ -29,13 +24,15 @@ class AuthController extends Controller
     {
         $credentials = request(['email', 'password']);
 
-        if (!$token = auth('api')->attempt($credentials)) {
-            return response()->json(['error' => 'Usuário inexistente para os dados enviados! Verifique os campos e tente novamente.'], 401);
+        if (! $token = auth('api')->attempt($credentials)) {
+            return response()->json([
+                'error' => 'Credenciais inválidas. Verifique e-mail e senha.',
+            ], 401);
         }
 
         $user = $this->authenticationService->validaUsuario($credentials['email']);
 
-        return $this->respondWithToken($token,$user);
+        return $this->respondWithToken($token, $user);
     }
 
     /**
@@ -46,7 +43,7 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request)
     {
-        $data = $request->all();
+        $data = $request->validated();
         $new = $this->authenticationService->novoUsuario($data);
 
         if ($new['status']) {
@@ -86,11 +83,11 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($token, $profile)
+    protected function respondWithToken(string $token, $profile): JsonResponse
     {
-        $user['token'] = $token;
-        $user['profile'] = $profile;
-
-        return $user;
+        return response()->json([
+            'token' => $token,
+            'profile' => $profile,
+        ]);
     }
 }

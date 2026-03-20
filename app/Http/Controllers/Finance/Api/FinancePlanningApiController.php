@@ -16,7 +16,9 @@ class FinancePlanningApiController extends RestrictedController
 {
     public function __construct(
         private readonly FinanceMonthlyPlanService $planning,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     public function index(Request $request): JsonResponse
     {

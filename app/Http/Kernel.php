@@ -64,6 +64,7 @@ class Kernel extends HttpKernel
         'cors' => \App\Http\Middleware\Cors::class,
         'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
         'autenticate' => \App\Http\Middleware\ValidateToken::class,
+        'authenticate' => \App\Http\Middleware\ValidateToken::class,
         'logs' => \App\Http\Middleware\Logs::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,

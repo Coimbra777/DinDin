@@ -17,7 +17,9 @@ class FinanceGoalApiController extends RestrictedController
 {
     public function __construct(
         private readonly FinanceGoalService $goals,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     public function index(Request $request): JsonResponse
     {

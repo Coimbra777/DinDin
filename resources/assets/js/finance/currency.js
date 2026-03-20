@@ -42,3 +42,30 @@ export function parseCurrencyBRLInput(str) {
   s = s.replace(/\./g, '').replace(',', '.')
   return Number.parseFloat(s)
 }
+
+/** Apenas dígitos (entrada mascarada em centavos). */
+export function extractBrlCurrencyDigits(str) {
+  return String(str ?? '').replace(/\D/g, '').slice(0, 14)
+}
+
+/**
+ * Máscara moeda BR enquanto digita: dígitos = centavos (ex.: "1234" → "12,34").
+ */
+export function formatBRLDigitsAsTyping(digits) {
+  const d = extractBrlCurrencyDigits(digits)
+  if (!d) return ''
+  const cents = parseInt(d, 10)
+  if (!Number.isFinite(cents)) return ''
+  const reais = cents / 100
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(reais)
+}
+
+/** Converte string mascarada (dígitos=centavos) para valor em reais. */
+export function parseBRLDigitsToNumber(displayOrDigits) {
+  const d = extractBrlCurrencyDigits(displayOrDigits)
+  if (!d) return NaN
+  return parseInt(d, 10) / 100
+}
