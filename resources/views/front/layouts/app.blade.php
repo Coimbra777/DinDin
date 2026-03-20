@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="IE=edge" http-equiv="X-UA-Compatible">
-  <link href="{{ url('/img/website/favicon.svg') }}" rel="icon" type="image/svg+xml">
+  <link href="{{ asset('logowhite.png') }}" rel="icon" type="image/png">
   <meta content="{{ csrf_token() }}" name="csrf-token">
   <meta name="robots" content="index" />
   <meta name=theme-color content=#00AD55>

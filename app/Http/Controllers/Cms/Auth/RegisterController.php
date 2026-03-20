@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cms\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Cms\CmsRegisterUserRequest;
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -14,11 +15,14 @@ class RegisterController extends Controller
 {
     use RegistersUsers;
 
-    protected $redirectTo = '/cms/configurations';
+    protected $redirectTo = '/cms/dashboard';
 
     public function __construct()
     {
         $this->middleware('guest');
+        if (config('finance.redirect_cms_dashboard_to_finance')) {
+            $this->redirectTo = '/cms/finance/finance_dashboard';
+        }
     }
 
     public function showRegistrationForm(): View
@@ -37,7 +41,7 @@ class RegisterController extends Controller
             'whatsapp' => $validated['whatsapp'],
             'password' => bcrypt($validated['password']),
             'username' => $username,
-            'group_id' => 0,
+            'group_id' => $this->selfRegisteredGroupId(),
         ])));
 
         $this->guard()->login($user);
@@ -47,6 +51,18 @@ class RegisterController extends Controller
         }
 
         return redirect($this->redirectPath());
+    }
+
+    private function selfRegisteredGroupId(): int
+    {
+        $configured = config('cms.self_registered_group_id');
+        if ($configured !== null && $configured !== '' && (int) $configured > 0) {
+            return (int) $configured;
+        }
+
+        $id = Group::query()->where('name', Group::NAME_SELF_REGISTERED)->value('id');
+
+        return $id ? (int) $id : 0;
     }
 
     private function uniqueUsernameFromEmail(string $email): string

@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <link rel="icon" href="{{ url('/img/website/favicon.svg') }}" type="image/svg+xml">
+  <link rel="icon" href="{{ asset('logowhite.png') }}" type="image/png">
   <title>Esqueci minha senha | {{ config('app.name') }}</title>
   <style>
     :root { --bg: #2c2f36; --text: #ffffff; --muted: #85888f; --primary: #ff0000; }

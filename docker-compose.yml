@@ -18,6 +18,9 @@ services:
     entrypoint: docker-entrypoint.sh --sql-mode='STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION'
     ports:
       - 3306:3306
+    volumes:
+      # Dados da base persistem entre `docker compose down` e reinícios do host
+      - mysql_nova_base_data:/var/lib/mysql
     networks:
       - nova_base
     environment:
@@ -40,3 +43,6 @@ services:
 networks:
   nova_base:
     driver: bridge
+
+volumes:
+  mysql_nova_base_data:

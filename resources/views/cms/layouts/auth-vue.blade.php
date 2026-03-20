@@ -9,7 +9,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="robots" content="noindex, nofollow">
-  <link rel="icon" href="{{ url('/img/website/favicon.svg') }}" type="image/svg+xml">
+  <link rel="icon" href="{{ asset('logowhite.png') }}" type="image/png">
 
   <title>{{ config('app.name') }} | @if ($authPage === 'register') Criar conta @else Entrar @endif</title>
 

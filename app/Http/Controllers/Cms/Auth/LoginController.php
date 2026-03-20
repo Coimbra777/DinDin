@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Cms\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -27,7 +29,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/cms/configurations';
+    protected $redirectTo = '/cms/dashboard';
 
     /**
      * Create a new controller instance.
@@ -52,6 +54,30 @@ class LoginController extends Controller
     {
         return 'username';
 
+    }
+
+    /**
+     * Campo do formulário continua a chamar-se "username" no POST (trait); aceita e-mail ou nome (`users.email` / `users.name`).
+     */
+    protected function attemptLogin(Request $request): bool
+    {
+        $login = trim((string) $request->input('username', ''));
+        $password = (string) $request->input('password', '');
+
+        $user = User::query()
+            ->where(function ($q) use ($login) {
+                $q->where('email', $login)
+                    ->orWhere('name', $login);
+            })
+            ->first();
+
+        if ($user === null || ! Hash::check($password, $user->getAuthPassword())) {
+            return false;
+        }
+
+        $this->guard()->login($user, $request->boolean('remember'));
+
+        return true;
     }
 
     /**

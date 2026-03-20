@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\DB;
 
 class Group extends Model
 {
+    /** Grupo atribuído a utilizadores criados pelo registo público do CMS */
+    public const NAME_SELF_REGISTERED = 'Cadastro público';
+
     /**
      * The attributes that are mass assignable.
      *

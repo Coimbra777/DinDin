@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Cms;
 
+use App\Models\Group;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -67,13 +68,18 @@ class RestrictedController extends Controller
 
     private function makeMenu()
     {
-        $userGroup = $this->user
-            ->group()
-            ->get();
-        $groupMenu = $userGroup[0]
-            ->menu();
+        $group = $this->authenticatedUserGroup();
 
-        return $groupMenu;
+        return $group ? $group->menu() : [];
+    }
+
+    private function authenticatedUserGroup(): ?Group
+    {
+        if ($this->user === null) {
+            return null;
+        }
+
+        return $this->user->group;
     }
 
     /**
@@ -122,12 +128,16 @@ class RestrictedController extends Controller
             return $this->userHasFinanceModule();
         }
 
-        $userGroup = $this->user
-            ->group()
-            ->get();
-        $allowedModules = $userGroup[0]
-            ->modules()
-            ->get();
+        if ($this->user === null) {
+            return false;
+        }
+
+        $group = $this->authenticatedUserGroup();
+        if ($group === null) {
+            return false;
+        }
+
+        $allowedModules = $group->modules()->get();
 
         $continue = false;
         foreach ($allowedModules as $key => $value) {
