@@ -7,127 +7,129 @@ use App\Models\Finance\CreditCard;
 use App\Models\Finance\FinanceGoal;
 use App\Models\Finance\FinanceMonthlyPlan;
 use App\Models\Finance\Transaction;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
-  /**
-   * Define your route model bindings, pattern filters, etc.
-   *
-   * @return void
-   */
-  public function boot()
-  {
-    Route::bind('finance_transaction', function ($value) {
-      if (!auth()->check()) {
-        abort(403);
-      }
-      return Transaction::query()
-        ->where('id', $value)
-        ->where('user_id', auth()->id())
-        ->firstOrFail();
-    });
+    /**
+     * Define your route model bindings, pattern filters, etc.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        Route::bind('finance_transaction', function ($value) {
+            if (! auth()->check()) {
+                abort(403);
+            }
 
-    Route::bind('finance_category', function ($value) {
-      if (!auth()->check()) {
-        abort(403);
-      }
-      return Category::query()
-        ->where('id', $value)
-        ->where('user_id', auth()->id())
-        ->firstOrFail();
-    });
+            return Transaction::query()
+                ->where('id', $value)
+                ->where('user_id', auth()->id())
+                ->firstOrFail();
+        });
 
-    Route::bind('finance_credit_card', function ($value) {
-      if (!auth()->check()) {
-        abort(403);
-      }
+        Route::bind('finance_category', function ($value) {
+            if (! auth()->check()) {
+                abort(403);
+            }
 
-      return CreditCard::query()
-        ->where('id', $value)
-        ->where('user_id', auth()->id())
-        ->firstOrFail();
-    });
+            return Category::query()
+                ->where('id', $value)
+                ->where('user_id', auth()->id())
+                ->firstOrFail();
+        });
 
-    Route::bind('finance_goal', function ($value) {
-      if (!auth()->check()) {
-        abort(403);
-      }
+        Route::bind('finance_credit_card', function ($value) {
+            if (! auth()->check()) {
+                abort(403);
+            }
 
-      return FinanceGoal::query()
-        ->where('id', $value)
-        ->where('user_id', auth()->id())
-        ->firstOrFail();
-    });
+            return CreditCard::query()
+                ->where('id', $value)
+                ->where('user_id', auth()->id())
+                ->firstOrFail();
+        });
 
-    Route::bind('finance_monthly_plan', function ($value) {
-      if (!auth()->check()) {
-        abort(403);
-      }
+        Route::bind('finance_goal', function ($value) {
+            if (! auth()->check()) {
+                abort(403);
+            }
 
-      return FinanceMonthlyPlan::query()
-        ->where('id', $value)
-        ->where('user_id', auth()->id())
-        ->firstOrFail();
-    });
+            return FinanceGoal::query()
+                ->where('id', $value)
+                ->where('user_id', auth()->id())
+                ->firstOrFail();
+        });
 
-    parent::boot();
-  }
+        Route::bind('finance_monthly_plan', function ($value) {
+            if (! auth()->check()) {
+                abort(403);
+            }
 
-  /**
-   * Define the routes for the application.
-   *
-   * @return void
-   */
-  public function map()
-  {
-    $this->mapApiRoutes();
+            return FinanceMonthlyPlan::query()
+                ->where('id', $value)
+                ->where('user_id', auth()->id())
+                ->firstOrFail();
+        });
 
-    $this->mapWebRoutes();
+        parent::boot();
+    }
 
-    $this->mapCmsRoutes();
-  }
+    /**
+     * Define the routes for the application.
+     *
+     * @return void
+     */
+    public function map()
+    {
+        $this->mapApiRoutes();
 
-  /**
-   * Define the "web" routes for the application.
-   *
-   * These routes all receive session state, CSRF protection, etc.
-   *
-   * @return void
-   */
-  protected function mapWebRoutes()
-  {
-    Route::middleware('web')
-      ->group(base_path('routes/front.php'));
-  }
+        $this->mapWebRoutes();
 
-  /**
-   * Define the "api" routes for the application.
-   *
-   * These routes are typically stateless.
-   *
-   * @return void
-   */
-  protected function mapApiRoutes()
-  {
-    Route::prefix('api')
-      ->middleware('api')
-      ->group(base_path('routes/api.php'));
-  }
+        $this->mapCmsRoutes();
+    }
 
-  /**
-   * Define the "cms" routes for the application.
-   *
-   * These routes all receive session state, CSRF protection, etc.
-   *
-   * @return void
-   */
-  protected function mapCmsRoutes()
-  {
-    // Sem ->namespace(): todas as rotas usam FQCN ([SomeController::class, 'method']).
-    Route::prefix('cms')
-      ->middleware('cms')
-      ->group(base_path('routes/cms.php'));
-  }
+    /**
+     * Define the "web" routes for the application.
+     *
+     * These routes all receive session state, CSRF protection, etc.
+     *
+     * @return void
+     */
+    protected function mapWebRoutes()
+    {
+        Route::middleware('web')
+            ->group(base_path('routes/front.php'));
+    }
+
+    /**
+     * Define the "api" routes for the application.
+     *
+     * These routes are typically stateless.
+     *
+     * @return void
+     */
+    protected function mapApiRoutes()
+    {
+        Route::prefix('api')
+            ->middleware('api')
+            ->group(base_path('routes/api.php'));
+    }
+
+    /**
+     * Define the "cms" routes for the application.
+     *
+     * These routes all receive session state, CSRF protection, etc.
+     *
+     * @return void
+     */
+    protected function mapCmsRoutes()
+    {
+        // Sem ->namespace(): todas as rotas usam FQCN ([SomeController::class, 'method']).
+        Route::prefix('cms')
+            ->middleware('cms')
+            ->group(base_path('routes/cms.php'));
+    }
 }

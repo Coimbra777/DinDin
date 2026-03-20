@@ -71,8 +71,8 @@ return [
         ],
         'JWTuser' => [
             'driver' => 'eloquent',
-            'model' => App\Models\JWTauth::class
-        ]
+            'model' => App\Models\JWTauth::class,
+        ],
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
@@ -113,7 +113,7 @@ return [
     |
     */
 
-    //10800 => UMA SEMANA
+    // 10800 => UMA SEMANA
     'password_timeout' => 10800,
 
     /*
@@ -128,4 +128,3 @@ return [
     'allow_jwt_registration' => (bool) env('ALLOW_JWT_REGISTRATION', false),
 
 ];
-

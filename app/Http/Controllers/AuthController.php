@@ -19,7 +19,6 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-
     public function login()
     {
         $credentials = request(['email', 'password']);
@@ -40,7 +39,6 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-
     public function register(RegisterRequest $request)
     {
         $data = $request->validated();
@@ -48,7 +46,7 @@ class AuthController extends Controller
 
         if ($new['status']) {
             return response()->json($new['msg'], 200);
-        }else{
+        } else {
             return response()->json($new['msg'], 500);
         }
 
@@ -78,10 +76,6 @@ class AuthController extends Controller
 
     /**
      * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
     protected function respondWithToken(string $token, $profile): JsonResponse
     {

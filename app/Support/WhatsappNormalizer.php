@@ -23,7 +23,7 @@ final class WhatsappNormalizer
 
         $len = strlen($digits);
         if ($len >= 10 && $len <= 11) {
-            return '55' . $digits;
+            return '55'.$digits;
         }
 
         return $digits;

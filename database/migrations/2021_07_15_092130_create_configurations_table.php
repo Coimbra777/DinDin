@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateConfigurationsTable extends Migration
 {
@@ -18,14 +18,14 @@ class CreateConfigurationsTable extends Migration
             $table->text('keywords');
             $table->longText('description');
             $table->text('title');
-            $table->string('phone',30);
-            $table->string('whatsapp',30);
+            $table->string('phone', 30);
+            $table->string('whatsapp', 30);
             $table->text('facebook');
             $table->text('instagram');
             $table->text('linkedin');
             $table->text('form_email');
-            $table->text('email');            
-            $table->timestamps();            
+            $table->text('email');
+            $table->timestamps();
         });
     }
 

@@ -9,6 +9,7 @@ use App\Models\Finance\Category;
 use App\Services\Finance\CategoryApiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+
 class CategoryApiController extends RestrictedController
 {
     public function __construct(

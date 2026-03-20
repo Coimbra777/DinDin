@@ -16,13 +16,13 @@ class JWTauth extends Authenticatable implements JWTSubject
 
     protected $fillable = [
         'email',
-        'password'
+        'password',
     ];
 
     protected $hidden = [
         'created_at',
         'updated_at',
-        'password'
+        'password',
     ];
 
     /**

@@ -46,21 +46,21 @@ class CategoryFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'name' => $name . ' ' . fake()->unique()->numerify('##'),
+            'name' => $name.' '.fake()->unique()->numerify('##'),
             'type' => $type,
             'group' => $type === Category::TYPE_EXPENSE ? fake()->randomElement([
                 Category::GROUP_FIXED,
                 Category::GROUP_VARIABLE,
                 Category::GROUP_FINANCIAL,
             ]) : null,
-            'slug' => Str::slug($name . '-' . fake()->unique()->numerify('###')),
+            'slug' => Str::slug($name.'-'.fake()->unique()->numerify('###')),
             'color' => fake()->randomElement(['#4caf50', '#ff0000', '#2196f3', '#ff9800', '#9c27b0']),
         ];
     }
 
     public function expense(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'type' => Category::TYPE_EXPENSE,
             'group' => Category::GROUP_VARIABLE,
         ]);

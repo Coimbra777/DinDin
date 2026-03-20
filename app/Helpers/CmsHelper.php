@@ -7,67 +7,66 @@ use Illuminate\Support\Facades\Storage;
 
 class CmsHelper
 {
-	use UploadTrait;
+    use UploadTrait;
 
-	/* Upload de arquivos
-		
-		@Exemplo (Store)
-			$variavel = CmsHelper::SelectList('diretório',$arquivo,800);
+    /* Upload de arquivos
 
-		@Exemplo (Update)
-			$variavel = CmsHelper::SelectList('diretório',$arquivo,800,$arquivo_antigo);
+        @Exemplo (Store)
+            $variavel = CmsHelper::SelectList('diretório',$arquivo,800);
 
-	*/
-	public static function UploadFile(string $diretory_name, $data_file, ?int $size = null, ?string $old_file = null)
-	{
-		if (!empty($data_file)) {
-			if (!$file = self::uploadValidFile($diretory_name, $data_file, $size)) {
-				return redirect()->back()->withErrors(['file' => 'O arquivo não pode ser carregado'])->withInput();
-			} else {
-				if ($old_file) {
-					$path = str_replace('storage/', '', $old_file);
+        @Exemplo (Update)
+            $variavel = CmsHelper::SelectList('diretório',$arquivo,800,$arquivo_antigo);
 
-					if (Storage::exists($path)) {
-						unlink($old_file);
-					}
-				}
+    */
+    public static function UploadFile(string $diretory_name, $data_file, ?int $size = null, ?string $old_file = null)
+    {
+        if (! empty($data_file)) {
+            if (! $file = self::uploadValidFile($diretory_name, $data_file, $size)) {
+                return redirect()->back()->withErrors(['file' => 'O arquivo não pode ser carregado'])->withInput();
+            } else {
+                if ($old_file) {
+                    $path = str_replace('storage/', '', $old_file);
 
-				return !empty($file) ? $file : '';
-			}
-		}
-	}
+                    if (Storage::exists($path)) {
+                        unlink($old_file);
+                    }
+                }
 
-	/*
-	 	Retorna o valor de campos: <input type="checkbox"/>
-		
-		@Exemplo 
-			$variavel = CmsHelper::CheckboxCheck(isset($checkbox));	*
-	*/
-	public static function CheckboxCheck(bool $checkbox)
-	{
-		if ($checkbox) {
-			return 1;
-		}
+                return ! empty($file) ? $file : '';
+            }
+        }
+    }
 
-		return 0;
-	}
+    /*
+         Retorna o valor de campos: <input type="checkbox"/>
 
-	/* Retorna uma lista para o UiSelect
-		
-		@Exemplo 
-			$variavel = CmsHelper::SelectList($dados,'id','name');
+        @Exemplo
+            $variavel = CmsHelper::CheckboxCheck(isset($checkbox));	*
+    */
+    public static function CheckboxCheck(bool $checkbox)
+    {
+        if ($checkbox) {
+            return 1;
+        }
 
-	*/
-	public static function SelectList(object $data, string $valuefield, string $labelfield)
-	{
-		$list = [];
+        return 0;
+    }
 
-		foreach ($data as $key => $item) {
-			$list[$key]['value'] = $item[$valuefield];
-			$list[$key]['label'] = $item[$labelfield];
-		}
+    /* Retorna uma lista para o UiSelect
 
-		return $list;
-	}
+        @Exemplo
+            $variavel = CmsHelper::SelectList($dados,'id','name');
 
+    */
+    public static function SelectList(object $data, string $valuefield, string $labelfield)
+    {
+        $list = [];
+
+        foreach ($data as $key => $item) {
+            $list[$key]['value'] = $item[$valuefield];
+            $list[$key]['label'] = $item[$labelfield];
+        }
+
+        return $list;
+    }
 }

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Configurations extends Model
 {
     protected $table = 'configurations';
+
     protected $fillable = [
         'keywords',
         'description',
@@ -17,8 +18,9 @@ class Configurations extends Model
         'phone',
         'instagram',
         'linkedin',
-        'facebook'
+        'facebook',
     ];
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -26,6 +28,6 @@ class Configurations extends Model
      */
     protected $hidden = [
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 }

@@ -7,11 +7,10 @@ class ApiMailHelper
     /**
      * Envia e-mail via API externa configurada.
      *
-     * @param string $assunto
-     * @param string|array $mensagem
-     * @param string|false $destinatarios
-     * @param string|false $fromName
-     * @param string|false $fromMail
+     * @param  string|array  $mensagem
+     * @param  string|false  $destinatarios
+     * @param  string|false  $fromName
+     * @param  string|false  $fromMail
      * @return mixed Resposta da API ou código HTTP em caso de erro
      */
     public static function sendEmail(
@@ -21,7 +20,7 @@ class ApiMailHelper
         $fromName = false,
         $fromMail = false
     ) {
-        if (!config('mail_api.enabled')) {
+        if (! config('mail_api.enabled')) {
             return false;
         }
 
@@ -38,7 +37,7 @@ class ApiMailHelper
      */
     public static function sendEmailFile(string $assunto, $mensagem, $file = false)
     {
-        if (!config('mail_api.enabled')) {
+        if (! config('mail_api.enabled')) {
             return false;
         }
 
@@ -56,12 +55,12 @@ class ApiMailHelper
      */
     public static function sendFile(string $emailId, $files)
     {
-        if (!config('mail_api.enabled')) {
+        if (! config('mail_api.enabled')) {
             return false;
         }
 
         $baseUrl = config('mail_api.base_url') ?: rtrim(config('mail_api.url'), '/automacao/');
-        $url = rtrim($baseUrl, '/') . "/arquivo/{$emailId}/?authenticator=" . config('mail_api.authenticator');
+        $url = rtrim($baseUrl, '/')."/arquivo/{$emailId}/?authenticator=".config('mail_api.authenticator');
         $curl = curl_init();
 
         curl_setopt_array($curl, [
@@ -98,7 +97,7 @@ class ApiMailHelper
     public static function sendToCrm(array $tags, string $firstname, string $email): ?string
     {
         $url = config('mail_api.crm_url');
-        if (!$url) {
+        if (! $url) {
             return null;
         }
 
@@ -139,7 +138,7 @@ class ApiMailHelper
     private static function buildBasePayload(string $assunto, $mensagem): array
     {
         $htmlMsg = is_array($mensagem)
-            ? implode('<br>', array_map(fn($k, $v) => "{$k}: {$v}", array_keys($mensagem), $mensagem))
+            ? implode('<br>', array_map(fn ($k, $v) => "{$k}: {$v}", array_keys($mensagem), $mensagem))
             : $mensagem;
 
         return [

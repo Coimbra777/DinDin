@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Finance;
 
 use App\Models\User;
-use App\Models\Finance\Category;
 use Database\Factories\Finance\FinanceGoalFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -10,12 +10,14 @@ class Clients extends Model
     use HasFactory;
 
     protected $table = 'clients';
+
     protected $fillable = [
         'active',
         'email',
         'name',
         'whatsapp',
     ];
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -23,6 +25,6 @@ class Clients extends Model
      */
     protected $hidden = [
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 }

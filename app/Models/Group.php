@@ -31,8 +31,8 @@ class Group extends Model
             $items = DB::table('groups')
                 ->select('id', 'name')
                 ->where(function ($query) use ($search) {
-                    $query->orWhere('id', 'like', '%' . $search . '%')
-                        ->orWhere('name', 'like', '%' . $search . '%');
+                    $query->orWhere('id', 'like', '%'.$search.'%')
+                        ->orWhere('name', 'like', '%'.$search.'%');
                 })
                 ->orderBy('id', 'DESC')
                 ->paginate($perPage);

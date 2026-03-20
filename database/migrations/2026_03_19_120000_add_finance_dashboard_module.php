@@ -7,7 +7,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!DB::getSchemaBuilder()->hasTable('modules')) {
+        if (! DB::getSchemaBuilder()->hasTable('modules')) {
             return;
         }
 
@@ -38,12 +38,12 @@ return new class extends Migration
             'updated_at' => $now,
         ]);
 
-        if (!DB::getSchemaBuilder()->hasTable('group_module')) {
+        if (! DB::getSchemaBuilder()->hasTable('group_module')) {
             return;
         }
 
         $moduleId = DB::table('modules')->where('path', 'finance_dashboard')->value('id');
-        if (!$moduleId) {
+        if (! $moduleId) {
             return;
         }
 
@@ -53,7 +53,7 @@ return new class extends Migration
                 ->where('group_id', $groupId)
                 ->where('module_id', $moduleId)
                 ->exists();
-            if (!$exists) {
+            if (! $exists) {
                 DB::table('group_module')->insert([
                     'group_id' => $groupId,
                     'module_id' => $moduleId,
@@ -64,7 +64,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (!DB::getSchemaBuilder()->hasTable('modules')) {
+        if (! DB::getSchemaBuilder()->hasTable('modules')) {
             return;
         }
 

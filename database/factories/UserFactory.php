@@ -22,7 +22,7 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'whatsapp' => null,
-            'username' => fake()->unique()->userName() . '_' . fake()->unique()->numerify('####'),
+            'username' => fake()->unique()->userName().'_'.fake()->unique()->numerify('####'),
             'password' => Hash::make('password'),
             'group_id' => 0,
             'image' => null,

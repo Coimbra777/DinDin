@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Traits;
 
 use Illuminate\Support\Facades\DB;
@@ -14,14 +15,14 @@ trait SlugTrait
                 return $slug;
             }
 
-            $slug = $slug . '-' . $count;
+            $slug = $slug.'-'.$count;
             $count++;
         }
     }
 
     /**
      * return a count of constructions with the slug
-     * @param $slug
+     *
      * @return mixed
      */
     public function validateSlug($slug, $tableName, $slugFieldName, $itemId)

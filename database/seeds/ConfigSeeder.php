@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class ConfigSeeder extends Seeder
 {
@@ -30,7 +29,7 @@ class ConfigSeeder extends Seeder
                 'email' => '',
                 'created_at' => $current_timestamp,
                 'updated_at' => $current_timestamp,
-            ]
+            ],
         ]);
     }
 }

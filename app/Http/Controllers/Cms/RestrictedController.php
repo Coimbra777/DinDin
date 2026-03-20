@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Cms;
 
+use App\Http\Controllers\Controller;
 use App\Models\Group;
-use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
-use App\Http\Controllers\Controller;
 
 class RestrictedController extends Controller
 {

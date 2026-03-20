@@ -73,8 +73,8 @@ class RegisterController extends Controller
 
         while (User::query()->where('username', $username)->exists()) {
             $n++;
-            $suffix = '_' . $n;
-            $username = Str::limit($base, 255 - strlen($suffix), '') . $suffix;
+            $suffix = '_'.$n;
+            $username = Str::limit($base, 255 - strlen($suffix), '').$suffix;
         }
 
         return $username;

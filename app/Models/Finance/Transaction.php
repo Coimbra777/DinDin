@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Finance;
 
-use App\Models\Finance\CreditCard;
 use App\Models\User;
 use Database\Factories\Finance\TransactionFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -81,24 +80,24 @@ class Transaction extends Model
 
     public function scopeFilter(Builder $query, array $filters): Builder
     {
-        if (!empty($filters['type']) && in_array($filters['type'], [self::TYPE_INCOME, self::TYPE_EXPENSE], true)) {
+        if (! empty($filters['type']) && in_array($filters['type'], [self::TYPE_INCOME, self::TYPE_EXPENSE], true)) {
             $query->where('type', $filters['type']);
         }
 
-        if (!empty($filters['category_id'])) {
+        if (! empty($filters['category_id'])) {
             $query->where('category_id', (int) $filters['category_id']);
         }
 
-        if (!empty($filters['month']) && is_string($filters['month'])) {
+        if (! empty($filters['month']) && is_string($filters['month'])) {
             [$start, $end] = self::monthToDateRange($filters['month']);
             $query->whereBetween('transaction_date', [$start, $end]);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->whereDate('transaction_date', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->whereDate('transaction_date', '<=', $filters['date_to']);
         }
 
@@ -112,7 +111,7 @@ class Transaction extends Model
      */
     public static function monthToDateRange(string $yearMonth): array
     {
-        if (!preg_match('/^(\d{4})-(\d{2})$/', $yearMonth, $m)) {
+        if (! preg_match('/^(\d{4})-(\d{2})$/', $yearMonth, $m)) {
             throw new InvalidArgumentException('Mês inválido. Use o formato YYYY-MM.');
         }
         $y = (int) $m[1];
@@ -135,7 +134,7 @@ class Transaction extends Model
         if ($month === null || $month === '') {
             return now()->format('Y-m');
         }
-        if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
+        if (! preg_match('/^\d{4}-\d{2}$/', $month)) {
             return now()->format('Y-m');
         }
         try {
@@ -185,9 +184,9 @@ class Transaction extends Model
         }
 
         $row = $q->selectRaw(
-            "SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as income_total, " .
-            "SUM(CASE WHEN type = ? AND (is_credit_card = 0 OR is_credit_card IS NULL) THEN amount ELSE 0 END) as expense_cash, " .
-            "SUM(CASE WHEN type = ? AND is_credit_card = 1 THEN amount ELSE 0 END) as expense_card, " .
+            'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as income_total, '.
+            'SUM(CASE WHEN type = ? AND (is_credit_card = 0 OR is_credit_card IS NULL) THEN amount ELSE 0 END) as expense_cash, '.
+            'SUM(CASE WHEN type = ? AND is_credit_card = 1 THEN amount ELSE 0 END) as expense_card, '.
             'COUNT(*) as tx_count',
             [$incomeType, $expenseType, $expenseType]
         )->first();

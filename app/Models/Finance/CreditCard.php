@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Finance;
 
-use App\Models\Finance\Transaction;
 use App\Models\User;
 use Database\Factories\Finance\CreditCardFactory;
 use Illuminate\Database\Eloquent\Builder;

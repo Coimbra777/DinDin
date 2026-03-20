@@ -7,13 +7,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!DB::getSchemaBuilder()->hasTable('modules')) {
+        if (! DB::getSchemaBuilder()->hasTable('modules')) {
             return;
         }
 
         $now = now()->format('Y-m-d H:i:s');
 
-        if (!DB::table('modules')->where('path', 'finance')->exists()) {
+        if (! DB::table('modules')->where('path', 'finance')->exists()) {
             DB::table('modules')->insert([
                 'name' => 'Finanças',
                 'father_path' => '',
@@ -28,7 +28,7 @@ return new class extends Migration
         }
 
         $financeId = DB::table('modules')->where('path', 'finance')->value('id');
-        if (!$financeId) {
+        if (! $financeId) {
             return;
         }
 
@@ -54,7 +54,7 @@ return new class extends Migration
             ]);
         }
 
-        if (!DB::getSchemaBuilder()->hasTable('group_module')) {
+        if (! DB::getSchemaBuilder()->hasTable('group_module')) {
             return;
         }
 
@@ -69,7 +69,7 @@ return new class extends Migration
                     ->where('group_id', $groupId)
                     ->where('module_id', $moduleId)
                     ->exists();
-                if (!$exists) {
+                if (! $exists) {
                     DB::table('group_module')->insert([
                         'group_id' => $groupId,
                         'module_id' => $moduleId,
@@ -81,7 +81,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (!DB::getSchemaBuilder()->hasTable('modules')) {
+        if (! DB::getSchemaBuilder()->hasTable('modules')) {
             return;
         }
 

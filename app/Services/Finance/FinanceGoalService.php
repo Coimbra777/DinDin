@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Finance;
 
-use App\Models\Finance\Transaction;
 use App\Models\Finance\FinanceGoal;
+use App\Models\Finance\Transaction;
 use Carbon\Carbon;
 
 final class FinanceGoalService

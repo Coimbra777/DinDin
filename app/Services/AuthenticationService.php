@@ -26,9 +26,11 @@ class AuthenticationService
             Clients::create($data);
             JWTauth::create($data);
             DB::commit();
+
             return ['status' => true, 'msg' => 'Conta criada com sucesso!'];
         } catch (\Throwable $th) {
             DB::rollBack();
+
             return ['status' => false, 'msg' => 'Não foi possivel realizar o cadastro. Recarregue a página e tente novamente.'];
         }
     }

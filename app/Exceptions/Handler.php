@@ -2,8 +2,8 @@
 
 namespace App\Exceptions;
 
-use Throwable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Throwable;
 
 class Handler extends ExceptionHandler
 {
@@ -28,8 +28,6 @@ class Handler extends ExceptionHandler
 
     /**
      * New error page.
-     *
-     *
      */
     protected function whoopsHandler()
     {
@@ -63,11 +61,11 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
 
-/* 				if ($this->isHttpException($exception))
-         {
-             return back();
-         } */
-         return parent::render($request, $exception);
+        /* 				if ($this->isHttpException($exception))
+                 {
+                     return back();
+                 } */
+        return parent::render($request, $exception);
 
     }
 }
