@@ -1,0 +1,7 @@
+/* PROJECT */
+    Product: Base CMS (Laravel)
+    Description: Painel e site reutilizáveis. Defina APP_NAME, APP_URL e conteúdo no .env e nas configurações.
+
+/* STANDARDS */
+    Last update: see repository history
+    Stack: HTML5, CSS3, JavaScript, Laravel, Vue (onde aplicável)

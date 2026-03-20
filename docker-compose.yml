@@ -1,0 +1,42 @@
+version: "2"
+services:
+  nova_base:
+    build:
+      context: .
+      dockerfile: ./devops/Dockerfile.local
+    ports:
+      - 8003:8000
+      - 5173:5173
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - nova_base
+    tty: true
+    container_name: nova_base
+  mysql_nova_base:
+    image: mariadb:10.3
+    entrypoint: docker-entrypoint.sh --sql-mode='STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION'
+    ports:
+      - 3306:3306
+    networks:
+      - nova_base
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=123456
+      - MYSQL_DATABASE=nova_base
+    container_name: mysql_nova_base
+  phpmyadmin_nova_base:
+    image: beeyev/phpmyadmin-lightweight
+    ports:
+      - 8181:80
+    networks:
+      - nova_base
+    environment:
+      PMA_HOST: mysql_nova_base
+      PMA_THEME: BooDark
+      UPLOAD_LIMIT: 2000M
+    container_name: phpmyadmin_nova_base
+networks:
+  nova_base:
+    driver: bridge

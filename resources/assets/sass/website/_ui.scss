@@ -1,0 +1,480 @@
+::selection {
+  background: $primary;
+  color: white;
+}
+
+.ui-container {
+  padding-bottom: 60px;
+  padding-top: 60px;
+
+  @media screen and (max-width: 1440px) {
+    padding-bottom: 30px;
+    padding-top: 30px;
+  }
+
+  @media screen and (max-width: 767px) {
+    padding-bottom: 20px;
+    padding-top: 20px;
+  }
+}
+
+.ui-container--top {
+  padding-top: 60px;
+
+  @media screen and (max-width: 1440px) {
+    padding-top: 30px;
+  }
+
+  @media screen and (max-width: 767px) {
+    padding-top: 20px;
+  }
+}
+
+.ui-container--bottom {
+  padding-bottom: 60px;
+
+  @media screen and (max-width: 1440px) {
+    padding-bottom: 30px;
+  }
+
+  @media screen and (max-width: 767px) {
+    padding-bottom: 20px;
+  }
+}
+
+.ui-text {
+  color: $text;
+  font-family: $font-family;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 28px;
+
+  p {
+    font-family: $font-family;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 28px;
+    margin-bottom: 10px;
+  }
+
+  b,
+  strong {
+    font-weight: 600;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    @extend .ui-subtitle;
+    font-weight: bold !important;
+  }
+
+  ul {
+    li {
+      list-style-type: disc !important;
+    }
+  }
+
+  ol {
+    li {
+      list-style-type: decimal !important;
+    }
+  }
+
+  li {
+    margin-left: 20px;
+    // border-bottom: 1px $primary solid;
+    padding-bottom: 2px;
+    margin-bottom: 2px;
+
+    &:nth-last-of-type(1) {
+      border-bottom: none;
+    }
+
+    &::marker {
+      // color: $primary;
+      font-weight: bold;
+    }
+  }
+
+  a {
+    color: $primary;
+    font-weight: 400;
+  }
+
+  pre {
+    background-color: #1d1f20;
+    box-shadow: 0 0 8px 0 rgba(0, 0, 0, .75);
+    color: #fff;
+    font-size: 14px;
+    padding: 15px;
+    white-space: pre;
+    word-wrap: break-word;
+
+    @media screen and (max-width: 767px) {
+      padding: 10px;
+    }
+  }
+
+  blockquote {
+    background: #f9f9f9;
+    border-left: 10px solid #ccc;
+    margin: 15px 0;
+    padding: 0.5em 10px;
+  }
+
+  .ql-indent-1 {
+    padding-left: 10%;
+  }
+
+  .ql-indent-2 {
+    padding-left: 20%;
+  }
+
+  .ql-indent-3 {
+    padding-left: 30%;
+  }
+
+  .ql-indent-4 {
+    padding-left: 40%;
+  }
+
+  .ql-indent-5 {
+    padding-left: 50%;
+  }
+
+  .ql-indent-6 {
+    padding-left: 60%;
+  }
+
+  .ql-indent-7 {
+    padding-left: 70%;
+  }
+
+  .ql-indent-8 {
+    padding-left: 80%;
+  }
+
+  iframe {
+    height: 400px;
+    width: 100%;
+
+    @media screen and (max-width: 767px) {
+      height: 250px;
+    }
+  }
+
+  img {
+    @media screen and (max-width: 767px) {
+      height: auto !important;
+      width: 100% !important;
+    }
+  }
+}
+
+.ui-text-primary {
+  color: $primary !important;
+}
+
+.ui-text-secondary {
+  color: $secondary !important;
+}
+
+.ui-button {
+  background-color: transparent;
+  border-right: 20px $primary solid;
+  color: $text;
+  font-family: $font-family;
+  font-size: 20px;
+  font-weight: 100;
+  margin-bottom: 0px;
+  padding: 5px 20px 5px 0px;
+  position: relative;
+  transition: all 0.2s;
+
+  &:hover {
+    color: $primary;
+    transition: all 0.2s;
+  }
+
+  .icon-right {
+    position: absolute;
+    right: -7px;
+    top: 3px;
+  }
+}
+
+.ui-image--contain {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.ui-image--cover {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.ui-title {
+  color: $text;
+  font-size: 30px;
+  font-weight: 100;
+  line-height: 40px;
+  margin-bottom: 30px;
+
+  b,
+  strong {
+    font-weight: 400;
+  }
+
+  span {
+    color: $primary;
+    font-weight: 400;
+  }
+
+  @media screen and (max-width: 767px) {
+    margin-bottom: 10px;
+    font-size: 28px;
+    line-height: 34px;
+    word-break: break-word;
+  }
+}
+
+.ui-subtitle {
+  color: $text;
+  font-family: $font-family;
+  font-size: 26px;
+  font-weight: 100;
+  line-height: 31px;
+  margin-bottom: 15px;
+
+  b,
+  strong {
+    font-weight: 400;
+  }
+
+  @media screen and (max-width: 767px) {
+    font-size: 20px;
+    line-height: 24px;
+    margin-bottom: 10px;
+  }
+
+  a {
+    color: $primary;
+    transition: all 0.3s;
+
+    &:hover {
+      opacity: 0.8;
+      transition: all 0.3s;
+    }
+  }
+}
+
+
+.VueCarousel-dot {
+  outline: none !important;
+  transition: all 0.3s;
+  user-select: none !important;
+  transition: all 0.2s;
+}
+
+.VueCarousel-dot--active {
+  outline: none !important;
+  background-color: $secondary !important;
+  transition: all 0.2s;
+  user-select: none !important;
+}
+
+
+.form-control {
+  color: $text;
+  border-radius: 0px;
+  border: 1px #E4E4E4 solid;
+  background-color: transparent;
+  font-family: $font-family;
+  font-weight: 100;
+  font-style: italic;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  width: 100%;
+
+  &:focus-visible,
+  &:focus {
+    outline: none !important;
+    border-color: $primary;
+  }
+}
+
+::placeholder {
+  color: $text !important;
+  font-weight: 100 !important;
+  opacity: 1;
+}
+
+:-ms-input-placeholder {
+  color: $text !important;
+}
+
+::-ms-input-placeholder {
+  color: $text !important;
+}
+
+.swal2-popup {
+  border-radius: 20px !important;
+  font-family: $font-family !important;
+}
+
+.swal2-styled.swal2-confirm {
+  background-color: $primary !important;
+}
+
+.VueCarousel-dot-container {
+  @media screen and (max-width: 767px) {
+    margin-top: 0px !important;
+    margin-bottom: 10px !important;
+
+    .VueCarousel-dot {
+      margin-top: 5px !important;
+    }
+  }
+}
+
+body {
+  top: 0px !important;
+}
+
+.ui-top-internal {
+  @extend .ui-container;
+  background-color: $bg;
+
+  h1,
+  h2 {
+    @extend .ui-title;
+  }
+
+  &-image {
+    height: 350px;
+    width: 100%;
+
+    @media screen and (max-width: 767px) {
+      height: 250px;
+      margin-top: 15px;
+    }
+  }
+}
+
+.ql-align-center {
+  text-align: center;
+}
+
+.ql-align-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-md-left {
+  @media screen and (min-width: 1200px) {
+    text-align: left;
+  }
+}
+
+.text-md-right {
+  @media screen and (min-width: 1200px) {
+    text-align: right;
+  }
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.whatsapp {
+  align-items: center;
+  background-color: #20C31D;
+  border-radius: 100%;
+  bottom: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
+  display: flex;
+  height: 50px;
+  justify-content: center;
+  position: fixed;
+  right: 15px;
+  transition: all 0.2s;
+  z-index: 10;
+  width: 50px;
+
+  img {
+    margin-bottom: -2px;
+    max-width: 30px;
+    transition: all 0.2s;
+  }
+
+  &:hover {
+    height: 60px;
+    transition: all 0.2s;
+    width: 60px;
+
+    img {
+      max-width: 40px;
+      transition: all 0.2s;
+    }
+  }
+}
+
+.floating {
+  animation-iteration-count: infinite;
+  animation-duration: 1.3s;
+  animation-name: floating-float, floating;
+}
+
+@keyframes floating {
+  0% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+  }
+
+  50% {
+    -webkit-transform: translateY(-4px);
+    transform: translateY(-4px);
+  }
+
+  100% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes floating-float {
+  100% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+  }
+}
+
+.text-white {
+  color: white;
+
+  * {
+    color: white;
+  }
+}
+
+.prev {
+  margin-top: 2px;
+  transform: rotate(180deg);
+}
+
+.VueCarousel-navigation-button {
+  outline: none !important;
+  user-select: none !important;
+}

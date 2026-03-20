@@ -1,0 +1,653 @@
+/* ==========================================================================
+   Finanças SPA — temas claro e escuro (Vuetify theme--light / theme--dark)
+   ========================================================================== */
+
+$finance-radius: 12px;
+
+/* -------- Dark tokens -------- */
+$d-bg: #2c2f36;
+$d-surface: #353942;
+$d-surface-elevated: #3d424d;
+$d-border: rgba(255, 255, 255, 0.08);
+$d-border-strong: rgba(255, 255, 255, 0.14);
+$d-text: #ffffff;
+$d-shadow-card: 0 4px 22px rgba(0, 0, 0, 0.32);
+
+/* -------- Light tokens -------- */
+$l-bg: #ffffff;
+$l-surface: #f5f5f5;
+$l-surface-elevated: #eeeeee;
+$l-text: #2c2f36;
+$l-border: rgba(44, 47, 54, 0.12);
+$l-border-strong: rgba(44, 47, 54, 0.2);
+$l-shadow-card: 0 2px 14px rgba(44, 47, 54, 0.08);
+
+$finance-primary: #ff0000;
+$finance-secondary: #85888f;
+$finance-income: #4caf50;
+$finance-expense: #ff0000;
+
+/* Transição suave ao trocar tema */
+.finance-standalone-body,
+.finance-v-app.v-application,
+.finance-v-app .v-application--wrap,
+.finance-v-app .v-card:not(.v-dialog__card),
+.finance-app-bar,
+.finance-drawer {
+  transition:
+    background-color 0.35s ease,
+    color 0.28s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease !important;
+}
+
+.finance-standalone-body.finance-theme-dark {
+  background: $d-bg;
+  color: $d-text;
+}
+
+.finance-standalone-body.finance-theme-light {
+  background: $l-bg;
+  color: $l-text;
+}
+
+.finance-text-muted {
+  color: $finance-secondary !important;
+}
+
+.finance-spa-root {
+  min-height: 100vh;
+}
+
+.finance-standalone-body {
+  margin: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =============================================================================
+   DARK
+   ============================================================================= */
+.finance-v-app.theme--dark.v-application {
+  background: $d-bg !important;
+  color: $d-text !important;
+}
+
+.finance-v-app.theme--dark .v-application--wrap {
+  background: $d-bg;
+}
+
+.finance-v-app.theme--dark .v-card:not(.v-dialog__card) {
+  border-radius: $finance-radius !important;
+  background-color: $d-surface !important;
+  border: 1px solid $d-border !important;
+  box-shadow: $d-shadow-card !important;
+}
+
+.finance-v-app.theme--dark .v-card:not(.v-dialog__card):hover {
+  border-color: $d-border-strong !important;
+}
+
+.finance-v-app.theme--dark .hero-balance.v-card {
+  background: linear-gradient(165deg, $d-surface-elevated 0%, $d-surface 55%, $d-bg 100%) !important;
+  box-shadow:
+    0 4px 28px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+.finance-v-app.theme--dark .tx-list__item--comfortable {
+  border-color: $d-border !important;
+  background: rgba(0, 0, 0, 0.12) !important;
+}
+
+.finance-v-app.theme--dark .proj-card {
+  background: $d-surface !important;
+}
+
+.finance-v-app.theme--dark .proj-month {
+  background: $d-surface-elevated !important;
+}
+
+.finance-v-app.theme--dark .cc-panel__body {
+  background: transparent !important;
+}
+
+.finance-v-app.theme--dark .cc-purchase-item {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border-color: $d-border !important;
+}
+
+.finance-v-app.theme--dark .cc-picker-item--active {
+  background: rgba(255, 0, 0, 0.12) !important;
+  border-color: rgba(255, 0, 0, 0.35) !important;
+}
+
+.finance-v-app.theme--dark .v-text-field--outlined:not(.v-input--is-focused) fieldset,
+.finance-v-app.theme--dark .v-select--outlined:not(.v-input--is-focused) fieldset,
+.finance-v-app.theme--dark .v-textarea--outlined:not(.v-input--is-focused) fieldset {
+  border-color: $d-border-strong !important;
+}
+
+.finance-v-app.theme--dark .v-text-field--outlined:hover fieldset,
+.finance-v-app.theme--dark .v-select--outlined:hover fieldset {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+.finance-v-app.theme--dark .v-text-field--outlined.v-input--is-focused fieldset,
+.finance-v-app.theme--dark .v-select--outlined.v-input--is-focused fieldset {
+  border-color: $finance-primary !important;
+}
+
+.finance-v-app.theme--dark .v-input:not(.v-input--is-disabled) .v-label {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.finance-v-app.theme--dark .v-input input,
+.finance-v-app.theme--dark .v-select__selection,
+.finance-v-app.theme--dark .v-select__selection--comma,
+.finance-v-app.theme--dark textarea {
+  color: $d-text !important;
+}
+
+.finance-v-app.theme--dark .finance-app-bar.v-sheet {
+  background: $d-surface !important;
+  border-bottom: 1px solid $d-border !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.28) !important;
+}
+
+.finance-v-app.theme--dark .finance-drawer__title,
+.finance-v-app.theme--dark .finance-app-bar__title {
+  color: rgba(255, 255, 255, 0.96) !important;
+}
+
+.finance-v-app.theme--dark .finance-app-bar .v-btn .v-icon {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.finance-v-app.theme--dark .finance-drawer.v-navigation-drawer {
+  background: $d-surface !important;
+  border-right: 1px solid $d-border !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18) !important;
+}
+
+.finance-v-app.theme--dark .finance-drawer__brand {
+  border-bottom: 1px solid $d-border;
+}
+
+.finance-v-app.theme--dark .finance-drawer .v-list-item:not(.primary):hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.finance-v-app.theme--dark .finance-drawer .v-list-item.primary {
+  box-shadow: 0 4px 16px rgba(255, 0, 0, 0.25);
+}
+
+.finance-v-app.theme--dark .v-btn.v-btn--contained.primary:not(:disabled) {
+  box-shadow: 0 4px 16px rgba(255, 0, 0, 0.32);
+}
+
+.finance-v-app.theme--dark .v-btn.v-btn--contained.primary:not(:disabled):hover {
+  box-shadow: 0 6px 22px rgba(255, 0, 0, 0.42);
+}
+
+.finance-v-app.theme--dark .v-btn--icon:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.finance-v-app.theme--dark .v-dialog .v-card {
+  background-color: $d-surface !important;
+}
+
+.finance-v-app.theme--dark .v-menu__content,
+.finance-v-app.theme--dark .v-autocomplete__content {
+  border: 1px solid $d-border !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+.finance-v-app.theme--dark .finance-tabs.v-tabs {
+  background: $d-surface !important;
+  border: 1px solid $d-border !important;
+}
+
+.finance-v-app.theme--dark .finance-tabs .v-tab:not(.v-tab--active) {
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+
+.finance-v-app.theme--dark .finance-tabs .v-tab--active {
+  color: #ffffff !important;
+}
+
+.finance-v-app.theme--dark .v-skeleton-loader {
+  background: $d-surface-elevated !important;
+}
+
+.finance-v-app.theme--dark .v-divider {
+  border-color: $d-border !important;
+}
+
+.finance-v-app.theme--dark .finance-cat-row--alt {
+  background: rgba(0, 0, 0, 0.14) !important;
+}
+
+/* Dashboard: saldo zero — texto claro */
+.finance-v-app.theme--dark .hero-balance__figure:not(.hero-balance__figure--positive):not(.hero-balance__figure--negative) {
+  color: #ffffff !important;
+}
+
+/* Stat tiles dark */
+.finance-v-app.theme--dark .stat-tile--income {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.14) 0%, rgba(53, 57, 66, 0.95) 100%) !important;
+}
+
+.finance-v-app.theme--dark .stat-tile--expense {
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.12) 0%, rgba(53, 57, 66, 0.95) 100%) !important;
+}
+
+.finance-v-app.theme--dark .stat-tile {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Transaction form — cartões tipo (idle) dark */
+.finance-v-app.theme--dark .finance-type-card--idle {
+  background-color: rgba(53, 57, 66, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.finance-v-app.theme--dark .finance-type-card--idle:hover {
+  background-color: rgba(61, 66, 77, 0.98) !important;
+}
+
+/* =============================================================================
+   LIGHT
+   ============================================================================= */
+.finance-v-app.theme--light.v-application {
+  background: $l-bg !important;
+  color: $l-text !important;
+}
+
+.finance-v-app.theme--light .v-application--wrap {
+  background: $l-bg;
+}
+
+.finance-v-app.theme--light .v-card:not(.v-dialog__card) {
+  border-radius: $finance-radius !important;
+  background-color: $l-surface !important;
+  border: 1px solid $l-border !important;
+  box-shadow: $l-shadow-card !important;
+}
+
+.finance-v-app.theme--light .v-card:not(.v-dialog__card):hover {
+  border-color: $l-border-strong !important;
+  box-shadow: 0 4px 20px rgba(44, 47, 54, 0.12) !important;
+}
+
+.finance-v-app.theme--light .hero-balance.v-card {
+  background: linear-gradient(165deg, #fafafa 0%, $l-surface 50%, $l-bg 100%) !important;
+  box-shadow: $l-shadow-card !important;
+}
+
+.finance-v-app.theme--light .tx-list__item--comfortable {
+  border-color: $l-border !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+}
+
+.finance-v-app.theme--light .proj-card {
+  background: $l-surface !important;
+}
+
+.finance-v-app.theme--light .proj-month {
+  background: #ffffff !important;
+}
+
+.finance-v-app.theme--light .cc-purchase-item {
+  background: #ffffff !important;
+  border-color: $l-border !important;
+}
+
+.finance-v-app.theme--light .cc-picker-item--active {
+  background: rgba(255, 0, 0, 0.08) !important;
+  border-color: rgba(255, 0, 0, 0.35) !important;
+}
+
+.finance-v-app.theme--light .v-text-field--outlined:not(.v-input--is-focused) fieldset,
+.finance-v-app.theme--light .v-select--outlined:not(.v-input--is-focused) fieldset,
+.finance-v-app.theme--light .v-textarea--outlined:not(.v-input--is-focused) fieldset {
+  border-color: $l-border-strong !important;
+}
+
+.finance-v-app.theme--light .v-text-field--outlined:hover fieldset,
+.finance-v-app.theme--light .v-select--outlined:hover fieldset {
+  border-color: rgba(44, 47, 54, 0.28) !important;
+}
+
+.finance-v-app.theme--light .v-text-field--outlined.v-input--is-focused fieldset,
+.finance-v-app.theme--light .v-select--outlined.v-input--is-focused fieldset {
+  border-color: $finance-primary !important;
+}
+
+.finance-v-app.theme--light .v-input:not(.v-input--is-disabled) .v-label {
+  color: rgba(44, 47, 54, 0.72);
+}
+
+.finance-v-app.theme--light .v-input input,
+.finance-v-app.theme--light .v-select__selection,
+.finance-v-app.theme--light .v-select__selection--comma,
+.finance-v-app.theme--light textarea {
+  color: $l-text !important;
+}
+
+.finance-v-app.theme--light .finance-app-bar.v-sheet {
+  background: $l-surface !important;
+  border-bottom: 1px solid $l-border !important;
+  box-shadow: 0 1px 8px rgba(44, 47, 54, 0.06) !important;
+}
+
+.finance-v-app.theme--light .finance-drawer__title,
+.finance-v-app.theme--light .finance-app-bar__title {
+  color: $l-text !important;
+}
+
+.finance-v-app.theme--light .finance-app-bar .v-btn .v-icon {
+  color: rgba(44, 47, 54, 0.85) !important;
+}
+
+.finance-v-app.theme--light .finance-drawer.v-navigation-drawer {
+  background: $l-surface !important;
+  border-right: 1px solid $l-border !important;
+  box-shadow: 4px 0 20px rgba(44, 47, 54, 0.06) !important;
+}
+
+.finance-v-app.theme--light .finance-drawer__brand {
+  border-bottom: 1px solid $l-border;
+}
+
+.finance-v-app.theme--light .finance-drawer .v-list-item:not(.primary):hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+.finance-v-app.theme--light .finance-drawer .v-list-item.primary {
+  box-shadow: 0 2px 12px rgba(255, 0, 0, 0.2);
+}
+
+.finance-v-app.theme--light .v-btn.v-btn--contained.primary:not(:disabled) {
+  box-shadow: 0 3px 12px rgba(255, 0, 0, 0.28);
+}
+
+.finance-v-app.theme--light .v-btn.v-btn--contained.primary:not(:disabled):hover {
+  box-shadow: 0 5px 18px rgba(255, 0, 0, 0.38);
+}
+
+.finance-v-app.theme--light .v-btn--icon:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+.finance-v-app.theme--light .v-dialog .v-card {
+  background-color: $l-bg !important;
+}
+
+.finance-v-app.theme--light .v-menu__content,
+.finance-v-app.theme--light .v-autocomplete__content {
+  border: 1px solid $l-border !important;
+  box-shadow: 0 12px 36px rgba(44, 47, 54, 0.15) !important;
+}
+
+.finance-v-app.theme--light .finance-tabs.v-tabs {
+  background: $l-surface !important;
+  border: 1px solid $l-border !important;
+}
+
+.finance-v-app.theme--light .finance-tabs .v-tab:not(.v-tab--active) {
+  color: rgba(44, 47, 54, 0.58) !important;
+}
+
+.finance-v-app.theme--light .finance-tabs .v-tab--active {
+  color: $l-text !important;
+}
+
+.finance-v-app.theme--light .v-skeleton-loader {
+  background: $l-surface-elevated !important;
+}
+
+.finance-v-app.theme--light .v-divider {
+  border-color: $l-border !important;
+}
+
+.finance-v-app.theme--light .finance-cat-row--alt {
+  background: rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Dashboard: saldo zero — texto escuro em light */
+.finance-v-app.theme--light .hero-balance__figure:not(.hero-balance__figure--positive):not(.hero-balance__figure--negative) {
+  color: $l-text !important;
+}
+
+.finance-v-app.theme--light .hero-balance {
+  border-color: $l-border !important;
+}
+
+/* Stat tiles light — contraste sem cinza claro ilegível */
+.finance-v-app.theme--light .stat-tile--income {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.12) 0%, #ffffff 100%) !important;
+}
+
+.finance-v-app.theme--light .stat-tile--expense {
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.08) 0%, #ffffff 100%) !important;
+}
+
+.finance-v-app.theme--light .stat-tile {
+  border-color: $l-border !important;
+}
+
+.finance-v-app.theme--dark .stat-tile:hover {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
+}
+
+.finance-v-app.theme--light .stat-tile:hover {
+  border-color: $l-border-strong !important;
+  box-shadow: 0 6px 22px rgba(44, 47, 54, 0.12) !important;
+}
+
+/* Lista transações — título em light */
+.finance-v-app.theme--light .tx-list__heading {
+  color: $l-text !important;
+}
+
+.finance-v-app.theme--dark .tx-list {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.finance-v-app.theme--light .tx-list {
+  border-color: $l-border !important;
+}
+
+.finance-v-app.theme--dark .tx-list__heading {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.finance-v-app.theme--dark .tx-list__item:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.finance-v-app.theme--light .tx-list__item:hover {
+  background: rgba(0, 0, 0, 0.03) !important;
+}
+
+@media (max-width: 599px) {
+  .finance-v-app.theme--dark .tx-list__item--comfortable {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(0, 0, 0, 0.16) !important;
+  }
+
+  .finance-v-app.theme--light .tx-list__item--comfortable {
+    border-color: $l-border !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+}
+
+/* Projeção — cartões mês light */
+.finance-v-app.theme--light .proj-month--pos {
+  background: linear-gradient(180deg, rgba(76, 175, 80, 0.1) 0%, #ffffff 55%) !important;
+}
+
+.finance-v-app.theme--light .proj-month--neg {
+  background: linear-gradient(180deg, rgba(255, 0, 0, 0.08) 0%, #ffffff 55%) !important;
+}
+
+.finance-v-app.theme--light .proj-month--neu {
+  border-left-color: rgba(44, 47, 54, 0.35) !important;
+}
+
+.finance-v-app.theme--dark .proj-card {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.finance-v-app.theme--light .proj-card {
+  border-color: $l-border !important;
+}
+
+.finance-v-app.theme--dark .proj-month {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.finance-v-app.theme--light .proj-month {
+  border-color: $l-border !important;
+}
+
+/* Transaction form — idle light */
+.finance-v-app.theme--light .finance-type-card--idle {
+  background-color: #ffffff !important;
+  border-color: $l-border !important;
+}
+
+.finance-v-app.theme--light .finance-type-card--idle:hover {
+  background-color: #fafafa !important;
+  box-shadow: 0 4px 14px rgba(44, 47, 54, 0.08);
+}
+
+.finance-v-app.theme--light .finance-type-card:focus {
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.22) !important;
+}
+
+/* Lista / tabela compras — título */
+.finance-v-app.theme--light .cc-purchase-item__title {
+  color: $l-text !important;
+}
+
+.finance-v-app.theme--light .cc-purchases-empty {
+  background: rgba(0, 0, 0, 0.02) !important;
+  border-color: $l-border !important;
+}
+
+.finance-v-app.theme--light .cc-card-hero {
+  background: linear-gradient(135deg, #eceff1 0%, #e8eaf0 45%, #f5f5f5 100%) !important;
+  box-shadow: 0 6px 20px rgba(44, 47, 54, 0.1) !important;
+  border: 1px solid $l-border;
+  border-bottom: none;
+}
+
+.finance-v-app.theme--light .cc-card-hero__text {
+  color: $l-text !important;
+}
+
+/* BalanceCard */
+.finance-v-app.theme--light .balance-card--hero {
+  background: linear-gradient(155deg, #ffffff 0%, $l-surface 50%, #eceff1 100%) !important;
+  border: 1px solid $l-border !important;
+  box-shadow: $l-shadow-card !important;
+}
+
+.finance-v-app.theme--dark .balance-card__amount--hero {
+  color: #ffffff !important;
+}
+
+.finance-v-app.theme--light .balance-card__amount--hero {
+  color: $l-text !important;
+}
+
+.finance-v-app.theme--dark .finance-amount-neutral {
+  color: rgba(255, 255, 255, 0.98) !important;
+}
+
+.finance-v-app.theme--light .finance-amount-neutral {
+  color: $l-text !important;
+}
+
+.finance-v-app.theme--light .balance-card--tone-neutral {
+  background: #ffffff !important;
+  border: 1px solid $l-border !important;
+}
+
+.finance-v-app.theme--light .balance-card--tone-income {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.12) 0%, #ffffff 100%) !important;
+  border-color: rgba(76, 175, 80, 0.3) !important;
+}
+
+.finance-v-app.theme--light .balance-card--tone-expense {
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.08) 0%, #ffffff 100%) !important;
+  border-color: rgba(255, 0, 0, 0.28) !important;
+}
+
+.finance-v-app.theme--dark .cc-card-hero__text {
+  color: #ffffff !important;
+}
+
+/* Data tables Vuetify (se usadas) */
+.finance-v-app.theme--light .v-data-table {
+  background: $l-surface !important;
+}
+
+.finance-v-app.theme--light .v-data-table > .v-data-table__wrapper > table > thead > tr > th {
+  color: rgba(44, 47, 54, 0.75) !important;
+}
+
+.finance-v-app.theme--light .v-data-table > .v-data-table__wrapper > table > tbody > tr:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+.finance-v-app.theme--dark .v-data-table {
+  background: $d-surface !important;
+}
+
+.finance-v-app.theme--dark .v-data-table > .v-data-table__wrapper > table > tbody > tr:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.finance-v-app.theme--dark .report-card {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.finance-v-app.theme--light .report-card {
+  border-color: $l-border !important;
+}
+
+/* Comum */
+.finance-dialog-content {
+  border-radius: $finance-radius !important;
+  overflow: hidden;
+}
+
+.finance-main {
+  background: transparent !important;
+  padding-bottom: 88px;
+}
+
+@media (min-width: 960px) {
+  .finance-main {
+    padding-bottom: 32px;
+  }
+}
+
+.finance-v-app .v-btn.v-btn--contained.primary:not(:disabled) {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease !important;
+}
+
+.finance-v-app .v-btn.v-btn--contained.primary:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.finance-v-app .v-btn.v-btn--contained.secondary:not(:disabled):hover {
+  transform: translateY(-1px);
+}

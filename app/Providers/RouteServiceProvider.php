@@ -1,0 +1,120 @@
+<?php
+
+namespace App\Providers;
+
+use App\Modules\CreditCard\Models\CreditCard;
+use App\Modules\Finance\Models\Category;
+use App\Modules\Finance\Models\Transaction;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+
+class RouteServiceProvider extends ServiceProvider
+{
+  /**
+   * This namespace is applied to your controller routes.
+   *
+   * In addition, it is set as the URL generator's root namespace.
+   *
+   * @var string
+   */
+  protected $namespace = 'App\Http\Controllers';
+
+  /**
+   * Define your route model bindings, pattern filters, etc.
+   *
+   * @return void
+   */
+  public function boot()
+  {
+    Route::bind('finance_transaction', function ($value) {
+      if (!auth()->check()) {
+        abort(403);
+      }
+      return Transaction::query()
+        ->where('id', $value)
+        ->where('user_id', auth()->id())
+        ->firstOrFail();
+    });
+
+    Route::bind('finance_category', function ($value) {
+      if (!auth()->check()) {
+        abort(403);
+      }
+      return Category::query()
+        ->where('id', $value)
+        ->where('user_id', auth()->id())
+        ->firstOrFail();
+    });
+
+    Route::bind('finance_credit_card', function ($value) {
+      if (!auth()->check()) {
+        abort(403);
+      }
+
+      return CreditCard::query()
+        ->where('id', $value)
+        ->where('user_id', auth()->id())
+        ->firstOrFail();
+    });
+
+    parent::boot();
+  }
+
+  /**
+   * Define the routes for the application.
+   *
+   * @return void
+   */
+  public function map()
+  {
+    $this->mapApiRoutes();
+
+    $this->mapWebRoutes();
+
+    $this->mapCmsRoutes();
+  }
+
+  /**
+   * Define the "web" routes for the application.
+   *
+   * These routes all receive session state, CSRF protection, etc.
+   *
+   * @return void
+   */
+  protected function mapWebRoutes()
+  {
+    Route::middleware('web')
+      ->namespace($this->namespace)
+      ->group(base_path('routes/front.php'));
+  }
+
+  /**
+   * Define the "api" routes for the application.
+   *
+   * These routes are typically stateless.
+   *
+   * @return void
+   */
+  protected function mapApiRoutes()
+  {
+    Route::prefix('api')
+      ->middleware('api')
+      ->namespace($this->namespace)
+      ->group(base_path('routes/api.php'));
+  }
+
+  /**
+   * Define the "cms" routes for the application.
+   *
+   * These routes all receive session state, CSRF protection, etc.
+   *
+   * @return void
+   */
+  protected function mapCmsRoutes()
+  {
+    Route::prefix('cms')
+      ->middleware('cms')
+      ->namespace($this->namespace)
+      ->group(base_path('routes/cms.php'));
+  }
+}
