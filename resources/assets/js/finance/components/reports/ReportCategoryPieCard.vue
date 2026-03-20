@@ -87,6 +87,7 @@ export default {
     },
     slices() {
       const rows = (this.categories || [])
+        .filter((r) => r.category_type !== 'income')
         .map((r) => ({
           key: r.category_key,
           name: r.category_name || '—',

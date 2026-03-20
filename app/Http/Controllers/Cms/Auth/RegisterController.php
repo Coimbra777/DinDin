@@ -7,46 +7,37 @@ use App\Http\Requests\Cms\CmsRegisterUserRequest;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class RegisterController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Register Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
-    |
-    */
-
     use RegistersUsers;
 
-    /**
-     * Where to redirect users after registration.
-     *
-     * @var string
-     */
     protected $redirectTo = '/cms/configurations';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('guest');
+    }
+
+    public function showRegistrationForm(): View
+    {
+        return view('cms.auth.register');
     }
 
     public function register(CmsRegisterUserRequest $request)
     {
         $validated = $request->validated();
+        $username = $this->uniqueUsernameFromEmail($validated['email']);
+
         event(new Registered($user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'whatsapp' => $validated['whatsapp'],
             'password' => bcrypt($validated['password']),
+            'username' => $username,
+            'group_id' => 0,
         ])));
 
         $this->guard()->login($user);
@@ -56,5 +47,23 @@ class RegisterController extends Controller
         }
 
         return redirect($this->redirectPath());
+    }
+
+    private function uniqueUsernameFromEmail(string $email): string
+    {
+        $local = Str::lower(Str::before($email, '@'));
+        $local = preg_replace('/[^a-z0-9_]/', '_', $local) ?: 'user';
+        $local = trim($local, '_') ?: 'user';
+        $base = Str::limit($local, 200, '');
+        $username = $base;
+        $n = 0;
+
+        while (User::query()->where('username', $username)->exists()) {
+            $n++;
+            $suffix = '_' . $n;
+            $username = Str::limit($base, 255 - strlen($suffix), '') . $suffix;
+        }
+
+        return $username;
     }
 }

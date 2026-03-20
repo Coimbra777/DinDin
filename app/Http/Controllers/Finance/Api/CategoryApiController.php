@@ -26,7 +26,7 @@ class CategoryApiController extends RestrictedController
 
     public function store(Request $request): JsonResponse
     {
-        $data = $request->validate($this->categories->validationRules());
+        $data = $request->validate($this->categories->validationRulesForStore());
         $c = $this->categories->create((int) $request->user()->id, $data);
 
         return response()->json($this->categories->toArray($c), 201);
@@ -35,7 +35,7 @@ class CategoryApiController extends RestrictedController
     public function update(Request $request, int $category): JsonResponse
     {
         $c = Category::forUser($request->user()->id)->where('id', $category)->firstOrFail();
-        $data = $request->validate($this->categories->validationRules());
+        $data = $request->validate($this->categories->validationRulesForUpdate());
         if (array_key_exists('type', $data) && $data['type'] === null) {
             unset($data['type']);
         }

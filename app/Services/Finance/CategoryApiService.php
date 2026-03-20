@@ -6,6 +6,7 @@ namespace App\Services\Finance;
 
 use App\Models\Finance\Category;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 final class CategoryApiService
 {
@@ -26,11 +27,19 @@ final class CategoryApiService
      */
     public function create(int $userId, array $data): Category
     {
+        $type = $data['type'] ?? Category::TYPE_EXPENSE;
+        $group = $data['group'] ?? null;
+        $this->validateTypeAndGroup($type, $group);
+
+        if ($type === Category::TYPE_INCOME) {
+            $group = null;
+        }
+
         return Category::create([
             'user_id' => $userId,
             'name' => $data['name'],
-            'type' => $data['type'] ?? Category::TYPE_EXPENSE,
-            'group' => $data['group'] ?? null,
+            'type' => $type,
+            'group' => $group,
             'color' => $data['color'] ?? null,
         ]);
     }
@@ -40,6 +49,16 @@ final class CategoryApiService
      */
     public function update(Category $category, array $data): Category
     {
+        $typeAfter = $data['type'] ?? $category->type ?? Category::TYPE_EXPENSE;
+        $groupAfter = array_key_exists('group', $data) ? $data['group'] : $category->group;
+
+        if ($typeAfter === Category::TYPE_INCOME) {
+            $groupAfter = null;
+            $data['group'] = null;
+        }
+
+        $this->validateTypeAndGroup($typeAfter, $groupAfter);
+
         $category->update($data);
 
         return $category->fresh();
@@ -68,17 +87,46 @@ final class CategoryApiService
     /**
      * @return array<string, mixed>
      */
-    public function validationRules(): array
+    public function validationRulesForStore(): array
     {
         return [
             'name' => 'required|string|max:120',
             'color' => 'nullable|string|max:7',
-            'type' => ['nullable', Rule::in([Category::TYPE_INCOME, Category::TYPE_EXPENSE])],
+            'type' => ['required', Rule::in([Category::TYPE_INCOME, Category::TYPE_EXPENSE])],
             'group' => ['nullable', 'string', 'max:32', Rule::in([
                 Category::GROUP_FIXED,
                 Category::GROUP_VARIABLE,
                 Category::GROUP_FINANCIAL,
             ])],
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function validationRulesForUpdate(): array
+    {
+        return [
+            'name' => ['sometimes', 'required', 'string', 'max:120'],
+            'color' => 'nullable|string|max:7',
+            'type' => ['sometimes', Rule::in([Category::TYPE_INCOME, Category::TYPE_EXPENSE])],
+            'group' => ['nullable', 'string', 'max:32', Rule::in([
+                Category::GROUP_FIXED,
+                Category::GROUP_VARIABLE,
+                Category::GROUP_FINANCIAL,
+            ])],
+        ];
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function validateTypeAndGroup(string $type, ?string $group): void
+    {
+        if ($type === Category::TYPE_INCOME && $group !== null && $group !== '') {
+            throw ValidationException::withMessages([
+                'group' => 'Categorias de receita não utilizam subgrupo (fixa / variável / financeira).',
+            ]);
+        }
     }
 }

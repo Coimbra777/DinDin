@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Clients;
 use App\Models\JWTauth;
+use App\Support\WhatsappNormalizer;
 use Illuminate\Support\Facades\DB;
 
 class AuthenticationService
@@ -18,6 +19,9 @@ class AuthenticationService
         try {
             DB::beginTransaction();
             $data['email'] = strtolower($data['email']);
+            if (isset($data['whatsapp'])) {
+                $data['whatsapp'] = WhatsappNormalizer::normalize((string) $data['whatsapp']);
+            }
             $data['password'] = bcrypt($data['password']);
             Clients::create($data);
             JWTauth::create($data);

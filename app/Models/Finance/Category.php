@@ -74,6 +74,16 @@ class Category extends Model
         return $query->where('type', self::TYPE_EXPENSE);
     }
 
+    public function isIncome(): bool
+    {
+        return $this->type === self::TYPE_INCOME;
+    }
+
+    public function isExpense(): bool
+    {
+        return ($this->type ?? self::TYPE_EXPENSE) === self::TYPE_EXPENSE;
+    }
+
     /**
      * Totais de transações por tipo (receita / despesa) para esta categoria.
      *

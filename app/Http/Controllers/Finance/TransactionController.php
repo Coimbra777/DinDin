@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Finance;
 use App\Http\Controllers\Cms\RestrictedController;
 use App\Models\Finance\Category;
 use App\Models\Finance\Transaction;
+use App\Services\Finance\TransactionCategoryTypeGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -131,6 +132,8 @@ class TransactionController extends RestrictedController
             $data['credit_card_id'] = null;
             $data['is_credit_card'] = false;
         }
+
+        TransactionCategoryTypeGuard::assertCompatible($userId, isset($data['category_id']) ? (int) $data['category_id'] : null, $data['type']);
 
         return $data;
     }

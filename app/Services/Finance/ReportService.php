@@ -11,7 +11,7 @@ final class ReportService
     /**
      * Totais por categoria no mês (análise / gráficos).
      *
-     * @return array<int, array{category_key: int, category_name: string, income: float, expense: float, net: float}>
+     * @return array<int, array{category_key: int, category_name: string, category_type: string|null, income: float, expense: float, net: float}>
      */
     public function categoryBreakdown(int $userId, ?string $monthQuery): array
     {
@@ -24,6 +24,7 @@ final class ReportService
             $out[] = [
                 'category_key' => $key,
                 'category_name' => $row['category_name'],
+                'category_type' => $row['category_type'] ?? null,
                 'income' => $row['income'],
                 'expense' => $row['expense'],
                 'net' => $row['net'],

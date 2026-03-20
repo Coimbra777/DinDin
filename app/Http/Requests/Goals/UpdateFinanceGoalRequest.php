@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Goals;
 
+use App\Models\Finance\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -30,7 +31,7 @@ class UpdateFinanceGoalRequest extends FormRequest
             'income_category_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('finance_categories', 'id')->where(fn ($q) => $q->where('user_id', $userId)),
+                Rule::exists('finance_categories', 'id')->where(fn ($q) => $q->where('user_id', $userId)->where('type', Category::TYPE_INCOME)),
             ],
         ];
     }

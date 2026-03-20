@@ -48,22 +48,15 @@ class FinanceCategorySeeder extends Seeder
     {
         return [
             ['name' => 'Salário', 'type' => Category::TYPE_INCOME, 'group' => null, 'color' => '#16a34a'],
-            ['name' => '13º salário', 'type' => Category::TYPE_INCOME, 'group' => null, 'color' => '#15803d'],
-            ['name' => 'Férias', 'type' => Category::TYPE_INCOME, 'group' => null, 'color' => '#22c55e'],
-            ['name' => 'Outras rendas', 'type' => Category::TYPE_INCOME, 'group' => null, 'color' => '#4ade80'],
-
-            ['name' => 'Aluguel', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_FIXED, 'color' => '#dc2626'],
-            ['name' => 'Energia', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_FIXED, 'color' => '#b91c1c'],
-            ['name' => 'Água', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_FIXED, 'color' => '#991b1b'],
-            ['name' => 'Internet', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_FIXED, 'color' => '#7f1d1d'],
+            ['name' => 'Freelance', 'type' => Category::TYPE_INCOME, 'group' => null, 'color' => '#15803d'],
+            ['name' => 'Vendas', 'type' => Category::TYPE_INCOME, 'group' => null, 'color' => '#22c55e'],
+            ['name' => 'Investimentos', 'type' => Category::TYPE_INCOME, 'group' => null, 'color' => '#4ade80'],
 
             ['name' => 'Alimentação', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_VARIABLE, 'color' => '#ea580c'],
             ['name' => 'Transporte', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_VARIABLE, 'color' => '#c2410c'],
+            ['name' => 'Moradia', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_FIXED, 'color' => '#dc2626'],
             ['name' => 'Lazer', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_VARIABLE, 'color' => '#9a3412'],
-            ['name' => 'Compras', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_VARIABLE, 'color' => '#7c2d12'],
-
-            ['name' => 'Cartão de crédito', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_FINANCIAL, 'color' => '#7c3aed'],
-            ['name' => 'Parcelas', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_FINANCIAL, 'color' => '#6d28d9'],
+            ['name' => 'Assinaturas', 'type' => Category::TYPE_EXPENSE, 'group' => Category::GROUP_FINANCIAL, 'color' => '#7c3aed'],
         ];
     }
 }

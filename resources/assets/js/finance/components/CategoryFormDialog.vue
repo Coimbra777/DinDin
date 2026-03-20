@@ -1,5 +1,5 @@
 <template>
-  <v-dialog :value="value" max-width="420" content-class="finance-dialog-content" @input="$emit('input', $event)">
+  <v-dialog :value="value" max-width="460" content-class="finance-dialog-content" @input="$emit('input', $event)">
     <v-card class="rounded-lg">
       <v-card-title class="subtitle-1 font-weight-bold">
         {{ isEdit ? 'Editar categoria' : 'Nova categoria' }}
@@ -9,6 +9,29 @@
       <v-divider />
       <v-card-text class="pt-4">
         <v-text-field v-model="name" label="Nome" outlined dense :rules="[rules.required]" />
+        <v-select
+          v-model="type"
+          :items="typeItems"
+          label="Tipo"
+          outlined
+          dense
+          item-text="text"
+          item-value="value"
+          :rules="[rules.required]"
+        />
+        <v-select
+          v-if="type === TX_EXPENSE"
+          v-model="group"
+          :items="groupItems"
+          label="Subgrupo (despesa)"
+          outlined
+          dense
+          clearable
+          hint="Opcional: fixa, variável ou financeira"
+          persistent-hint
+          item-text="text"
+          item-value="value"
+        />
         <v-text-field v-model="color" label="Cor (hex, opcional)" outlined dense placeholder="#2563eb" hint="Ex: #43a047" persistent-hint />
       </v-card-text>
       <v-card-actions class="px-4 pb-4">
@@ -22,6 +45,11 @@
 
 <script>
 import axios from 'axios'
+import { TRANSACTION_TYPE_EXPENSE, TRANSACTION_TYPE_INCOME } from '../transactionTypes'
+
+const GROUP_FIXED = 'fixa'
+const GROUP_VARIABLE = 'variavel'
+const GROUP_FINANCIAL = 'financeira'
 
 export default {
   name: 'CategoryFormDialog',
@@ -32,11 +60,23 @@ export default {
   },
   data() {
     return {
+      TX_EXPENSE: TRANSACTION_TYPE_EXPENSE,
       name: '',
+      type: TRANSACTION_TYPE_EXPENSE,
+      group: null,
       color: '',
       saving: false,
+      typeItems: [
+        { text: 'Receita', value: TRANSACTION_TYPE_INCOME },
+        { text: 'Despesa', value: TRANSACTION_TYPE_EXPENSE },
+      ],
+      groupItems: [
+        { text: 'Fixa', value: GROUP_FIXED },
+        { text: 'Variável', value: GROUP_VARIABLE },
+        { text: 'Financeira', value: GROUP_FINANCIAL },
+      ],
       rules: {
-        required: (v) => (v && String(v).trim() !== '') || 'Obrigatório',
+        required: (v) => (v !== null && v !== undefined && String(v).trim() !== '') || 'Obrigatório',
       },
     }
   },
@@ -49,15 +89,24 @@ export default {
     value(v) {
       if (v) this.hydrate()
     },
+    type(t) {
+      if (t === TRANSACTION_TYPE_INCOME) {
+        this.group = null
+      }
+    },
   },
   methods: {
     hydrate() {
       if (this.isEdit) {
         this.name = this.category.name
         this.color = this.category.color || ''
+        this.type = this.category.type || TRANSACTION_TYPE_EXPENSE
+        this.group = this.category.group || null
       } else {
         this.name = ''
         this.color = ''
+        this.type = TRANSACTION_TYPE_EXPENSE
+        this.group = null
       }
     },
     close() {
@@ -65,8 +114,14 @@ export default {
     },
     async save() {
       if (!this.name || !String(this.name).trim()) return
+      if (!this.type) return
       this.saving = true
-      const payload = { name: this.name.trim(), color: this.color || null }
+      const payload = {
+        name: this.name.trim(),
+        color: this.color || null,
+        type: this.type,
+        group: this.type === TRANSACTION_TYPE_EXPENSE ? this.group || null : null,
+      }
       try {
         if (this.isEdit) {
           await axios.put(`${this.apiBase}/categories/${this.category.id}`, payload)

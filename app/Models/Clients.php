@@ -14,6 +14,7 @@ class Clients extends Model
         'active',
         'email',
         'name',
+        'whatsapp',
     ];
     /**
      * The attributes that should be hidden for arrays.

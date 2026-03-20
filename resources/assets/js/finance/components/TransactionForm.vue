@@ -298,7 +298,9 @@ export default {
     categoryItems() {
       const t = normalizeTransactionType(this.form.type)
       return this.categories.filter((c) => {
-        if (c.type == null || c.type === '') return true
+        if (c.type == null || c.type === '') {
+          return t === this.TX_EXPENSE
+        }
         return c.type === t
       })
     },

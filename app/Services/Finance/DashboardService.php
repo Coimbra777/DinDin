@@ -27,7 +27,7 @@ final class DashboardService
         $totalTransacoes = (int) ($row->tx_count ?? 0);
 
         $ultimas = Transaction::forUser($userId)
-            ->with(['category:id,name,color', 'creditCard:id,name'])
+            ->with(['category:id,name,color,type', 'creditCard:id,name'])
             ->whereBetween('transaction_date', [$start, $end])
             ->orderByDesc('transaction_date')
             ->orderByDesc('id')

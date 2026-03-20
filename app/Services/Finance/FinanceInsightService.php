@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Finance;
 
+use App\Models\Finance\Category;
 use App\Models\Finance\Transaction;
 use Carbon\Carbon;
 
@@ -25,6 +26,9 @@ final class FinanceInsightService
 
         $totalExpense = 0.0;
         foreach ($totals as $row) {
+            if (($row['category_type'] ?? null) === Category::TYPE_INCOME) {
+                continue;
+            }
             $totalExpense += (float) $row['expense'];
         }
 
@@ -32,6 +36,9 @@ final class FinanceInsightService
         foreach ($totals as $key => $row) {
             $exp = (float) $row['expense'];
             if ($exp <= 0) {
+                continue;
+            }
+            if (($row['category_type'] ?? null) === Category::TYPE_INCOME) {
                 continue;
             }
             $pct = $totalExpense > 0 ? round(($exp / $totalExpense) * 100, 1) : 0.0;

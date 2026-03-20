@@ -152,7 +152,11 @@
                     </v-list-item-avatar>
                     <v-list-item-content>
                       <v-list-item-title class="font-weight-medium">{{ c.name }}</v-list-item-title>
-                      <v-list-item-subtitle v-if="c.color">{{ c.color }}</v-list-item-subtitle>
+                      <v-list-item-subtitle class="text-caption">
+                        <span :class="c.type === 'income' ? 'success--text' : 'error--text'">{{ categoryTypeLabel(c) }}</span>
+                        <span v-if="c.type === 'expense' && c.group" class="text--secondary"> · {{ c.group }}</span>
+                        <span v-if="c.color" class="text--secondary"> · {{ c.color }}</span>
+                      </v-list-item-subtitle>
                     </v-list-item-content>
                     <v-list-item-action class="flex-row mx-0">
                       <v-btn icon small @click="openCategoryEdit(c)"><v-icon small color="secondary">mdi-pencil</v-icon></v-btn>
@@ -484,6 +488,10 @@ export default {
     chipBg(c) {
       if (c.color && /^#[0-9A-Fa-f]{6}$/.test(c.color)) return c.color
       return 'secondary'
+    },
+    categoryTypeLabel(c) {
+      if (c.type === 'income') return 'Receita'
+      return 'Despesa'
     },
     async refreshAll() {
       this.dashboardRefreshKey += 1

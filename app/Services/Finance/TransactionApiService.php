@@ -126,6 +126,8 @@ final class TransactionApiService
             $data['is_credit_card'] = false;
         }
 
+        TransactionCategoryTypeGuard::assertCompatible($userId, $data['category_id'] ?? null, $data['type']);
+
         return $data;
     }
 }

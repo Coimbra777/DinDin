@@ -30,6 +30,7 @@ final class TransactionResource
                 'id' => $t->category->id,
                 'name' => $t->category->name,
                 'color' => $t->category->color,
+                'type' => $t->category->type ?? null,
             ] : null,
             'credit_card' => $t->creditCard ? [
                 'id' => $t->creditCard->id,

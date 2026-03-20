@@ -52,6 +52,11 @@
                   </button>
                 </div>
               </div>
+              <div class="row" style="margin-top: 12px;">
+                <div class="col-12 text-center">
+                  <a href="{{ route('register') }}">Criar conta</a>
+                </div>
+              </div>
             </form>
           </div>
         </div>

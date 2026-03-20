@@ -7,6 +7,7 @@
 */
 
 use App\Http\Controllers\Cms\Auth\LoginController;
+use App\Http\Controllers\Cms\Auth\RegisterController;
 use App\Http\Controllers\Cms\BlogCategoriesController;
 use App\Http\Controllers\Cms\BlogGalleryController;
 use App\Http\Controllers\Cms\BlogPostsController;
@@ -40,6 +41,9 @@ Route::get('/', function () {
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
+
+Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('register', [RegisterController::class, 'register']);
 
 Route::middleware(['auth'])->group(function () {
   if (config('finance.redirect_cms_dashboard_to_finance')) {

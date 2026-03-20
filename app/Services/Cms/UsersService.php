@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Cms;
 
 use App\Models\User;
+use App\Support\WhatsappNormalizer;
 use Illuminate\Http\UploadedFile;
 
 class UsersService
@@ -16,6 +17,12 @@ class UsersService
 
     public function store(array $data, ?UploadedFile $imageFile): User
     {
+        if (array_key_exists('whatsapp', $data) && $data['whatsapp'] !== null && $data['whatsapp'] !== '') {
+            $data['whatsapp'] = WhatsappNormalizer::normalize((string) $data['whatsapp']);
+        } else {
+            unset($data['whatsapp']);
+        }
+
         $data['password'] = bcrypt($data['password']);
         unset($data['image']);
         $data['image'] = null;
@@ -34,6 +41,14 @@ class UsersService
     public function update(User $user, array $data, ?UploadedFile $imageFile): void
     {
         unset($data['id'], $data['image']);
+
+        if (array_key_exists('whatsapp', $data)) {
+            if ($data['whatsapp'] === null || $data['whatsapp'] === '') {
+                $data['whatsapp'] = null;
+            } else {
+                $data['whatsapp'] = WhatsappNormalizer::normalize((string) $data['whatsapp']);
+            }
+        }
 
         $image = $user->image;
         if ($imageFile !== null) {

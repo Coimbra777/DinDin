@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Support\WhatsappNormalizer;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
 {
@@ -21,12 +23,22 @@ class RegisterRequest extends FormRequest
      *
      * @return array
      */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('whatsapp')) {
+            $this->merge([
+                'whatsapp' => WhatsappNormalizer::normalize((string) $this->input('whatsapp')),
+            ]);
+        }
+    }
+
     public function rules()
     {
         return [
-            'name' => ['required','string','regex:/^[a-zA-Z]+(?:\s[a-zA-Z]+)+$/'],
+            'name' => ['required', 'string', 'regex:/^[a-zA-Z]+(?:\s[a-zA-Z]+)+$/'],
             'email' => ['required', 'email', 'unique:jwt_users', 'string', 'regex:/^(([^<>()\\.,;:ç~\s@"]+(\.[^<>()\\.,;:ç~\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/'],
-            'password' => 'string|required|min:6'
+            'whatsapp' => ['required', 'string', 'regex:/^\d{10,15}$/'],
+            'password' => ['required', 'string', 'confirmed', Password::min(8)->letters()->numbers()],
         ];
     }
 
@@ -39,7 +51,9 @@ class RegisterRequest extends FormRequest
             'unique' => 'Já há uma conta cadastrada para este E-mail.',
             'email.regex' => 'E-mail inválido.',
             'name.regex' => 'É necessário inserir pelo menos um sobrenome.',
-            'password.min' => 'A senha deve conter no mínimo 6 caracteres.'
+            'password.min' => 'A senha deve conter no mínimo 8 caracteres, com letras e números.',
+            'whatsapp.required' => 'O WhatsApp é obrigatório.',
+            'whatsapp.regex' => 'Informe um número de WhatsApp válido (com DDD).',
         ];
     }
 }

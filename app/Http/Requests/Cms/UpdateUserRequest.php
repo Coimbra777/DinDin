@@ -6,6 +6,7 @@ namespace App\Http\Requests\Cms;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -33,7 +34,8 @@ class UpdateUserRequest extends FormRequest
             'id' => ['required', 'integer'],
             'name' => ['required', 'string', 'max:200'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($id)],
-            'password' => ['nullable', 'string', 'min:6'],
+            'whatsapp' => ['nullable', 'string', 'max:30'],
+            'password' => ['nullable', 'string', Password::min(8)->letters()->numbers()],
             'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($id)],
             'group_id' => ['required', 'integer', 'exists:groups,id'],
             'image' => ['nullable', 'image'],

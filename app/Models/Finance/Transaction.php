@@ -268,7 +268,7 @@ class Transaction extends Model
     /**
      * Totais agregados por categoria: ['category_id' => ['income' => x, 'expense' => y, 'net' => z], ...]
      *
-     * @return array<int, array{income: float, expense: float, net: float, category_name: string|null}>
+     * @return array<int, array{income: float, expense: float, net: float, category_name: string|null, category_type: string|null}>
      */
     public static function totalsByCategoryForUser(int $userId, ?array $filters = null): array
     {
@@ -286,7 +286,7 @@ class Transaction extends Model
         }
 
         $rows = $query->get();
-        $categoryNames = Category::forUser($userId)->pluck('name', 'id');
+        $categories = Category::forUser($userId)->get(['id', 'name', 'type'])->keyBy('id');
 
         $result = [];
         foreach ($rows as $row) {
@@ -294,11 +294,16 @@ class Transaction extends Model
             $expense = (float) $row->expense_total;
             $key = (int) $row->category_key;
             $cid = $key === 0 ? null : $key;
+            $cat = $cid ? $categories->get($cid) : null;
+            $rawType = $cat ? (string) ($cat->type ?? '') : '';
+            $categoryType = $cid ? ($rawType !== '' ? $rawType : Category::TYPE_EXPENSE) : null;
+
             $result[$key] = [
                 'income' => $income,
                 'expense' => $expense,
                 'net' => $income - $expense,
-                'category_name' => $cid ? ($categoryNames[$cid] ?? '—') : 'Sem categoria',
+                'category_name' => $cid ? ($cat ? $cat->name : '—') : 'Sem categoria',
+                'category_type' => $categoryType,
             ];
         }
 
