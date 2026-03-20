@@ -177,14 +177,15 @@
           >
             <template slot="activator" slot-scope="{ on, attrs }">
               <v-text-field
-                v-model="form.transaction_date"
+                :value="transactionDateDisplay"
                 label="Data"
                 prepend-inner-icon="mdi-calendar"
                 readonly
                 outlined
                 dense
+                placeholder="DD/MM/AAAA"
                 v-bind="attrs"
-                :rules="[rules.required]"
+                :rules="transactionDateRules"
                 v-on="on"
               />
             </template>
@@ -266,6 +267,7 @@ import {
   normalizeTransactionType,
 } from '../transactionTypes'
 import HelpTooltip from './HelpTooltip.vue'
+import { formatDatePtBR, toIsoDateOnly, todayIsoLocal } from '../format'
 
 const emptyForm = () => ({
   title: '',
@@ -273,7 +275,7 @@ const emptyForm = () => ({
   type: TRANSACTION_TYPE_EXPENSE,
   category_id: null,
   credit_card_id: null,
-  transaction_date: new Date().toISOString().slice(0, 10),
+  transaction_date: todayIsoLocal(),
   description: '',
   installment_number: null,
   installment_of: null,
@@ -345,6 +347,12 @@ export default {
         ? 'finance-type-card--active-expense'
         : 'finance-type-card--idle'
     },
+    transactionDateDisplay() {
+      return formatDatePtBR(this.form.transaction_date)
+    },
+    transactionDateRules() {
+      return [() => (toIsoDateOnly(this.form.transaction_date) ? true : 'Informe a data')]
+    },
   },
   watch: {
     value(val) {
@@ -405,7 +413,7 @@ export default {
           type: normalizeTransactionType(this.transaction.type),
           category_id: this.transaction.category_id,
           credit_card_id: this.transaction.credit_card_id || null,
-          transaction_date: this.transaction.transaction_date,
+          transaction_date: toIsoDateOnly(this.transaction.transaction_date) || todayIsoLocal(),
           description: this.transaction.description || '',
           installment_number: this.transaction.installment_number ?? null,
           installment_of: this.transaction.installment_of ?? null,
@@ -452,7 +460,7 @@ export default {
         title: this.form.title,
         amount: n,
         type: normalizeTransactionType(this.form.type),
-        transaction_date: this.form.transaction_date,
+        transaction_date: toIsoDateOnly(this.form.transaction_date) || this.form.transaction_date,
         description: this.form.description || null,
         category_id: this.form.category_id || null,
         credit_card_id: this.form.type === this.TX_EXPENSE && this.form.credit_card_id ? this.form.credit_card_id : null,

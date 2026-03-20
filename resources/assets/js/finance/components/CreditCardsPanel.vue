@@ -261,6 +261,7 @@
 
 <script>
 import axios from 'axios'
+import { formatDatePtBR, toIsoDateOnly } from '../format'
 import CreditCardFormDialog from './CreditCardFormDialog.vue'
 
 export default {
@@ -341,15 +342,15 @@ export default {
     },
     formatPeriod(p) {
       if (!p || !p.start || !p.end) return ''
-      const a = p.start.split('-').reverse().join('/')
-      const b = p.end.split('-').reverse().join('/')
+      const a = formatDatePtBR(toIsoDateOnly(p.start))
+      const b = formatDatePtBR(toIsoDateOnly(p.end))
+      if (!a || !b) return ''
       return `${a} — ${b}`
     },
     formatPurchaseDate(iso) {
       if (!iso) return '—'
-      const [y, m, d] = String(iso).split('-')
-      if (!d || !m) return iso
-      return `${d}/${m}/${y}`
+      const s = formatDatePtBR(iso)
+      return s || '—'
     },
     async loadCards() {
       this.loadingList = true

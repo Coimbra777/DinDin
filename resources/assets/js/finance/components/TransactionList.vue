@@ -53,7 +53,7 @@
             <v-list-item-subtitle class="tx-list__meta text-caption secondary--text mt-1">
               <span class="tx-list__meta-icon">
                 <v-icon x-small class="mr-1" color="secondary">mdi-calendar-outline</v-icon>
-                {{ formatDate(item.transaction_date) }}
+                {{ formatTxDate(item.transaction_date) }}
               </span>
               <template v-if="item.category">
                 <span class="mx-1">·</span>
@@ -96,6 +96,7 @@
 
 <script>
 import { formatCurrencyBRL } from '../currency'
+import { formatDatePtBR } from '../format'
 
 export default {
   name: 'TransactionList',
@@ -114,10 +115,8 @@ export default {
     },
   },
   methods: {
-    formatDate(iso) {
-      if (!iso) return ''
-      const [y, m, d] = iso.split('-')
-      return `${d}/${m}/${y}`
+    formatTxDate(iso) {
+      return formatDatePtBR(iso)
     },
     itemIcon(item) {
       if (item.type === 'income') return 'mdi-cash-plus'
