@@ -25,7 +25,7 @@ class ResetPasswordController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/cms/dashboard';
+    protected $redirectTo = '/cms/finance/finance_dashboard';
 
     /**
      * Create a new controller instance.
@@ -35,8 +35,5 @@ class ResetPasswordController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        if (config('finance.redirect_cms_dashboard_to_finance')) {
-            $this->redirectTo = '/cms/finance/finance_dashboard';
-        }
     }
 }

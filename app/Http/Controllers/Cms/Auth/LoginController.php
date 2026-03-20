@@ -29,7 +29,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/cms/dashboard';
+    protected $redirectTo = '/cms/finance/finance_dashboard';
 
     /**
      * Create a new controller instance.
@@ -39,9 +39,6 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
-        if (config('finance.redirect_cms_dashboard_to_finance')) {
-            $this->redirectTo = '/cms/finance/finance_dashboard';
-        }
     }
 
     public function showLoginForm()

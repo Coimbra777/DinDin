@@ -15,14 +15,11 @@ class RegisterController extends Controller
 {
     use RegistersUsers;
 
-    protected $redirectTo = '/cms/dashboard';
+    protected $redirectTo = '/cms/finance/finance_dashboard';
 
     public function __construct()
     {
         $this->middleware('guest');
-        if (config('finance.redirect_cms_dashboard_to_finance')) {
-            $this->redirectTo = '/cms/finance/finance_dashboard';
-        }
     }
 
     public function showRegistrationForm(): View

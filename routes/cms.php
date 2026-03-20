@@ -2,22 +2,12 @@
 
 /*
 |--------------------------------------------------------------------------
-| CMS Routes (prefix /cms via RouteServiceProvider)
+| CMS / app autenticada — autenticação + finanças (sem CMS institucional antigo)
 |--------------------------------------------------------------------------
 */
 
 use App\Http\Controllers\Cms\Auth\LoginController;
 use App\Http\Controllers\Cms\Auth\RegisterController;
-use App\Http\Controllers\Cms\BlogCategoriesController;
-use App\Http\Controllers\Cms\BlogGalleryController;
-use App\Http\Controllers\Cms\BlogPostsController;
-use App\Http\Controllers\Cms\ClientsController;
-use App\Http\Controllers\Cms\ConfigurationController;
-use App\Http\Controllers\Cms\DashboardController;
-use App\Http\Controllers\Cms\GroupsController;
-use App\Http\Controllers\Cms\PageController;
-use App\Http\Controllers\Cms\UploadImageController;
-use App\Http\Controllers\Cms\UsersController;
 use App\Http\Controllers\Finance\Api\CreditCardApiController;
 use App\Http\Controllers\Finance\Api\CategoryApiController;
 use App\Http\Controllers\Finance\Api\DashboardApiController;
@@ -48,24 +38,9 @@ Route::post('register', [RegisterController::class, 'register']);
 Route::view('password/forgot', 'cms.auth.forgot-password')->name('cms.password.forgot');
 
 Route::middleware(['auth'])->group(function () {
-  if (config('finance.redirect_cms_dashboard_to_finance')) {
-    Route::get('dashboard', function () {
-      return redirect()->route('finance_dashboard.index');
-    })->name('dashboard.index');
-  } else {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
-  }
-  Route::resource('configurations', ConfigurationController::class);
-  Route::resource('pages', PageController::class);
-  Route::resource('clients', ClientsController::class);
-
-  Route::prefix('blog')->group(function () {
-    Route::resource('blog_categories', BlogCategoriesController::class);
-    Route::resource('blog_posts', BlogPostsController::class);
-    Route::resource('blog_posts.gallery', BlogGalleryController::class);
-    Route::post('upload-images', [UploadImageController::class, 'editorUpload'])->name('upload-images');
-    Route::get('/preview/{slug}', [BlogPostsController::class, 'preview'])->name('blog.preview');
-  });
+  Route::get('dashboard', function () {
+    return redirect()->route('finance_dashboard.index');
+  })->name('dashboard.index');
 
   Route::prefix('finance')->group(function () {
     Route::prefix('api')->group(function () {
@@ -112,9 +87,4 @@ Route::middleware(['auth'])->group(function () {
   });
 
   Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-
-  Route::prefix('admin')->group(function () {
-    Route::resource('groups', GroupsController::class);
-    Route::resource('users', UsersController::class);
-  });
 });

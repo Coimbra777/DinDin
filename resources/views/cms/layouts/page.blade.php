@@ -6,7 +6,7 @@
   <div class="wrapper" id="app">
     <header class="main-header">
       <!-- Logo -->
-      <a href="{{ route('configurations.index') }}" class="logo d-md-flex d-none justify-content-center align-items-center">
+      <a href="{{ route('finance_dashboard.index') }}" class="logo d-md-flex d-none justify-content-center align-items-center">
         <!-- mini logo for sidebar mini 50x50 pixels -->
         <span class="logo-mini"><img src="{{ asset('img/logo_cms.svg') }}" alt="{{ config('app.name') }}"></span>
         <!-- logo for regular state and mobile devices -->
@@ -24,7 +24,7 @@
           </span>
         </a>
 
-        <a href="{{ route('configurations.index') }}" class="logo d-flex d-md-none justify-content-center align-items-center">
+        <a href="{{ route('finance_dashboard.index') }}" class="logo d-flex d-md-none justify-content-center align-items-center">
           <!-- mini logo for sidebar mini 50x50 pixels -->
           <span class="logo-mini"><img src="{{ asset('img/logo_cms.svg') }}" alt="{{ config('app.name') }}"></span>
           <!-- logo for regular state and mobile devices -->
