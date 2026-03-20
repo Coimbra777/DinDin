@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Modules\Finance\Models\Category;
+use App\Models\Finance\Category;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;

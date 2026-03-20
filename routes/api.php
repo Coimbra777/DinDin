@@ -8,9 +8,9 @@
 
 use App\Http\Controllers\Api\TinyMceController;
 use App\Http\Controllers\AuthController;
-use App\Modules\CreditCard\Http\Controllers\Api\CreditCardApiController;
-use App\Modules\Finance\Http\Controllers\Api\DashboardApiController;
-use App\Modules\Projection\Http\Controllers\Api\ProjectionApiController;
+use App\Http\Controllers\Finance\Api\CreditCardApiController;
+use App\Http\Controllers\Finance\Api\DashboardApiController;
+use App\Http\Controllers\Finance\Api\ProjectionApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('cors')->group(function () {
@@ -38,16 +38,31 @@ Route::group([
 */
 Route::middleware(['web', 'auth'])->group(function () {
     Route::prefix('finance')->group(function () {
-        require base_path('app/Modules/Finance/Routes/api.php');
+        require base_path('routes/api/finance.php');
     });
     Route::prefix('cards')->group(function () {
-        require base_path('app/Modules/CreditCard/Routes/api.php');
+        require base_path('routes/api/cards.php');
     });
     Route::prefix('projection')->group(function () {
-        require base_path('app/Modules/Projection/Routes/api.php');
+        require base_path('routes/api/projection.php');
     });
     Route::prefix('reports')->group(function () {
-        require base_path('app/Modules/Reports/Routes/api.php');
+        require base_path('routes/api/reports.php');
+    });
+    Route::prefix('goals')->group(function () {
+        require base_path('routes/api/goals.php');
+    });
+    Route::prefix('alerts')->group(function () {
+        require base_path('routes/api/alerts.php');
+    });
+    Route::prefix('insights')->group(function () {
+        require base_path('routes/api/insights.php');
+    });
+    Route::prefix('credit-simulator')->group(function () {
+        require base_path('routes/api/credit-simulator.php');
+    });
+    Route::prefix('planning')->group(function () {
+        require base_path('routes/api/planning.php');
     });
 
     /** @deprecated use GET /api/finance/dashboard */

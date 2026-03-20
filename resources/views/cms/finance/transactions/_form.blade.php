@@ -1,5 +1,5 @@
 @php
-    /** @var \App\Modules\Finance\Models\Transaction|null $finance_transaction */
+    /** @var \App\Models\Finance\Transaction|null $finance_transaction */
     $t = $finance_transaction ?? null;
 @endphp
 @include('cms.finance.partials.errors')

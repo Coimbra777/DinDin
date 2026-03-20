@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Modules\Finance\Models\Category;
-use App\Modules\Finance\Models\Transaction;
+use App\Models\Finance\Category;
+use App\Models\Finance\Transaction;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;

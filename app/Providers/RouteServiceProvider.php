@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
-use App\Modules\CreditCard\Models\CreditCard;
-use App\Modules\Finance\Models\Category;
-use App\Modules\Finance\Models\Transaction;
+use App\Models\Finance\Category;
+use App\Models\Finance\CreditCard;
+use App\Models\Finance\FinanceGoal;
+use App\Models\Finance\FinanceMonthlyPlan;
+use App\Models\Finance\Transaction;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
@@ -43,6 +45,28 @@ class RouteServiceProvider extends ServiceProvider
       }
 
       return CreditCard::query()
+        ->where('id', $value)
+        ->where('user_id', auth()->id())
+        ->firstOrFail();
+    });
+
+    Route::bind('finance_goal', function ($value) {
+      if (!auth()->check()) {
+        abort(403);
+      }
+
+      return FinanceGoal::query()
+        ->where('id', $value)
+        ->where('user_id', auth()->id())
+        ->firstOrFail();
+    });
+
+    Route::bind('finance_monthly_plan', function ($value) {
+      if (!auth()->check()) {
+        abort(403);
+      }
+
+      return FinanceMonthlyPlan::query()
         ->where('id', $value)
         ->where('user_id', auth()->id())
         ->firstOrFail();

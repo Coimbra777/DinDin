@@ -1,5 +1,5 @@
 @php
-    /** @var \App\Modules\Finance\Models\Category|null $finance_category */
+    /** @var \App\Models\Finance\Category|null $finance_category */
     $c = $finance_category ?? null;
 @endphp
 @include('cms.finance.partials.errors')

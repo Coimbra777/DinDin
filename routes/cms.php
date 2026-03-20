@@ -17,16 +17,16 @@ use App\Http\Controllers\Cms\GroupsController;
 use App\Http\Controllers\Cms\PageController;
 use App\Http\Controllers\Cms\UploadImageController;
 use App\Http\Controllers\Cms\UsersController;
-use App\Modules\CreditCard\Http\Controllers\Api\CreditCardApiController;
-use App\Modules\Finance\Http\Controllers\Api\CategoryApiController;
-use App\Modules\Finance\Http\Controllers\Api\DashboardApiController;
-use App\Modules\Finance\Http\Controllers\Api\SummaryApiController;
-use App\Modules\Finance\Http\Controllers\Api\TransactionApiController;
-use App\Modules\Finance\Http\Controllers\CategoryController;
-use App\Modules\Finance\Http\Controllers\FinanceDashboardController;
-use App\Modules\Finance\Http\Controllers\TransactionController;
-use App\Modules\Projection\Http\Controllers\Api\ProjectionApiController;
-use App\Modules\Reports\Http\Controllers\Api\ReportApiController;
+use App\Http\Controllers\Finance\Api\CreditCardApiController;
+use App\Http\Controllers\Finance\Api\CategoryApiController;
+use App\Http\Controllers\Finance\Api\DashboardApiController;
+use App\Http\Controllers\Finance\Api\SummaryApiController;
+use App\Http\Controllers\Finance\Api\TransactionApiController;
+use App\Http\Controllers\Finance\Api\ProjectionApiController;
+use App\Http\Controllers\Finance\Api\ReportApiController;
+use App\Http\Controllers\Finance\CategoryController;
+use App\Http\Controllers\Finance\FinanceDashboardController;
+use App\Http\Controllers\Finance\TransactionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -82,6 +82,21 @@ Route::middleware(['auth'])->group(function () {
       Route::get('credit-cards/{finance_credit_card}/bill', [CreditCardApiController::class, 'bill'])->name('finance.api.credit-cards.bill');
       Route::get('reports/categories', [ReportApiController::class, 'categories'])->name('finance.api.reports.categories');
       Route::get('reports/trend', [ReportApiController::class, 'trend'])->name('finance.api.reports.trend');
+      Route::prefix('goals')->group(function () {
+        require base_path('routes/api/goals.php');
+      });
+      Route::prefix('alerts')->group(function () {
+        require base_path('routes/api/alerts.php');
+      });
+      Route::prefix('insights')->group(function () {
+        require base_path('routes/api/insights.php');
+      });
+      Route::prefix('credit-simulator')->group(function () {
+        require base_path('routes/api/credit-simulator.php');
+      });
+      Route::prefix('planning')->group(function () {
+        require base_path('routes/api/planning.php');
+      });
     });
 
     Route::get('finance_dashboard', [FinanceDashboardController::class, 'index'])

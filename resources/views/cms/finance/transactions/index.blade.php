@@ -80,7 +80,7 @@
                             <td>{{ $t->transaction_date->format('d/m/Y') }}</td>
                             <td>{{ $t->title }}</td>
                             <td>
-                                @if($t->type === \App\Modules\Finance\Models\Transaction::TYPE_INCOME)
+                                @if($t->type === \App\Models\Finance\Transaction::TYPE_INCOME)
                                 <span class="label label-success">Receita</span>
                                 @else
                                 <span class="label label-danger">Despesa</span>

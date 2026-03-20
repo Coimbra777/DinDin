@@ -193,6 +193,44 @@
               @error="showError"
             />
           </div>
+
+          <!-- ALERTAS -->
+          <div v-else-if="view === 'alerts'" key="alerts">
+            <alerts-page
+              :api-base="apiBase"
+              :month="month"
+              :refresh-key="alertsRefreshKey"
+              @error="showError"
+            />
+          </div>
+
+          <!-- INSIGHTS -->
+          <div v-else-if="view === 'insights'" key="insights">
+            <insights-page
+              :api-base="apiBase"
+              :month="month"
+              :refresh-key="insightsRefreshKey"
+              @error="showError"
+            />
+          </div>
+
+          <!-- SIMULADOR CARTÃO -->
+          <div v-else-if="view === 'simulator'" key="sim">
+            <credit-simulator-page
+              :api-base="apiBase"
+              :refresh-key="simulatorRefreshKey"
+              @error="showError"
+            />
+          </div>
+
+          <!-- PLANEJAMENTO -->
+          <div v-else-if="view === 'planning'" key="plan">
+            <planning-page
+              :api-base="apiBase"
+              :refresh-key="planningRefreshKey"
+              @error="showError"
+            />
+          </div>
         </v-fade-transition>
       </v-container>
     </v-main>
@@ -293,11 +331,26 @@ import CategoryFormDialog from '../../components/CategoryFormDialog.vue'
 import CreditCardsPage from '../cards/CreditCardsPage.vue'
 import ReportsPage from '../reports/ReportsPage.vue'
 import ProjectionPage from '../projection/ProjectionPage.vue'
+import AlertsPage from '../alerts/AlertsPage.vue'
+import InsightsPage from '../insights/InsightsPage.vue'
+import CreditSimulatorPage from '../simulator/CreditSimulatorPage.vue'
+import PlanningPage from '../planning/PlanningPage.vue'
 import FinanceThemeToggle from '../../components/FinanceThemeToggle.vue'
 import { monthChoices, normalizeMonth } from '../../format'
 import { applyBodyThemeClass, getStoredTheme } from '../../financeTheme'
 
-const VALID_VIEWS = ['dashboard', 'transactions', 'categories', 'cards', 'projection', 'reports']
+const VALID_VIEWS = [
+  'dashboard',
+  'transactions',
+  'categories',
+  'cards',
+  'projection',
+  'reports',
+  'alerts',
+  'insights',
+  'simulator',
+  'planning',
+]
 
 export default {
   name: 'FinanceApp',
@@ -309,6 +362,10 @@ export default {
     CreditCardsPage,
     ReportsPage,
     ProjectionPage,
+    AlertsPage,
+    InsightsPage,
+    CreditSimulatorPage,
+    PlanningPage,
     FinanceThemeToggle,
   },
   props: {
@@ -328,6 +385,10 @@ export default {
       creditCardsRefreshKey: 0,
       reportsRefreshKey: 0,
       projectionRefreshKey: 0,
+      alertsRefreshKey: 0,
+      insightsRefreshKey: 0,
+      simulatorRefreshKey: 0,
+      planningRefreshKey: 0,
       navItems: [
         { title: 'Dashboard', value: 'dashboard', icon: 'mdi-view-dashboard-outline' },
         { title: 'Transações', value: 'transactions', icon: 'mdi-bank-transfer' },
@@ -335,6 +396,10 @@ export default {
         { title: 'Cartões', value: 'cards', icon: 'mdi-credit-card-outline' },
         { title: 'Projeção', value: 'projection', icon: 'mdi-chart-timeline-variant' },
         { title: 'Relatórios', value: 'reports', icon: 'mdi-file-chart-outline' },
+        { title: 'Alertas', value: 'alerts', icon: 'mdi-bell-alert-outline' },
+        { title: 'Insights', value: 'insights', icon: 'mdi-lightbulb-outline' },
+        { title: 'Simulador', value: 'simulator', icon: 'mdi-calculator-variant' },
+        { title: 'Planejamento', value: 'planning', icon: 'mdi-calendar-check' },
       ],
       transactions: [],
       categories: [],
@@ -358,7 +423,7 @@ export default {
       return this.categories.map((c) => ({ text: c.name, value: c.id }))
     },
     showMonthSelector() {
-      return ['dashboard', 'transactions', 'reports'].includes(this.view)
+      return ['dashboard', 'transactions', 'reports', 'alerts', 'insights'].includes(this.view)
     },
     showTransactionFab() {
       return ['dashboard', 'transactions'].includes(this.view)
@@ -376,6 +441,18 @@ export default {
       }
       if (v === 'projection') {
         this.projectionRefreshKey += 1
+      }
+      if (v === 'alerts') {
+        this.alertsRefreshKey += 1
+      }
+      if (v === 'insights') {
+        this.insightsRefreshKey += 1
+      }
+      if (v === 'simulator') {
+        this.simulatorRefreshKey += 1
+      }
+      if (v === 'planning') {
+        this.planningRefreshKey += 1
       }
     },
   },
@@ -413,6 +490,10 @@ export default {
       this.creditCardsRefreshKey += 1
       this.reportsRefreshKey += 1
       this.projectionRefreshKey += 1
+      this.alertsRefreshKey += 1
+      this.insightsRefreshKey += 1
+      this.simulatorRefreshKey += 1
+      this.planningRefreshKey += 1
       await Promise.all([this.loadTransactions(), this.loadCategories(), this.loadCreditCards()])
     },
     goView(value) {
