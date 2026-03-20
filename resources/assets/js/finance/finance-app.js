@@ -75,6 +75,8 @@ if (el) {
           initialMonth: el.dataset.initialMonth || '',
           apiBase: (el.dataset.apiBase || '').replace(/\/$/, ''),
           userName: el.dataset.userName || '',
+          onboardingInitialCompleted: el.dataset.onboardingCompleted === '1',
+          onboardingCompleteUrl: el.dataset.onboardingCompleteUrl || '',
         },
       }),
   }).$mount(el)

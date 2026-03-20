@@ -26,6 +26,7 @@ class UserFactory extends Factory
             'password' => Hash::make('password'),
             'group_id' => 0,
             'image' => null,
+            'onboarding_completed' => false,
             'remember_token' => Str::random(10),
         ];
     }

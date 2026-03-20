@@ -11,12 +11,14 @@ use App\Http\Controllers\Cms\Auth\RegisterController;
 use App\Http\Controllers\Finance\Api\CategoryApiController;
 use App\Http\Controllers\Finance\Api\CreditCardApiController;
 use App\Http\Controllers\Finance\Api\DashboardApiController;
+use App\Http\Controllers\Finance\Api\FinanceOnboardingApiController;
 use App\Http\Controllers\Finance\Api\ProjectionApiController;
 use App\Http\Controllers\Finance\Api\ReportApiController;
 use App\Http\Controllers\Finance\Api\SummaryApiController;
 use App\Http\Controllers\Finance\Api\TransactionApiController;
 use App\Http\Controllers\Finance\CategoryController;
 use App\Http\Controllers\Finance\FinanceDashboardController;
+use App\Http\Controllers\Finance\FinanceOnboardingWebController;
 use App\Http\Controllers\Finance\TransactionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +47,8 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('finance')->group(function () {
         Route::prefix('api')->group(function () {
             Route::get('dashboard', [DashboardApiController::class, 'show'])->name('finance.api.dashboard');
+            Route::get('user/onboarding', [FinanceOnboardingApiController::class, 'show'])->name('finance.api.user.onboarding');
+            Route::post('user/onboarding/complete', [FinanceOnboardingApiController::class, 'complete'])->name('finance.api.user.onboarding.complete');
             Route::get('projection', [ProjectionApiController::class, 'show'])->name('finance.api.projection');
             Route::get('summary', [SummaryApiController::class, 'show'])->name('finance.api.summary');
             Route::get('transactions', [TransactionApiController::class, 'index'])->name('finance.api.transactions');
@@ -79,6 +83,9 @@ Route::middleware(['auth'])->group(function () {
                 require base_path('routes/api/planning.php');
             });
         });
+
+        Route::post('onboarding/complete', [FinanceOnboardingWebController::class, 'complete'])
+            ->name('finance.onboarding.complete');
 
         Route::get('finance_dashboard', [FinanceDashboardController::class, 'index'])
             ->name('finance_dashboard.index');

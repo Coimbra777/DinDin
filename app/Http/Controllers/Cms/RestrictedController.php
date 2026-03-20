@@ -87,6 +87,7 @@ class RestrictedController extends Controller
     private function isFinanceApiRequest(Request $request): bool
     {
         return $request->is(
+            'cms/finance/api*',
             'api/finance*',
             'api/cards*',
             'api/projection*',

@@ -28,6 +28,7 @@
           :key="item.value"
           link
           rounded
+          :data-tour="item.value === 'categories' ? 'nav-categories' : undefined"
           :class="{ 'primary white--text': view === item.value }"
           @click="goView(item.value)"
         >
@@ -260,6 +261,7 @@
           large
           color="primary"
           dark
+          data-tour="finance-fab-transaction"
           class="finance-fab finance-fab--primary-action"
           elevation="10"
           v-bind="attrs"
@@ -336,6 +338,14 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <onboarding-tour
+      v-if="!onboardingCompletedLocal"
+      v-model="onboardingTourOpen"
+      :onboarding-complete-url="onboardingCompleteUrl"
+      :return-month="month"
+      @step="onOnboardingStep"
+    />
   </v-app>
 </template>
 
@@ -354,6 +364,7 @@ import CreditSimulatorPage from '../simulator/CreditSimulatorPage.vue'
 import PlanningPage from '../planning/PlanningPage.vue'
 import FinanceThemeToggle from '../../components/FinanceThemeToggle.vue'
 import FinanceHelpModal from '../../components/FinanceHelpModal.vue'
+import OnboardingTour from '../../components/OnboardingTour.vue'
 import { monthChoices, normalizeMonth } from '../../format'
 import { applyBodyThemeClass, getStoredTheme } from '../../financeTheme'
 
@@ -386,16 +397,21 @@ export default {
     PlanningPage,
     FinanceThemeToggle,
     FinanceHelpModal,
+    OnboardingTour,
   },
   props: {
     initialView: { type: String, default: 'dashboard' },
     initialMonth: { type: String, default: '' },
     apiBase: { type: String, required: true },
     userName: { type: String, default: '' },
+    onboardingInitialCompleted: { type: Boolean, default: false },
+    onboardingCompleteUrl: { type: String, required: true },
   },
   data() {
     const v = VALID_VIEWS.includes(this.initialView) ? this.initialView : 'dashboard'
     return {
+      onboardingCompletedLocal: this.onboardingInitialCompleted,
+      onboardingTourOpen: !this.onboardingInitialCompleted,
       navDrawer: false,
       view: v,
       month: normalizeMonth(this.initialMonth),
@@ -497,6 +513,19 @@ export default {
     this.refreshAll()
   },
   methods: {
+    setViewOnly(value) {
+      this.view = value
+    },
+    onOnboardingStep(stepIndex) {
+      if (stepIndex === 2) {
+        this.setViewOnly('dashboard')
+        if (this.$vuetify.breakpoint.smAndDown) this.navDrawer = true
+        return
+      }
+      this.setViewOnly('dashboard')
+      if (this.$vuetify.breakpoint.smAndDown) this.navDrawer = false
+      if (stepIndex === 3) this.dashboardRefreshKey += 1
+    },
     logout() {
       const f = document.getElementById('finance-logout-form')
       if (f) f.submit()

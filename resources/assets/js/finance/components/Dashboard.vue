@@ -55,7 +55,8 @@
         </v-col>
       </v-row>
 
-      <!-- 2. Receitas | Despesas — grid mobile-first -->
+      <!-- 2. Receitas | Despesas — grid mobile-first (data-tour: onboarding) -->
+      <div data-tour="dashboard-income-expense">
       <v-row dense class="mb-4 mb-sm-5">
         <v-col cols="12" sm="6" class="px-2 px-sm-4">
           <v-card class="stat-tile stat-tile--income rounded-xl h-100" flat outlined>
@@ -97,6 +98,7 @@
           </v-card>
         </v-col>
       </v-row>
+      </div>
 
       <!-- 3. Gráfico -->
       <v-row class="mb-4 mb-sm-5">

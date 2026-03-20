@@ -36,6 +36,11 @@ class User extends Authenticatable
         'username',
         'group_id',
         'image',
+        'onboarding_completed',
+    ];
+
+    protected $casts = [
+        'onboarding_completed' => 'boolean',
     ];
 
     /**
