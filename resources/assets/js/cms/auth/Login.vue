@@ -13,19 +13,31 @@
 
       <transition appear name="cms-auth-fade">
         <div>
-          <div class="cms-auth-logo-wrap text-center mb-8">
+          <div class="cms-auth-logo-wrap text-center mb-6">
             <v-img :src="logoUrl" :alt="appName" contain max-height="56" class="mx-auto" style="max-width: 220px" />
           </div>
 
           <h1 class="text-h4 font-weight-bold mb-2" :class="titleClass">Entrar</h1>
           <p class="text-body-1 mb-8" :class="subtitleClass">Painel administrativo</p>
 
-          <v-form ref="form" v-model="formValid" lazy-validation class="cms-auth-fields" @submit.prevent="submitLogin">
+          <v-alert
+            v-if="initialStatus"
+            type="success"
+            dense
+            text
+            prominent
+            class="mb-6 rounded-lg"
+            border="left"
+            colored-border
+          >
+            {{ initialStatus }}
+          </v-alert>
+
+          <v-form ref="form" v-model="formValid" class="cms-auth-fields" @submit.prevent="submitLogin">
             <v-text-field
               ref="firstField"
               v-model="username"
-              solo
-              flat
+              outlined
               dense
               hide-details="auto"
               autocomplete="username"
@@ -33,10 +45,9 @@
               :rules="usernameRules"
               :error-messages="serverErrors.username"
               label="E-mail ou nome"
-              placeholder=" "
-              validate-on-blur
-              class="cms-auth-input mb-1"
+              class="cms-auth-input mb-3"
               :dark="dark"
+              :color="fieldColor"
               @input="clearServerError('username')"
               @keydown.enter.native="focusPassword"
             />
@@ -44,8 +55,7 @@
             <v-text-field
               ref="passwordField"
               v-model="password"
-              solo
-              flat
+              outlined
               dense
               hide-details="auto"
               :type="showPassword ? 'text' : 'password'"
@@ -55,10 +65,9 @@
               :rules="passwordRules"
               :error-messages="serverErrors.password"
               label="Senha"
-              placeholder=" "
-              validate-on-blur
               class="cms-auth-input mb-2"
               :dark="dark"
+              :color="fieldColor"
               @click:append="showPassword = !showPassword"
               @input="clearServerError('password')"
               @keydown.enter.native="submitLogin"
@@ -114,6 +123,7 @@ export default {
     forgotUrl: { type: String, required: true },
     logoUrl: { type: String, required: true },
     appName: { type: String, default: 'DinDin' },
+    initialStatus: { type: String, default: '' },
     initialErrors: { type: Object, default: () => ({}) },
     oldInput: { type: Object, default: () => ({}) },
   },
@@ -140,6 +150,10 @@ export default {
     },
     subtitleClass() {
       return this.dark ? 'grey--text' : 'grey--text text--darken-1'
+    },
+    /** Borda/label no escuro: branco; no claro: primary (#ff0000) */
+    fieldColor() {
+      return this.dark ? 'white' : 'primary'
     },
   },
   watch: {

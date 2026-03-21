@@ -17,64 +17,22 @@
             <v-img :src="logoUrl" :alt="appName" contain max-height="52" class="mx-auto" style="max-width: 200px" />
           </div>
 
-          <h1 class="text-h4 font-weight-bold mb-2" :class="titleClass">Criar conta</h1>
-          <p class="text-body-2 mb-6" :class="subtitleClass">WhatsApp com DDD — normalizamos ao guardar</p>
+          <h1 class="text-h4 font-weight-bold mb-2" :class="titleClass">Nova senha</h1>
+          <p class="text-body-2 mb-6" :class="subtitleClass">Defina uma senha forte para sua conta.</p>
 
-          <v-form ref="form" v-model="formValid" class="cms-auth-fields" @submit.prevent="submitRegister">
+          <v-form ref="form" v-model="formValid" class="cms-auth-fields" @submit.prevent="submitReset">
             <v-text-field
-              ref="firstField"
-              v-model="name"
-              outlined
-              dense
-              hide-details="auto"
-              autocomplete="name"
-              prepend-inner-icon="mdi-account-outline"
-              :rules="nameRules"
-              :error-messages="serverErrors.name"
-              label="Nome completo"
-              class="cms-auth-input mb-3"
-              :dark="dark"
-              :color="fieldColor"
-              @input="clearServerError('name')"
-              @keydown.enter.native="focusNext('emailField')"
-            />
-
-            <v-text-field
-              ref="emailField"
               v-model="email"
               outlined
               dense
               hide-details="auto"
               type="email"
-              autocomplete="email"
+              readonly
               prepend-inner-icon="mdi-email-outline"
-              :rules="emailRules"
-              :error-messages="serverErrors.email"
               label="E-mail"
               class="cms-auth-input mb-3"
               :dark="dark"
               :color="fieldColor"
-              @input="clearServerError('email')"
-              @keydown.enter.native="focusNext('whatsappField')"
-            />
-
-            <v-text-field
-              ref="whatsappField"
-              v-model="whatsapp"
-              v-mask="'(##) #####-####'"
-              outlined
-              dense
-              hide-details="auto"
-              autocomplete="tel"
-              prepend-inner-icon="mdi-whatsapp"
-              :rules="whatsappRules"
-              :error-messages="serverErrors.whatsapp"
-              label="WhatsApp"
-              class="cms-auth-input mb-3"
-              :dark="dark"
-              :color="fieldColor"
-              @input="clearServerError('whatsapp')"
-              @keydown.enter.native="focusNext('passwordField')"
             />
 
             <v-text-field
@@ -89,7 +47,7 @@
               :append-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
               :rules="passwordRules"
               :error-messages="serverErrors.password"
-              label="Senha"
+              label="Nova senha"
               hint="Mínimo 8 caracteres, letras e números"
               persistent-hint
               class="cms-auth-input mb-1"
@@ -133,7 +91,7 @@
               :color="fieldColor"
               @click:append="showPassword2 = !showPassword2"
               @input="clearServerError('password_confirmation')"
-              @keydown.enter.native="submitIfValid"
+              @keydown.enter.native="submitReset"
             />
 
             <v-btn
@@ -146,12 +104,12 @@
               class="font-weight-bold text-none elevation-2"
               :loading="submitting"
             >
-              Cadastrar
+              Redefinir senha
             </v-btn>
           </v-form>
 
           <div class="text-center mt-10">
-            <a :href="loginUrl" class="cms-auth-link text-body-1 font-weight-medium"> Já tenho conta </a>
+            <a :href="loginUrl" class="cms-auth-link text-body-1 font-weight-medium">Voltar ao login</a>
           </div>
         </div>
       </transition>
@@ -164,13 +122,15 @@ import { getInitialDark, persistTheme, applyAuthBodyClass } from './cmsAuthTheme
 import { submitNativePost } from './submitNativePost'
 
 export default {
-  name: 'CmsRegister',
+  name: 'CmsResetPassword',
   props: {
     csrfToken: { type: String, required: true },
-    registerUrl: { type: String, required: true },
+    resetSubmitUrl: { type: String, required: true },
     loginUrl: { type: String, required: true },
     logoUrl: { type: String, required: true },
     appName: { type: String, default: 'DinDin' },
+    resetToken: { type: String, required: true },
+    resetEmail: { type: String, default: '' },
     initialErrors: { type: Object, default: () => ({}) },
     oldInput: { type: Object, default: () => ({}) },
   },
@@ -178,27 +138,13 @@ export default {
     return {
       dark: false,
       formValid: true,
-      name: '',
       email: '',
-      whatsapp: '',
       password: '',
       passwordConfirmation: '',
       showPassword: false,
       showPassword2: false,
       submitting: false,
       serverErrors: {},
-      nameRules: [
-        (v) => (v != null && String(v).trim() !== '') || 'Informe seu nome',
-        (v) => String(v || '').trim().length >= 2 || 'Mínimo 2 caracteres',
-      ],
-      emailRules: [
-        (v) => (v != null && String(v).trim() !== '') || 'Informe o e-mail',
-        (v) => /.+@.+\..+/.test(String(v || '').trim()) || 'E-mail inválido',
-      ],
-      whatsappRules: [
-        (v) => (v != null && String(v).trim() !== '') || 'Informe o WhatsApp',
-        (v) => String(v || '').replace(/\D/g, '').length >= 10 || 'Inclua DDD e número',
-      ],
       passwordRules: [
         (v) => (v != null && String(v) !== '') || 'Defina uma senha',
         (v) => String(v || '').length >= 8 || 'Mínimo 8 caracteres',
@@ -263,11 +209,10 @@ export default {
     this.$vuetify.theme.dark = this.dark
     applyAuthBodyClass(this.dark)
     this.serverErrors = this.normalizeServerErrors(this.initialErrors)
-    if (this.oldInput.name) this.name = String(this.oldInput.name)
-    if (this.oldInput.email) this.email = String(this.oldInput.email)
-    if (this.oldInput.whatsapp) this.whatsapp = String(this.oldInput.whatsapp)
+    this.email = this.resetEmail || (this.oldInput.email ? String(this.oldInput.email) : '')
+    if (this.oldInput.email && !this.email) this.email = String(this.oldInput.email)
     this.$nextTick(() => {
-      const c = this.$refs.firstField
+      const c = this.$refs.passwordField
       const el = c && (c.$refs.input || c.$refs.input_)
       if (el) el.focus()
     })
@@ -297,17 +242,13 @@ export default {
       const el = c && (c.$refs.input || c.$refs.input_)
       if (el) el.focus()
     },
-    submitIfValid() {
-      this.submitRegister()
-    },
-    submitRegister() {
+    submitReset() {
       if (!this.$refs.form || !this.$refs.form.validate()) return
       this.submitting = true
-      submitNativePost(this.registerUrl, {
+      submitNativePost(this.resetSubmitUrl, {
         _token: this.csrfToken,
-        name: String(this.name || '').trim(),
+        token: this.resetToken,
         email: String(this.email || '').trim(),
-        whatsapp: String(this.whatsapp || '').trim(),
         password: String(this.password || ''),
         password_confirmation: String(this.passwordConfirmation || ''),
       })

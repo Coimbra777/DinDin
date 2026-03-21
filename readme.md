@@ -50,6 +50,15 @@ Após o seed: utilizador **`test@test.com`** / **`123456`** (grupo administrador
 
 Outros comandos do Artisan, quando precisar: `php artisan <comando>`.
 
+### Formatação PHP (Pint)
+
+Na raiz do projeto (host ou container, com Composer instalado):
+
+```bash
+vendor/bin/pint
+vendor/bin/pint --dirty
+```
+
 ### Testes automatizados (PHPUnit)
 
 ```bash
@@ -60,14 +69,34 @@ Outros comandos do Artisan, quando precisar: `php artisan <comando>`.
 
 Requisitos e `.env.testing`: ver [docs/testing.md](docs/testing.md).
 
-### 5. Front-end (fora do container)
+### 5. Front-end (no host, na raiz do projeto)
 
-No host, na raiz do projeto:
+Instalação única:
 
 ```bash
 npm i
+```
+
+**Desenvolvimento (HMR)** — recomendado enquanto altera Vue/SCSS:
+
+```bash
 npm run dev
 ```
+
+**Build de produção** (gera assets em `public/build/`, usados pelo `@vite` nas views):
+
+```bash
+npm run build
+```
+
+**Bundles relevantes:**
+
+| Entrada Vite                                 | Uso                                         |
+| -------------------------------------------- | ------------------------------------------- |
+| `resources/assets/js/cms/auth-app.js`        | Login, cadastro, esqueci senha, reset (CMS) |
+| `resources/assets/js/finance/finance-app.js` | SPA Finanças (dashboard, onboarding, etc.)  |
+
+Se o CMS ou as finanças não refletirem alterações de JS/CSS, rode `npm run dev` ou `npm run build` conforme o ambiente.
 
 ---
 

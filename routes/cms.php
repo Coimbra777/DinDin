@@ -6,8 +6,10 @@
 |--------------------------------------------------------------------------
 */
 
+use App\Http\Controllers\Cms\Auth\ForgotPasswordController;
 use App\Http\Controllers\Cms\Auth\LoginController;
 use App\Http\Controllers\Cms\Auth\RegisterController;
+use App\Http\Controllers\Cms\Auth\ResetPasswordController;
 use App\Http\Controllers\Finance\Api\CategoryApiController;
 use App\Http\Controllers\Finance\Api\CreditCardApiController;
 use App\Http\Controllers\Finance\Api\DashboardApiController;
@@ -37,7 +39,10 @@ Route::post('login', [LoginController::class, 'login']);
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('register', [RegisterController::class, 'register']);
 
-Route::view('password/forgot', 'cms.auth.forgot-password')->name('cms.password.forgot');
+Route::get('password/forgot', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('cms.password.forgot');
+Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('cms.forgot-password');
+Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('cms.reset-password');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {

@@ -1,5 +1,5 @@
 /**
- * Auth CMS — layout minimalista (sem card), campos transparentes.
+ * Auth CMS — layout central; campos outlined + dark via Vuetify.
  */
 
 html.cms-auth-html {
@@ -62,12 +62,10 @@ body.cms-auth--dark {
   max-width: 440px;
 }
 
-/* Logo: leve destaque no escuro */
 .theme--dark .cms-auth-logo-wrap {
   filter: drop-shadow(0 2px 20px rgba(255, 0, 0, 0.08));
 }
 
-/* Transição suave */
 .cms-auth-fade-enter-active {
   transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -80,59 +78,16 @@ body.cms-auth--dark {
   transform: translateY(0);
 }
 
-/* Campos solo/flat: sem caixa branca — só linha inferior */
-.cms-auth-fields .v-text-field.v-text-field--solo > .v-input__control > .v-input__slot {
-  background: transparent !important;
-  box-shadow: none !important;
-  filter: none !important;
-  border-radius: 0 !important;
-  border-bottom: 1px solid rgba(44, 47, 54, 0.2) !important;
-  min-height: 48px !important;
-  padding-left: 4px !important;
-  padding-right: 4px !important;
-  transition: border-color 0.2s ease, border-width 0.15s ease;
+/* Outlined dense — altura confortável */
+.cms-auth-fields .v-text-field.v-text-field--outlined.v-input--dense .v-input__slot {
+  min-height: 44px !important;
 }
 
-/* Linha Material padrão (::before/::after) + ripple geram “sombra” por baixo do texto */
-.cms-auth-fields .v-text-field > .v-input__control > .v-input__slot::before,
-.cms-auth-fields .v-text-field > .v-input__control > .v-input__slot::after {
-  display: none !important;
-  content: none !important;
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.theme--light .cms-auth-fields .v-text-field.v-text-field--solo > .v-input__control > .v-input__slot,
-.theme--dark .cms-auth-fields .v-text-field.v-text-field--solo > .v-input__control > .v-input__slot {
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.theme--dark .cms-auth-fields .v-text-field.v-text-field--solo > .v-input__control > .v-input__slot {
-  border-bottom-color: rgba(255, 255, 255, 0.22) !important;
-}
-
-.cms-auth-fields .v-text-field.v-text-field--solo.v-input--is-focused > .v-input__control > .v-input__slot {
-  border-bottom-color: #ff0000 !important;
-  border-bottom-width: 2px !important;
-}
-
-.cms-auth-fields .v-text-field.v-text-field--solo:not(.v-input--is-focused):hover > .v-input__control > .v-input__slot {
-  border-bottom-color: rgba(255, 0, 0, 0.45) !important;
-}
-
-.theme--dark .cms-auth-fields .v-text-field.v-text-field--solo:not(.v-input--is-focused):hover > .v-input__control > .v-input__slot {
-  border-bottom-color: rgba(255, 255, 255, 0.35) !important;
-}
-
-/* Mensagens de erro / hints sem “card” */
 .cms-auth-fields .v-messages {
-  padding-left: 4px;
+  padding-left: 2px;
   margin-top: 4px;
 }
 
-/* Barra força senha — trilho discreto */
 .cms-auth-strength.v-progress-linear {
   background: rgba(44, 47, 54, 0.08) !important;
   border-radius: 4px;
@@ -140,4 +95,21 @@ body.cms-auth--dark {
 
 .theme--dark .cms-auth-strength.v-progress-linear {
   background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Autofill: evita “faixa” clara por cima do tema escuro */
+.cms-auth-fields .v-text-field input:-webkit-autofill,
+.cms-auth-fields .v-text-field input:-webkit-autofill:hover,
+.cms-auth-fields .v-text-field input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  transition: background-color 99999s ease-out 0s;
+}
+
+body.cms-auth--light .cms-auth-fields .v-text-field input:-webkit-autofill {
+  -webkit-text-fill-color: #2c2f36 !important;
+}
+
+body.cms-auth--dark .cms-auth-fields .v-text-field input:-webkit-autofill {
+  -webkit-text-fill-color: #ffffff !important;
 }
