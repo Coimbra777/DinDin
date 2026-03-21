@@ -187,7 +187,7 @@
                       <v-icon>mdi-chevron-right</v-icon>
                     </v-btn>
                   </template>
-                  <span>Mês seguinte (mais recente)</span>
+                  <span>Mês seguinte</span>
                 </v-tooltip>
               </div>
             </v-sheet>
@@ -675,7 +675,7 @@ import GoalsPage from '../goals/GoalsPage.vue'
 import FinanceThemeToggle from '../../components/FinanceThemeToggle.vue'
 import FinanceHelpModal from '../../components/FinanceHelpModal.vue'
 import OnboardingTour from '../../components/OnboardingTour.vue'
-import { monthChoices, normalizeMonth, toIsoDateOnly } from '../../format'
+import { addMonthsToYearMonth, monthChoices, normalizeMonth, toIsoDateOnly } from '../../format'
 import { applyBodyThemeClass, getStoredTheme } from '../../financeTheme'
 
 const VALID_VIEWS = [
@@ -829,12 +829,12 @@ export default {
       return m.current_page < m.last_page
     },
     canShiftMonthOlder() {
-      const i = this.monthItems.findIndex((x) => x.value === this.month)
-      return i >= 0 && i < this.monthItems.length - 1
+      const prev = addMonthsToYearMonth(this.month, -1)
+      return prev !== '' && this.monthItems.some((x) => x.value === prev)
     },
     canShiftMonthNewer() {
-      const i = this.monthItems.findIndex((x) => x.value === this.month)
-      return i > 0
+      const next = addMonthsToYearMonth(this.month, 1)
+      return next !== '' && this.monthItems.some((x) => x.value === next)
     },
     duplicateSliderModel: {
       get() {
@@ -1055,16 +1055,16 @@ export default {
       this.goalsRefreshKey += 1
     },
     shiftMonthOlder() {
-      const i = this.monthItems.findIndex((x) => x.value === this.month)
-      if (i >= 0 && i < this.monthItems.length - 1) {
-        this.month = this.monthItems[i + 1].value
+      const prev = addMonthsToYearMonth(this.month, -1)
+      if (prev && this.monthItems.some((x) => x.value === prev)) {
+        this.month = prev
         this.onMonthChange()
       }
     },
     shiftMonthNewer() {
-      const i = this.monthItems.findIndex((x) => x.value === this.month)
-      if (i > 0) {
-        this.month = this.monthItems[i - 1].value
+      const next = addMonthsToYearMonth(this.month, 1)
+      if (next && this.monthItems.some((x) => x.value === next)) {
+        this.month = next
         this.onMonthChange()
       }
     },
