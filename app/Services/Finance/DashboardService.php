@@ -9,6 +9,9 @@ use Carbon\Carbon;
 
 final class DashboardService
 {
+    /** Valor de `forecast_type` na API: apenas dados já lançados no mês (sem modelo preditivo). */
+    public const FORECAST_TYPE_REALIZED_ONLY = 'realized_only';
+
     /**
      * Painel do mês: saldos, totais e últimas transações (sem recorrência automática).
      *
@@ -37,7 +40,6 @@ final class DashboardService
             2
         );
 
-        /** @see self::FORECAST_TYPE_REALIZED_ONLY — sem projeção além do já lançado no mês */
         $forecastType = self::FORECAST_TYPE_REALIZED_ONLY;
 
         $ultimas = Transaction::forUser($userId)
