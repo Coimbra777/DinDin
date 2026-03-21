@@ -27,6 +27,21 @@ class TransactionApiTest extends FinanceApiTestCase
             ->assertJsonCount(2, 'data');
     }
 
+    public function test_store_transaction_requires_category_id(): void
+    {
+        $user = $this->financeUser();
+
+        $this->actingAs($user)
+            ->postJson($this->financeApi('transactions'), [
+                'title' => 'Sem categoria',
+                'amount' => 10,
+                'type' => Transaction::TYPE_EXPENSE,
+                'transaction_date' => now()->format('Y-m-d'),
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['category_id']);
+    }
+
     public function test_store_transaction_persists_and_summary_reflects_expense(): void
     {
         $user = $this->financeUser();

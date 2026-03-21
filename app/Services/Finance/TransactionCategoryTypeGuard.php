@@ -20,7 +20,9 @@ final class TransactionCategoryTypeGuard
 
         $category = Category::forUser($userId)->whereKey($categoryId)->first();
         if ($category === null) {
-            return;
+            throw ValidationException::withMessages([
+                'category_id' => 'A categoria selecionada não é válida.',
+            ]);
         }
 
         $categoryType = ($category->type ?? '') !== '' ? $category->type : Category::TYPE_EXPENSE;

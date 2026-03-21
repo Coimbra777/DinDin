@@ -18,6 +18,19 @@ class StoreTransactionRequest extends FormRequest
         return $this->user() !== null;
     }
 
+    public function messages(): array
+    {
+        return [
+            'category_id.required' => 'Selecione uma categoria.',
+            'category_id.exists' => 'A categoria selecionada não é válida.',
+            'amount.required' => 'Informe o valor.',
+            'amount.min' => 'O valor deve ser pelo menos :min.',
+            'type.required' => 'Selecione o tipo da transação (receita ou despesa).',
+            'type.in' => 'O tipo da transação deve ser receita ou despesa.',
+            'title.required' => 'Informe um título.',
+        ];
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -30,7 +43,8 @@ class StoreTransactionRequest extends FormRequest
             'amount' => 'required|numeric|min:0.01',
             'type' => ['required', Rule::in([Transaction::TYPE_INCOME, Transaction::TYPE_EXPENSE])],
             'category_id' => [
-                'nullable',
+                'required',
+                'integer',
                 Rule::exists('finance_categories', 'id')->where(fn ($q) => $q->where('user_id', $userId)),
             ],
             'transaction_date' => 'required|date',

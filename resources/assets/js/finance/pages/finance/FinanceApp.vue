@@ -320,12 +320,14 @@
       :transaction="editTransaction"
       @saved="onSaved"
       @error="showError"
+      @create-category="onCreateCategoryFromTransaction"
     />
 
     <category-form-dialog
       v-model="categoryDialog"
       :api-base="apiBase"
       :category="editCategory"
+      :initial-type="categoryDialogInitialType"
       @saved="onCategorySaved"
       @error="showError"
     />
@@ -473,6 +475,7 @@ export default {
       editTransaction: null,
       deleteDialog: { open: false, loading: false, item: null },
       categoryDialog: false,
+      categoryDialogInitialType: null,
       editCategory: null,
       deleteCatDialog: { open: false, loading: false, item: null },
       helpDialog: false,
@@ -498,6 +501,9 @@ export default {
     },
   },
   watch: {
+    categoryDialog(val) {
+      if (!val) this.categoryDialogInitialType = null
+    },
     view(v) {
       if (v === 'categories') this.loadCategories()
       if (v === 'cards') {
@@ -683,12 +689,19 @@ export default {
         this.deleteDialog.item = null
       }
     },
+    onCreateCategoryFromTransaction(payload) {
+      this.editCategory = null
+      this.categoryDialogInitialType = (payload && payload.type) || null
+      this.categoryDialog = true
+    },
     openCategoryCreate() {
       this.editCategory = null
+      this.categoryDialogInitialType = null
       this.categoryDialog = true
     },
     openCategoryEdit(c) {
       this.editCategory = { ...c }
+      this.categoryDialogInitialType = null
       this.categoryDialog = true
     },
     askDeleteCategory(c) {

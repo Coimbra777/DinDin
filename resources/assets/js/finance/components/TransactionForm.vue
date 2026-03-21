@@ -127,26 +127,58 @@
             </template>
           </v-text-field>
 
+          <v-alert
+            v-if="categoryItems.length === 0"
+            type="warning"
+            dense
+            text
+            prominent
+            border="left"
+            colored-border
+            class="mb-3 rounded-lg"
+          >
+            Não há categorias para {{ form.type === TX_INCOME ? 'receitas' : 'despesas' }}. Crie uma com o botão abaixo.
+          </v-alert>
+
           <v-select
             v-model="form.category_id"
             :items="categoryItems"
             label="Categoria"
             outlined
             dense
-            clearable
+            placeholder="Selecionar categoria"
             prepend-inner-icon="mdi-shape-outline"
             item-text="name"
             item-value="id"
+            :rules="categoryRules"
+            :error-messages="fieldErrors.category_id"
+            hint="Define o tipo do seu gasto ou ganho (ex.: Alimentação, Salário)."
+            persistent-hint
             hide-details="auto"
-            class="mb-2"
+            class="mb-1"
+            @input="clearFieldError('category_id')"
           >
             <template slot="append-outer">
               <help-tooltip
-                text="A categoria define se é receita ou despesa"
+                text="Toda transação precisa de uma categoria. Ela classifica o movimento (ex.: salário = receita, alimentação = despesa) e deve combinar com o tipo escolhido acima."
                 aria-label="Ajuda: categoria"
               />
             </template>
           </v-select>
+
+          <div class="mb-4">
+            <v-btn
+              text
+              small
+              color="primary"
+              class="px-0 text-none"
+              type="button"
+              @click="$emit('create-category', { type: form.type })"
+            >
+              <v-icon left small>mdi-plus-circle-outline</v-icon>
+              Criar categoria
+            </v-btn>
+          </div>
 
           <v-select
             v-if="form.type === TX_EXPENSE && creditCardItems.length"
@@ -245,7 +277,15 @@
       <v-card-actions class="pa-4">
         <v-btn text color="secondary" @click="close">Cancelar</v-btn>
         <v-spacer />
-        <v-btn :loading="saving" color="primary" depressed rounded large @click="submit">
+        <v-btn
+          :loading="saving"
+          :disabled="saving || !canSubmit"
+          color="primary"
+          depressed
+          rounded
+          large
+          @click="submit"
+        >
           <v-icon left>mdi-content-save</v-icon>
           {{ isEdit ? 'Atualizar' : 'Guardar' }}
         </v-btn>
@@ -302,6 +342,7 @@ export default {
       installmentNumberStr: '',
       installmentOfStr: '',
       form: emptyForm(),
+      fieldErrors: {},
       rules: {
         required: (v) => (v !== null && v !== undefined && String(v).trim() !== '') || 'Obrigatório',
         requiredAmount: (v) => {
@@ -316,7 +357,14 @@ export default {
     isEdit() {
       return !!(this.transaction && this.transaction.id)
     },
-    /** Categorias compatíveis com o tipo (se a API enviar category.type). */
+    categoryRules() {
+      return [
+        (v) =>
+          (v !== null && v !== undefined && v !== '' && !(typeof v === 'number' && !Number.isFinite(v))) ||
+          'Selecione uma categoria',
+      ]
+    },
+    /** Só categorias do mesmo tipo da transação (receita / despesa). */
     categoryItems() {
       const t = normalizeTransactionType(this.form.type)
       return this.categories.filter((c) => {
@@ -325,6 +373,18 @@ export default {
         }
         return c.type === t
       })
+    },
+    canSubmit() {
+      const titleOk = this.form.title != null && String(this.form.title).trim() !== ''
+      const catOk =
+        this.form.category_id !== null &&
+        this.form.category_id !== undefined &&
+        this.form.category_id !== ''
+      let n = parseBRLDigitsToNumber(this.amountDisplay)
+      if (Number.isNaN(n)) n = parseCurrencyBRLInput(this.amountDisplay)
+      const amountOk = !Number.isNaN(n) && n >= 0.01
+      const dateOk = !!toIsoDateOnly(this.form.transaction_date)
+      return titleOk && catOk && amountOk && dateOk
     },
     creditCardItems() {
       return this.creditCards || []
@@ -370,6 +430,7 @@ export default {
       const t = normalizeTransactionType(type)
       const prev = this.form.category_id
       this.$set(this.form, 'type', t)
+      this.clearFieldError('category_id')
       if (t !== this.TX_EXPENSE) {
         this.form.credit_card_id = null
       }
@@ -378,6 +439,24 @@ export default {
       if (cat && cat.type && cat.type !== t) {
         this.form.category_id = null
       }
+    },
+    clearFieldError(key) {
+      if (!this.fieldErrors[key]) return
+      const next = { ...this.fieldErrors }
+      delete next[key]
+      this.fieldErrors = next
+    },
+    applyApiFieldErrors(errors) {
+      if (!errors || typeof errors !== 'object') {
+        this.fieldErrors = {}
+        return
+      }
+      const next = {}
+      Object.keys(errors).forEach((k) => {
+        const v = errors[k]
+        next[k] = Array.isArray(v) ? v : [String(v)]
+      })
+      this.fieldErrors = next
     },
     formatAmountBR(num) {
       if (num == null || num === '' || Number.isNaN(Number(num))) return ''
@@ -429,6 +508,7 @@ export default {
         this.installmentNumberStr = ''
         this.installmentOfStr = ''
       }
+      this.fieldErrors = {}
       this.$nextTick(() => this.$refs.form && this.$refs.form.resetValidation())
     },
     onAmountInput(val) {
@@ -462,7 +542,7 @@ export default {
         type: normalizeTransactionType(this.form.type),
         transaction_date: toIsoDateOnly(this.form.transaction_date) || this.form.transaction_date,
         description: this.form.description || null,
-        category_id: this.form.category_id || null,
+        category_id: parseInt(String(this.form.category_id), 10),
         credit_card_id: this.form.type === this.TX_EXPENSE && this.form.credit_card_id ? this.form.credit_card_id : null,
       }
       const inN = this.form.installment_number
@@ -473,6 +553,7 @@ export default {
       }
 
       try {
+        this.fieldErrors = {}
         if (this.isEdit) {
           await axios.put(`${this.apiBase}/transactions/${this.transaction.id}`, payload)
         } else {
@@ -488,10 +569,12 @@ export default {
           (typeof d === 'string' ? d : null) ||
           'Não foi possível guardar.'
         if (d && d.errors) {
+          this.applyApiFieldErrors(d.errors)
           const first = Object.keys(d.errors)[0]
           if (first && d.errors[first][0]) msg = d.errors[first][0]
         }
         this.$emit('error', msg)
+        this.$nextTick(() => this.$refs.form && this.$refs.form.validate())
       } finally {
         this.saving = false
       }

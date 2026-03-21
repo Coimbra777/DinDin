@@ -7,6 +7,7 @@ use App\Http\Requests\Cms\CmsRegisterUserRequest;
 use App\Models\Group;
 use App\Models\SaasModule;
 use App\Models\User;
+use App\Services\Finance\DefaultFinanceCategories;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Str;
@@ -47,6 +48,8 @@ class RegisterController extends Controller
         if ($financeId !== null) {
             $user->saasModules()->syncWithoutDetaching([(int) $financeId]);
         }
+
+        DefaultFinanceCategories::ensureForUserId((int) $user->id);
 
         $this->guard()->login($user);
 

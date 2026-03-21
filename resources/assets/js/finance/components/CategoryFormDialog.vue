@@ -57,6 +57,8 @@ export default {
     value: { type: Boolean, default: false },
     apiBase: { type: String, required: true },
     category: { type: Object, default: null },
+    /** Ao criar (não edição), pré-seleciona receita ou despesa (ex.: vindo do modal de transação). */
+    initialType: { type: String, default: null },
   },
   data() {
     return {
@@ -105,7 +107,8 @@ export default {
       } else {
         this.name = ''
         this.color = ''
-        this.type = TRANSACTION_TYPE_EXPENSE
+        const allowed = [TRANSACTION_TYPE_INCOME, TRANSACTION_TYPE_EXPENSE]
+        this.type = allowed.includes(this.initialType) ? this.initialType : TRANSACTION_TYPE_EXPENSE
         this.group = null
       }
     },
