@@ -76,16 +76,6 @@
             >
               <span class="text-truncate">{{ item.title }}</span>
               <v-chip
-                v-if="item.parent_transaction_id"
-                x-small
-                outlined
-                color="blue-grey"
-                class="ml-2 flex-shrink-0"
-                label
-              >
-                Duplicada
-              </v-chip>
-              <v-chip
                 v-if="item.is_legacy_recurring || item.recurring_transaction_id"
                 x-small
                 outlined
