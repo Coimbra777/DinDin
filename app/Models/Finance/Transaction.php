@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -30,7 +31,9 @@ class Transaction extends Model
 
     protected $fillable = [
         'user_id',
+        'parent_transaction_id',
         'category_id',
+        'recurring_transaction_id',
         'credit_card_id',
         'title',
         'amount',
@@ -56,6 +59,21 @@ class Transaction extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function recurringSource(): BelongsTo
+    {
+        return $this->belongsTo(RecurringTransaction::class, 'recurring_transaction_id');
+    }
+
+    public function parentTransaction(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_transaction_id');
+    }
+
+    public function childDuplicates(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_transaction_id');
     }
 
     public function creditCard(): BelongsTo
@@ -196,6 +214,40 @@ class Transaction extends Model
             'expense_cash' => 0,
             'expense_card' => 0,
             'tx_count' => 0,
+        ];
+    }
+
+    /**
+     * Totais acumulados desde o primeiro lançamento até ao último dia do mês (inclusive).
+     *
+     * @return object{income_total: float, expense_cash: float, expense_card: float, saldo_caixa: float, saldo_com_cartao: float}
+     */
+    public static function cumulativeStatsThroughMonthEnd(int $userId, string $yearMonth): object
+    {
+        [, $end] = self::monthToDateRange($yearMonth);
+        $incomeType = self::TYPE_INCOME;
+        $expenseType = self::TYPE_EXPENSE;
+
+        $row = static::query()
+            ->forUser($userId)
+            ->whereDate('transaction_date', '<=', $end)
+            ->selectRaw(
+                'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as income_total, '.
+                'SUM(CASE WHEN type = ? AND (is_credit_card = 0 OR is_credit_card IS NULL) THEN amount ELSE 0 END) as expense_cash, '.
+                'SUM(CASE WHEN type = ? AND is_credit_card = 1 THEN amount ELSE 0 END) as expense_card',
+                [$incomeType, $expenseType, $expenseType]
+            )->first();
+
+        $inc = (float) ($row->income_total ?? 0);
+        $cash = (float) ($row->expense_cash ?? 0);
+        $card = (float) ($row->expense_card ?? 0);
+
+        return (object) [
+            'income_total' => $inc,
+            'expense_cash' => $cash,
+            'expense_card' => $card,
+            'saldo_caixa' => $inc - $cash,
+            'saldo_com_cartao' => $inc - $cash - $card,
         ];
     }
 

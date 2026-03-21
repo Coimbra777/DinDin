@@ -125,7 +125,7 @@
             />
           </div>
 
-          <!-- TRANSAÇÕES -->
+          <!-- MOVIMENTAÇÕES -->
           <div v-else-if="view === 'transactions'" key="tx">
             <v-row dense class="mb-4">
               <v-col cols="12" md="5">
@@ -143,12 +143,57 @@
                 />
               </v-col>
             </v-row>
+            <v-row v-if="txSummary" dense class="mb-4">
+              <v-col cols="12" sm="4">
+                <v-card class="rounded-xl" flat outlined>
+                  <v-card-text class="py-3 px-4">
+                    <div class="text-overline secondary--text text-uppercase letter-wider">Saldo acumulado</div>
+                    <div
+                      class="text-h6 font-weight-bold tabular-nums"
+                      :class="txSaldoAcumuladoClass"
+                    >
+                      {{ formatBRL(txSummary.saldo_acumulado_ate_mes) }}
+                    </div>
+                    <div class="text-caption secondary--text">Até {{ monthLabelPt }}</div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+              <v-col cols="12" sm="4">
+                <v-card class="rounded-xl" flat outlined>
+                  <v-card-text class="py-3 px-4">
+                    <div class="text-overline secondary--text text-uppercase letter-wider">Resultado do mês</div>
+                    <div
+                      class="text-h6 font-weight-bold tabular-nums"
+                      :class="txResultadoMesClass"
+                    >
+                      {{ formatBRL(txSummary.available_this_month) }}
+                    </div>
+                    <div class="text-caption secondary--text">Receitas − despesas à vista</div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+              <v-col cols="12" sm="4">
+                <v-card class="rounded-xl" flat outlined>
+                  <v-card-text class="py-3 px-4">
+                    <div class="text-overline secondary--text text-uppercase letter-wider">Projeção ao fim do mês</div>
+                    <div
+                      class="text-h6 font-weight-bold tabular-nums"
+                      :class="txProjecaoClass"
+                    >
+                      {{ formatBRL(txSummary.saldo_previsto_acumulado_fim_mes) }}
+                    </div>
+                    <div class="text-caption secondary--text">Acumulado previsto (caixa)</div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
             <transaction-list
               title="Movimentações"
               :items="transactions"
               :loading="loading.transactions"
               @edit="openEdit"
               @delete="askDelete"
+              @duplicate="openDuplicateDialog"
             />
           </div>
 
@@ -332,6 +377,39 @@
       @error="showError"
     />
 
+    <v-dialog v-model="duplicateDialog.open" max-width="420" persistent>
+      <v-card class="rounded-lg">
+        <v-card-title class="headline">Duplicar transação</v-card-title>
+        <v-card-text class="finance-text-muted">
+          <p class="mb-3">
+            Serão criadas cópias nos meses seguintes à data desta transação, com o mesmo valor, categoria e tipo.
+          </p>
+          <v-text-field
+            v-model.number="duplicateDialog.months"
+            type="number"
+            min="1"
+            max="60"
+            label="Quantidade de meses"
+            outlined
+            dense
+            hide-details="auto"
+            hint="De 1 a 60."
+            persistent-hint
+            :disabled="duplicateDialog.loading"
+          />
+        </v-card-text>
+        <v-card-actions>
+          <v-btn text color="secondary" :disabled="duplicateDialog.loading" @click="duplicateDialog.open = false">
+            Cancelar
+          </v-btn>
+          <v-spacer />
+          <v-btn color="primary" depressed :loading="duplicateDialog.loading" @click="confirmDuplicate">
+            Duplicar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-dialog v-model="deleteDialog.open" max-width="400" persistent>
       <v-card class="rounded-lg">
         <v-card-title class="headline">Excluir transação?</v-card-title>
@@ -452,7 +530,7 @@ export default {
        */
       navItemsAll: [
         { title: 'Dashboard', value: 'dashboard', icon: 'mdi-view-dashboard-outline', core: true },
-        { title: 'Transações', value: 'transactions', icon: 'mdi-bank-transfer', core: true },
+        { title: 'Movimentações', value: 'transactions', icon: 'mdi-bank-transfer', core: true },
         { title: 'Categorias', value: 'categories', icon: 'mdi-shape-outline', core: true },
         { title: 'Cartões', value: 'cards', icon: 'mdi-credit-card-outline', core: false, slug: 'cards' },
         { title: 'Projeção', value: 'projection', icon: 'mdi-chart-timeline-variant', core: false, slug: 'projections' },
@@ -463,6 +541,7 @@ export default {
         { title: 'Planejamento', value: 'planning', icon: 'mdi-calendar-check', core: false, slug: 'planning' },
       ],
       transactions: [],
+      txSummary: null,
       categories: [],
       creditCards: [],
       filterCategoryId: null,
@@ -473,6 +552,7 @@ export default {
       snackbar: { show: false, text: '', color: 'primary' },
       formOpen: false,
       editTransaction: null,
+      duplicateDialog: { open: false, loading: false, item: null, months: 3 },
       deleteDialog: { open: false, loading: false, item: null },
       categoryDialog: false,
       categoryDialogInitialType: null,
@@ -492,6 +572,29 @@ export default {
     },
     categoryFilterItems() {
       return this.categories.map((c) => ({ text: c.name, value: c.id }))
+    },
+    monthLabelPt() {
+      if (!this.month || !/^\d{4}-\d{2}$/.test(this.month)) return '—'
+      const [y, m] = this.month.split('-')
+      return `${m}/${y}`
+    },
+    txSaldoAcumuladoClass() {
+      const n = Number(this.txSummary && this.txSummary.saldo_acumulado_ate_mes)
+      if (n > 0) return 'success--text'
+      if (n < 0) return 'error--text'
+      return ''
+    },
+    txResultadoMesClass() {
+      const n = Number(this.txSummary && this.txSummary.available_this_month)
+      if (n > 0) return 'success--text'
+      if (n < 0) return 'error--text'
+      return ''
+    },
+    txProjecaoClass() {
+      const n = Number(this.txSummary && this.txSummary.saldo_previsto_acumulado_fim_mes)
+      if (n > 0) return 'success--text'
+      if (n < 0) return 'error--text'
+      return ''
     },
     showMonthSelector() {
       return ['dashboard', 'transactions', 'reports', 'alerts', 'insights'].includes(this.view)
@@ -610,7 +713,11 @@ export default {
       this.insightsRefreshKey += 1
       this.simulatorRefreshKey += 1
       this.planningRefreshKey += 1
-      await Promise.all([this.loadTransactions(), this.loadCategories(), this.loadCreditCards()])
+      await Promise.all([
+        this.loadTransactions(),
+        this.loadCategories(),
+        this.loadCreditCards(),
+      ])
     },
     goView(value) {
       if (!this.canShowView(value)) {
@@ -626,15 +733,28 @@ export default {
     async onMonthChange() {
       await this.loadTransactions()
     },
+    formatBRL(v) {
+      return this.$formatCurrencyBRL(v)
+    },
     async loadTransactions() {
       this.loading.transactions = true
       try {
         const params = { month: this.month }
         if (this.filterCategoryId) params.category_id = this.filterCategoryId
-        const { data } = await axios.get(`${this.apiBase}/transactions`, { params })
-        this.transactions = data.data || []
-      } catch (e) {
-        this.transactions = []
+        const [txOut, sumOut] = await Promise.allSettled([
+          axios.get(`${this.apiBase}/transactions`, { params }),
+          axios.get(`${this.apiBase}/summary`, { params: { month: this.month } }),
+        ])
+        if (txOut.status === 'fulfilled') {
+          this.transactions = txOut.value.data.data || []
+        } else {
+          this.transactions = []
+        }
+        if (sumOut.status === 'fulfilled') {
+          this.txSummary = sumOut.value.data || null
+        } else {
+          this.txSummary = null
+        }
       } finally {
         this.loading.transactions = false
       }
@@ -669,6 +789,51 @@ export default {
     openEdit(item) {
       this.editTransaction = { ...item }
       this.formOpen = true
+    },
+    openDuplicateDialog(transaction) {
+      // eslint-disable-next-line no-console
+      console.log('[finance] openDuplicateDialog', transaction && transaction.id, 'apiBase=', this.apiBase)
+      this.duplicateDialog.item = transaction
+      this.duplicateDialog.months = 3
+      this.duplicateDialog.open = true
+    },
+    async confirmDuplicate() {
+      // eslint-disable-next-line no-console
+      console.log(
+        '[finance] confirmDuplicate',
+        this.duplicateDialog.item && this.duplicateDialog.item.id,
+        'months=',
+        this.duplicateDialog.months,
+        'url=',
+        this.duplicateDialog.item
+          ? `${this.apiBase}/transactions/${this.duplicateDialog.item.id}/duplicate`
+          : null
+      )
+      if (!this.duplicateDialog.item) return
+      let m = parseInt(String(this.duplicateDialog.months), 10)
+      if (!Number.isFinite(m) || m < 1) m = 1
+      if (m > 60) m = 60
+      this.duplicateDialog.loading = true
+      try {
+        const { data } = await axios.post(
+          `${this.apiBase}/transactions/${this.duplicateDialog.item.id}/duplicate`,
+          { months: m }
+        )
+        const n = (data && data.count) || 0
+        this.duplicateDialog.open = false
+        this.toast(n ? `${n} cópia(s) criada(s).` : 'Cópias criadas.', 'success')
+        this.refreshAll()
+      } catch (e) {
+        const d = e.response && e.response.data
+        let msg =
+          (d && d.message) ||
+          (d && d.errors && d.errors.months && d.errors.months[0]) ||
+          'Não foi possível duplicar.'
+        this.showError(msg)
+      } finally {
+        this.duplicateDialog.loading = false
+        this.duplicateDialog.item = null
+      }
     },
     askDelete(item) {
       this.deleteDialog.item = item

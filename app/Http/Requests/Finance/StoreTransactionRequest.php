@@ -49,8 +49,6 @@ class StoreTransactionRequest extends FormRequest
             ],
             'transaction_date' => 'required|date',
             'description' => 'nullable|string|max:5000',
-            'installment_number' => ['nullable', 'integer', 'min:1', 'max:360'],
-            'installment_of' => ['nullable', 'integer', 'min:2', 'max:360'],
             'credit_card_id' => [
                 'nullable',
                 'integer',
@@ -68,25 +66,6 @@ class StoreTransactionRequest extends FormRequest
 
             $data = $validator->getData();
             $userId = (int) $this->user()->id;
-
-            $hasN = array_key_exists('installment_number', $data) && $data['installment_number'] !== null;
-            $hasO = array_key_exists('installment_of', $data) && $data['installment_of'] !== null;
-            if ($hasN xor $hasO) {
-                $validator->errors()->add(
-                    'installment_number',
-                    'Informe parcela atual e total (ex.: 3 e 12) ou deixe os dois em branco.'
-                );
-
-                return;
-            }
-            if ($hasN && $hasO && (int) $data['installment_number'] >= (int) $data['installment_of']) {
-                $validator->errors()->add(
-                    'installment_number',
-                    'A parcela atual deve ser menor que o número total de parcelas.'
-                );
-
-                return;
-            }
 
             $hasCard = ! empty($data['credit_card_id']);
             if ($hasCard && ($data['type'] ?? '') !== Transaction::TYPE_EXPENSE) {
@@ -115,13 +94,12 @@ class StoreTransactionRequest extends FormRequest
     }
 
     /**
-     * Payload pronto para {@see \App\Services\Finance\TransactionApiService::create()} / {@see update()}.
-     *
      * @return array<string, mixed>
      */
     public function toTransactionAttributes(): array
     {
         $data = $this->validated();
+
         $hasCard = ! empty($data['credit_card_id']);
         if ($hasCard) {
             $data['is_credit_card'] = true;

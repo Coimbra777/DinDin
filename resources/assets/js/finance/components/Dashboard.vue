@@ -26,16 +26,18 @@
           >
             <v-card-text class="text-center py-6 py-md-8 px-4">
               <div class="hero-balance__kicker text-caption font-weight-medium text-uppercase letter-wider secondary--text">
-                Saldo atual
+                Saldo acumulado
               </div>
               <div
                 class="hero-balance__figure font-weight-bold tabular-nums"
                 :class="heroBalanceTextClass"
               >
-                {{ formatBRL(saldoReal) }}
+                {{ formatBRL(saldoAcumulado) }}
               </div>
               <div class="text-caption secondary--text mt-1">
-                {{ monthLabel }}
+                Até {{ monthLabel }}
+                <span class="mx-1">·</span>
+                resultado do mês: {{ formatBRL(saldoMes) }}
                 <span class="mx-1">·</span>
                 {{ totalTransacoes }} lançamento(s)
                 <span class="d-none d-sm-inline"> · caixa (sem fatura)</span>
@@ -48,7 +50,7 @@
                 color="secondary"
               >
                 <v-icon left x-small>mdi-credit-card-outline</v-icon>
-                Com cartão: {{ formatBRL(saldoComCartao) }}
+                Acumulado c/ cartão: {{ formatBRL(saldoAcumuladoComCartao) }}
               </v-chip>
             </v-card-text>
           </v-card>
@@ -100,6 +102,79 @@
       </v-row>
       </div>
 
+      <!-- Previsão e compromissos -->
+      <v-row dense class="mb-4 mb-sm-5">
+        <v-col cols="12" class="px-2 px-sm-4">
+          <v-card class="rounded-xl forecast-card" flat outlined>
+            <v-card-text class="py-4 px-4">
+              <div class="d-flex align-center flex-wrap mb-2">
+                <v-icon color="primary" class="mr-2">mdi-chart-timeline-variant</v-icon>
+                <span class="subtitle-1 font-weight-bold">Projeção acumulada ao fim do mês</span>
+                <v-spacer />
+                <span class="text-caption secondary--text">{{ monthLabel }}</span>
+              </div>
+              <div
+                class="forecast-card__figure font-weight-bold tabular-nums"
+                :class="forecastBalanceClass"
+              >
+                {{ formatBRL(saldoPrevistoAcumuladoFimMes) }}
+              </div>
+              <div class="text-caption secondary--text mt-2">
+                Acumulado no início do mês: {{ formatBRL(acumuladoAteInicioMes) }}
+                <span class="mx-1">·</span>
+                + resultado previsto (caixa) no mês: {{ formatBRL(saldoPrevistoMes) }}
+                <span class="mx-1 d-none d-sm-inline">·</span>
+                <span class="d-none d-sm-inline">entradas prev. {{ formatBRL(entradasPrevistasMes) }}</span>
+                <span class="mx-1 d-none d-sm-inline">·</span>
+                <span class="d-none d-sm-inline">fixas prev. {{ formatBRL(despesasFixasPrevistasMes) }}</span>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
+        <v-col cols="12" class="px-2 px-sm-4">
+          <v-card class="rounded-xl" flat outlined>
+            <v-card-text class="pb-2 pt-4 px-4 d-flex align-center">
+              <v-icon color="secondary" class="mr-2">mdi-calendar-clock</v-icon>
+              <span class="subtitle-1 font-weight-bold">Próximos compromissos</span>
+            </v-card-text>
+            <v-card-text v-if="upcomingLoading" class="py-6 text-center">
+              <v-progress-circular indeterminate color="primary" size="28" />
+            </v-card-text>
+            <v-card-text v-else-if="upcoming.length === 0" class="py-6 text-center finance-text-muted text-body-2">
+              Nenhum compromisso agendado à frente.
+            </v-card-text>
+            <v-list v-else dense class="py-0 transparent pb-3">
+              <template v-for="(c, i) in upcoming">
+                <v-list-item :key="c.id" class="px-4">
+                  <v-list-item-content>
+                    <v-list-item-title class="font-weight-medium d-flex align-center flex-wrap">
+                      {{ c.description }}
+                      <v-chip x-small label outlined color="deep-purple" class="ml-2 flex-shrink-0">
+                        {{ commitmentTypeLabel(c) }}
+                      </v-chip>
+                    </v-list-item-title>
+                    <v-list-item-subtitle class="text-caption">
+                      {{ formatUpcomingDate(c.next_run_date) }}
+                      <span v-if="c.category"> · {{ c.category.name }}</span>
+                      <span v-if="c.installments_label" class="ml-1"> · {{ c.installments_label }}</span>
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                  <v-list-item-action>
+                    <span
+                      class="font-weight-bold tabular-nums"
+                      :class="c.type === 'income' ? 'finance-amount-income' : 'finance-amount-expense'"
+                    >
+                      {{ c.type === 'income' ? '+' : '−' }}{{ formatBRL(Math.abs(c.amount)) }}
+                    </span>
+                  </v-list-item-action>
+                </v-list-item>
+                <v-divider v-if="i < upcoming.length - 1" :key="'d' + c.id" class="mx-4 opacity-35" />
+              </template>
+            </v-list>
+          </v-card>
+        </v-col>
+      </v-row>
+
       <!-- 3. Gráfico -->
       <v-row class="mb-4 mb-sm-5">
         <v-col cols="12" class="px-2 px-sm-4">
@@ -142,6 +217,7 @@
 import axios from 'axios'
 import Chart from 'chart.js/auto'
 import { formatCurrencyBRLAxis } from '../currency'
+import { formatDatePtBR } from '../format'
 import TransactionList from './TransactionList.vue'
 
 export default {
@@ -157,8 +233,12 @@ export default {
       loading: true,
       reloading: false,
       hasPayload: false,
-      saldoReal: 0,
+      saldoAcumulado: 0,
+      saldoAcumuladoComCartao: 0,
+      saldoMes: 0,
       saldoComCartao: 0,
+      acumuladoAteInicioMes: 0,
+      saldoPrevistoAcumuladoFimMes: 0,
       receitasMes: 0,
       despesasCaixaMes: 0,
       despesasCartaoMes: 0,
@@ -166,6 +246,11 @@ export default {
       ultimasTransacoes: [],
       apiMonth: '',
       chartInstance: null,
+      entradasPrevistasMes: 0,
+      despesasFixasPrevistasMes: 0,
+      saldoPrevistoMes: 0,
+      upcoming: [],
+      upcomingLoading: true,
     }
   },
   computed: {
@@ -178,12 +263,20 @@ export default {
       return this.despesasCaixaMes + this.despesasCartaoMes
     },
     mostrarMiniCartao() {
-      return Math.abs(this.saldoComCartao - this.saldoReal) > 0.005 || this.despesasCartaoMes > 0
+      return (
+        Math.abs(this.saldoAcumuladoComCartao - this.saldoAcumulado) > 0.005 ||
+        this.despesasCartaoMes > 0
+      )
     },
     /** Saldo em tipografia neutra; só intensidade muda levemente */
     heroBalanceTextClass() {
-      if (this.saldoReal > 0) return 'hero-balance__figure--positive'
-      if (this.saldoReal < 0) return 'hero-balance__figure--negative'
+      if (this.saldoAcumulado > 0) return 'hero-balance__figure--positive'
+      if (this.saldoAcumulado < 0) return 'hero-balance__figure--negative'
+      return ''
+    },
+    forecastBalanceClass() {
+      if (this.saldoPrevistoAcumuladoFimMes > 0) return 'forecast-card__figure--positive'
+      if (this.saldoPrevistoAcumuladoFimMes < 0) return 'forecast-card__figure--negative'
       return ''
     },
   },
@@ -213,6 +306,12 @@ export default {
     formatAxis(v) {
       return formatCurrencyBRLAxis(v)
     },
+    formatUpcomingDate(iso) {
+      return formatDatePtBR(iso)
+    },
+    commitmentTypeLabel() {
+      return 'Compromisso'
+    },
     destroyChart() {
       if (this.chartInstance) {
         this.chartInstance.destroy()
@@ -236,13 +335,26 @@ export default {
       if (isRefresh) this.reloading = true
       else this.loading = true
 
+      if (!isRefresh) this.upcomingLoading = true
+
       try {
-        const { data } = await axios.get(`${base}/dashboard`, {
-          params: { month: this.month },
-        })
-        const saldoR = Number(data.saldo_real)
-        this.saldoReal = Number.isFinite(saldoR) ? saldoR : Number(data.saldo_atual) || 0
+        const [dashRes, upRes] = await Promise.all([
+          axios.get(`${base}/dashboard`, { params: { month: this.month } }),
+          axios.get(`${base}/dashboard/upcoming`).catch(() => ({ data: { data: [] } })),
+        ])
+        const data = dashRes.data
+        const ac = Number(data.saldo_acumulado)
+        const at = Number(data.saldo_atual)
+        this.saldoAcumulado = Number.isFinite(ac) ? ac : (Number.isFinite(at) ? at : 0)
+        const sac = Number(data.saldo_acumulado_com_cartao)
+        this.saldoAcumuladoComCartao = Number.isFinite(sac) ? sac : this.saldoAcumulado
+        this.saldoMes = Number(data.saldo_real) || 0
         this.saldoComCartao = Number(data.saldo_com_cartao) || 0
+        this.acumuladoAteInicioMes = Number(data.acumulado_ate_inicio_mes) || 0
+        const spa = Number(data.saldo_previsto_acumulado_fim_mes)
+        this.saldoPrevistoAcumuladoFimMes = Number.isFinite(spa)
+          ? spa
+          : this.acumuladoAteInicioMes + (Number(data.saldo_previsto_mes) || 0)
         this.receitasMes = Number(data.receitas_mes) || 0
         const dCaixa = data.despesas_caixa_mes
         this.despesasCaixaMes = Number(dCaixa !== undefined ? dCaixa : data.despesas_mes) || 0
@@ -250,6 +362,10 @@ export default {
         this.totalTransacoes = Number(data.total_transacoes) || 0
         this.ultimasTransacoes = data.ultimas_transacoes || []
         this.apiMonth = data.month || this.month
+        this.entradasPrevistasMes = Number(data.entradas_previstas_mes) || 0
+        this.despesasFixasPrevistasMes = Number(data.despesas_fixas_previstas_mes) || 0
+        this.saldoPrevistoMes = Number(data.saldo_previsto_mes) || 0
+        this.upcoming = (upRes.data && upRes.data.data) || []
         this.hasPayload = true
 
         await this.$nextTick()
@@ -261,6 +377,7 @@ export default {
       } finally {
         this.loading = false
         this.reloading = false
+        this.upcomingLoading = false
       }
     },
     renderChart() {
@@ -416,6 +533,18 @@ export default {
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+.forecast-card__figure {
+  font-size: clamp(1.35rem, 5vw, 1.85rem);
+  line-height: 1.2;
+  margin-top: 0.25rem;
+}
+.forecast-card__figure--positive {
+  color: #4caf50 !important;
+}
+.forecast-card__figure--negative {
+  color: #ff0000 !important;
 }
 
 .chart-wrap {

@@ -27,6 +27,8 @@ class TransactionFactory extends Factory
 
         return [
             'user_id' => User::factory(),
+            'parent_transaction_id' => null,
+            'recurring_transaction_id' => null,
             'credit_card_id' => null,
             'title' => fake()->randomElement(['Mercado', 'Uber', 'Aluguel', 'Farmácia', 'Restaurante', 'Salário', 'Bônus']),
             'amount' => $amount,

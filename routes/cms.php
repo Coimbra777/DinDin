@@ -10,6 +10,9 @@
 |--------------------------------------------------------------------------
 */
 
+use App\Http\Controllers\Cms\Admin\AdminSpaController;
+use App\Http\Controllers\Cms\Admin\UserAdminApiController;
+use App\Http\Controllers\Cms\Admin\UserAdminController;
 use App\Http\Controllers\Cms\Auth\ForgotPasswordController;
 use App\Http\Controllers\Cms\Auth\LoginController;
 use App\Http\Controllers\Cms\Auth\RegisterController;
@@ -26,9 +29,6 @@ use App\Http\Controllers\Finance\CategoryController;
 use App\Http\Controllers\Finance\FinanceDashboardController;
 use App\Http\Controllers\Finance\FinanceOnboardingWebController;
 use App\Http\Controllers\Finance\TransactionController;
-use App\Http\Controllers\Cms\Admin\AdminSpaController;
-use App\Http\Controllers\Cms\Admin\UserAdminApiController;
-use App\Http\Controllers\Cms\Admin\UserAdminController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -73,6 +73,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['finance.module'])->prefix('finance')->group(function () {
         Route::prefix('api')->group(function () {
             Route::get('dashboard', [DashboardApiController::class, 'show'])->name('finance.api.dashboard');
+            Route::get('dashboard/upcoming', [DashboardApiController::class, 'upcoming'])->name('finance.api.dashboard.upcoming');
             Route::get('user/onboarding', [FinanceOnboardingApiController::class, 'show'])->name('finance.api.user.onboarding');
             Route::post('user/onboarding/complete', [FinanceOnboardingApiController::class, 'complete'])->name('finance.api.user.onboarding.complete');
             Route::get('projection', [ProjectionApiController::class, 'show'])
@@ -86,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('categories/{category}', [CategoryApiController::class, 'update'])->name('finance.api.categories.update');
             Route::delete('categories/{category}', [CategoryApiController::class, 'destroy'])->name('finance.api.categories.destroy');
             Route::post('transactions', [TransactionApiController::class, 'store'])->name('finance.api.transactions.store');
+            Route::post('transactions/{transaction}/duplicate', [TransactionApiController::class, 'duplicate'])->name('finance.api.transactions.duplicate');
             Route::put('transactions/{transaction}', [TransactionApiController::class, 'update'])->name('finance.api.transactions.update');
             Route::delete('transactions/{transaction}', [TransactionApiController::class, 'destroy'])->name('finance.api.transactions.destroy');
             Route::middleware('module:cards')->group(function () {

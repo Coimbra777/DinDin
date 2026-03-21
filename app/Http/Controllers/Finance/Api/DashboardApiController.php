@@ -26,4 +26,13 @@ class DashboardApiController extends RestrictedController
 
         return response()->json($payload);
     }
+
+    public function upcoming(Request $request): JsonResponse
+    {
+        $limit = min(60, max(1, (int) $request->query('limit', 30)));
+
+        return response()->json([
+            'data' => $this->dashboard->getUpcomingCommitments((int) $request->user()->id, $limit),
+        ]);
+    }
 }

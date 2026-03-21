@@ -46,7 +46,7 @@ const STEPS = [
   },
   {
     title: 'Entradas e saídas',
-    text: 'Receitas aumentam o saldo; despesas reduzem. Aqui você vê os totais do mês lado a lado.',
+    text: 'Receitas e despesas do mês aparecem ao lado; o saldo grande é o acumulado até esse mês. A projeção mostra quanto deve sobrar no acumulado ao fim do mês.',
     selector: '[data-tour="dashboard-income-expense"]',
   },
   {

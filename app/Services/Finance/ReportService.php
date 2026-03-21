@@ -37,7 +37,7 @@ final class ReportService
     /**
      * Série mensal: receitas, despesas caixa, despesas cartão e saldos (últimos N meses).
      *
-     * @return list<array{month: string, receitas: float, despesas_caixa: float, despesas_cartao: float, saldo_real: float, saldo_com_cartao: float}>
+     * @return list<array{month: string, receitas: float, despesas_caixa: float, despesas_cartao: float, saldo_real: float, saldo_com_cartao: float, saldo_acumulado: float, saldo_acumulado_com_cartao: float}>
      */
     public function monthlyTrend(int $userId, int $months = 6): array
     {
@@ -61,6 +61,14 @@ final class ReportService
             $cursor = $cursor->copy()->subMonth();
         }
 
-        return array_reverse($out);
+        $out = array_reverse($out);
+        foreach ($out as &$row) {
+            $cum = Transaction::cumulativeStatsThroughMonthEnd($userId, (string) $row['month']);
+            $row['saldo_acumulado'] = round($cum->saldo_caixa, 2);
+            $row['saldo_acumulado_com_cartao'] = round($cum->saldo_com_cartao, 2);
+        }
+        unset($row);
+
+        return $out;
     }
 }

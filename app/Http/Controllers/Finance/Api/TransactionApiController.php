@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Finance\Api;
 
 use App\Http\Controllers\Cms\RestrictedController;
+use App\Http\Requests\Finance\DuplicateTransactionRequest;
 use App\Http\Requests\Finance\StoreTransactionRequest;
 use App\Http\Requests\Finance\UpdateTransactionRequest;
 use App\Models\Finance\Transaction;
@@ -46,7 +47,7 @@ class TransactionApiController extends RestrictedController
     {
         $payload = $this->transactions->create(
             (int) $request->user()->id,
-            $request->toTransactionAttributes()
+            $request->toTransactionAttributes(),
         );
 
         return response()->json($payload, 201);
@@ -55,9 +56,23 @@ class TransactionApiController extends RestrictedController
     public function update(UpdateTransactionRequest $request, int $transaction): JsonResponse
     {
         $t = Transaction::forUser($request->user()->id)->where('id', $transaction)->firstOrFail();
-        $payload = $this->transactions->update($t, $request->toTransactionAttributes());
+        $payload = $this->transactions->update(
+            $t,
+            $request->toTransactionAttributes(),
+        );
 
         return response()->json($payload);
+    }
+
+    public function duplicate(DuplicateTransactionRequest $request, int $transaction): JsonResponse
+    {
+        $t = Transaction::forUser($request->user()->id)->where('id', $transaction)->firstOrFail();
+        $created = $this->transactions->duplicateFollowingMonths($t, $request->months());
+
+        return response()->json([
+            'data' => $created,
+            'count' => count($created),
+        ], 201);
     }
 
     public function destroy(Request $request, int $transaction): JsonResponse

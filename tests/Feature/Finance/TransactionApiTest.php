@@ -76,6 +76,76 @@ class TransactionApiTest extends FinanceApiTestCase
         $this->assertEquals(100.5, (float) $summary['expense_month']);
     }
 
+    public function test_duplicate_transaction_creates_copies_in_following_months(): void
+    {
+        $user = $this->financeUser();
+        $cat = Category::factory()->expense()->create(['user_id' => $user->id]);
+        $source = Transaction::factory()->forUserId((int) $user->id)->create([
+            'category_id' => $cat->id,
+            'title' => 'Aluguel base',
+            'amount' => 1500,
+            'type' => Transaction::TYPE_EXPENSE,
+            'transaction_date' => '2026-01-15',
+        ]);
+
+        $this->actingAs($user)
+            ->postJson($this->financeApi('transactions/'.$source->id.'/duplicate'), [
+                'months' => 2,
+            ])
+            ->assertCreated()
+            ->assertJsonPath('count', 2);
+
+        $this->assertDatabaseHas('finance_transactions', [
+            'user_id' => $user->id,
+            'parent_transaction_id' => $source->id,
+            'transaction_date' => '2026-02-15',
+            'amount' => '1500.00',
+        ]);
+        $this->assertDatabaseHas('finance_transactions', [
+            'user_id' => $user->id,
+            'parent_transaction_id' => $source->id,
+            'transaction_date' => '2026-03-15',
+        ]);
+    }
+
+    public function test_duplicate_transaction_rejects_second_copy_in_same_target_month(): void
+    {
+        $user = $this->financeUser();
+        $cat = Category::factory()->expense()->create(['user_id' => $user->id]);
+        $source = Transaction::factory()->forUserId((int) $user->id)->create([
+            'category_id' => $cat->id,
+            'transaction_date' => '2026-01-10',
+        ]);
+        Transaction::factory()->forUserId((int) $user->id)->create([
+            'category_id' => $cat->id,
+            'parent_transaction_id' => $source->id,
+            'transaction_date' => '2026-02-10',
+        ]);
+
+        $this->actingAs($user)
+            ->postJson($this->financeApi('transactions/'.$source->id.'/duplicate'), [
+                'months' => 1,
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['months']);
+    }
+
+    public function test_user_cannot_duplicate_other_users_transaction(): void
+    {
+        $user = $this->financeUser();
+        $other = $this->financeUser();
+        $cat = Category::factory()->expense()->create(['user_id' => $other->id]);
+        $source = Transaction::factory()->forUserId((int) $other->id)->create([
+            'category_id' => $cat->id,
+        ]);
+
+        $this->actingAs($user)
+            ->postJson($this->financeApi('transactions/'.$source->id.'/duplicate'), [
+                'months' => 1,
+            ])
+            ->assertNotFound();
+    }
+
     public function test_user_cannot_create_transaction_for_other_users_category(): void
     {
         $user = $this->financeUser();

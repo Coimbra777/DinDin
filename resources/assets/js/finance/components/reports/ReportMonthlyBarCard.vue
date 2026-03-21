@@ -27,7 +27,7 @@
         <canvas ref="barCanvas" />
       </div>
       <p class="text-caption secondary--text text-center px-4 pb-4 mb-0">
-        Receitas (verde) · Despesas totais à vista + cartão (vermelho)
+        Barras: receitas e despesas por mês · Linha: saldo acumulado (caixa), mês a mês
       </p>
     </template>
     <v-card-text v-else class="finance-text-muted text-body-2 pb-8 text-center">
@@ -124,6 +124,7 @@ export default {
       const labels = this.series.map((r) => this.labelMes(r.month))
       const receitas = this.series.map((r) => Number(r.receitas) || 0)
       const despesas = this.series.map((r) => (Number(r.despesas_caixa) || 0) + (Number(r.despesas_cartao) || 0))
+      const saldoAcum = this.series.map((r) => Number(r.saldo_acumulado) || 0)
       const isNarrow = typeof window !== 'undefined' && window.innerWidth < 600
       const tc = this.chartThemeColors()
       const ctx = canvas.getContext('2d')
@@ -133,24 +134,41 @@ export default {
           labels,
           datasets: [
             {
+              type: 'bar',
               label: 'Receitas',
               data: receitas,
+              yAxisID: 'y',
               backgroundColor: 'rgba(76, 175, 80, 0.9)',
               borderRadius: isNarrow ? 5 : 8,
               maxBarThickness: isNarrow ? 28 : 40,
             },
             {
+              type: 'bar',
               label: 'Despesas',
               data: despesas,
+              yAxisID: 'y',
               backgroundColor: 'rgba(255, 0, 0, 0.85)',
               borderRadius: isNarrow ? 5 : 8,
               maxBarThickness: isNarrow ? 28 : 40,
+            },
+            {
+              type: 'line',
+              label: 'Saldo acumulado (caixa)',
+              data: saldoAcum,
+              yAxisID: 'y1',
+              borderColor: 'rgba(33, 150, 243, 0.95)',
+              backgroundColor: 'rgba(33, 150, 243, 0.12)',
+              borderWidth: 2,
+              tension: 0.25,
+              pointRadius: isNarrow ? 2 : 3,
+              fill: false,
             },
           ],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: {
               position: 'bottom',
@@ -181,8 +199,18 @@ export default {
               },
             },
             y: {
+              position: 'left',
               beginAtZero: true,
               grid: { color: tc.gridY },
+              ticks: {
+                color: tc.tickY,
+                callback: (value) => this.formatAxis(value),
+                maxTicksLimit: isNarrow ? 5 : 8,
+              },
+            },
+            y1: {
+              position: 'right',
+              grid: { drawOnChartArea: false },
               ticks: {
                 color: tc.tickY,
                 callback: (value) => this.formatAxis(value),

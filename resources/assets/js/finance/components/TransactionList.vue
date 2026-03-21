@@ -47,8 +47,38 @@
           </v-list-item-avatar>
 
           <v-list-item-content class="py-2">
-            <v-list-item-title class="tx-list__title font-weight-medium text-body-1 tx-list__heading">
-              {{ item.title }}
+            <v-list-item-title class="tx-list__title font-weight-medium text-body-1 tx-list__heading d-flex align-center flex-wrap">
+              <span class="text-truncate">{{ item.title }}</span>
+              <v-chip
+                v-if="item.parent_transaction_id"
+                x-small
+                outlined
+                color="blue-grey"
+                class="ml-2 flex-shrink-0"
+                label
+              >
+                Duplicada
+              </v-chip>
+              <v-chip
+                v-if="item.recurring_transaction_id"
+                x-small
+                outlined
+                color="deep-purple"
+                class="ml-2 flex-shrink-0"
+                label
+              >
+                Recorrente
+              </v-chip>
+              <v-chip
+                v-if="item.installment_number != null && item.installment_of != null"
+                x-small
+                outlined
+                color="teal"
+                class="ml-2 flex-shrink-0"
+                label
+              >
+                {{ item.installment_number }}/{{ item.installment_of }} parcelas
+              </v-chip>
             </v-list-item-title>
             <v-list-item-subtitle class="tx-list__meta text-caption secondary--text mt-1">
               <span class="tx-list__meta-icon">
@@ -80,6 +110,15 @@
           </v-list-item-action>
 
           <v-list-item-action v-if="showActions" class="flex-row mx-0 my-2">
+            <v-btn
+              icon
+              small
+              aria-label="Duplicar nos próximos meses"
+              type="button"
+              @click.stop="onDuplicateClick(item)"
+            >
+              <v-icon small color="secondary">mdi-content-copy</v-icon>
+            </v-btn>
             <v-btn icon small aria-label="Editar" @click="$emit('edit', item)">
               <v-icon small color="secondary">mdi-pencil-outline</v-icon>
             </v-btn>
@@ -115,6 +154,11 @@ export default {
     },
   },
   methods: {
+    onDuplicateClick(transaction) {
+      // eslint-disable-next-line no-console
+      console.log('[finance] duplicar clicado', transaction && transaction.id)
+      this.$emit('duplicate', transaction)
+    },
     formatTxDate(iso) {
       return formatDatePtBR(iso)
     },

@@ -229,39 +229,6 @@
             />
           </v-menu>
 
-          <v-row dense class="mt-2">
-            <v-col cols="6">
-              <v-text-field
-                :value="installmentNumberStr"
-                label="Parcela atual (opc.)"
-                outlined
-                dense
-                clearable
-                hint="ex.: 3"
-                persistent-hint
-                prepend-inner-icon="mdi-numeric"
-                hide-details="auto"
-                inputmode="numeric"
-                @input="onInstallmentNumberInput"
-              />
-            </v-col>
-            <v-col cols="6">
-              <v-text-field
-                :value="installmentOfStr"
-                label="Total parcelas (opc.)"
-                outlined
-                dense
-                clearable
-                hint="ex.: 12"
-                persistent-hint
-                prepend-inner-icon="mdi-counter"
-                hide-details="auto"
-                inputmode="numeric"
-                @input="onInstallmentOfInput"
-              />
-            </v-col>
-          </v-row>
-
           <v-textarea
             v-model="form.description"
             label="Descrição (opcional)"
@@ -317,8 +284,6 @@ const emptyForm = () => ({
   credit_card_id: null,
   transaction_date: todayIsoLocal(),
   description: '',
-  installment_number: null,
-  installment_of: null,
 })
 
 export default {
@@ -339,8 +304,6 @@ export default {
       saving: false,
       dateMenu: false,
       amountDisplay: '',
-      installmentNumberStr: '',
-      installmentOfStr: '',
       form: emptyForm(),
       fieldErrors: {},
       rules: {
@@ -465,25 +428,6 @@ export default {
         maximumFractionDigits: 2,
       }).format(Number(num))
     },
-    digitsOnly(str, maxLen) {
-      return String(str ?? '')
-        .replace(/\D/g, '')
-        .slice(0, maxLen)
-    },
-    onInstallmentNumberInput(v) {
-      this.installmentNumberStr = this.digitsOnly(v, 3)
-      this.syncInstallments()
-    },
-    onInstallmentOfInput(v) {
-      this.installmentOfStr = this.digitsOnly(v, 4)
-      this.syncInstallments()
-    },
-    syncInstallments() {
-      const n = this.installmentNumberStr === '' ? null : parseInt(this.installmentNumberStr, 10)
-      const o = this.installmentOfStr === '' ? null : parseInt(this.installmentOfStr, 10)
-      this.form.installment_number = Number.isFinite(n) ? n : null
-      this.form.installment_of = Number.isFinite(o) ? o : null
-    },
     hydrate() {
       if (this.transaction && this.transaction.id) {
         this.form = {
@@ -494,19 +438,11 @@ export default {
           credit_card_id: this.transaction.credit_card_id || null,
           transaction_date: toIsoDateOnly(this.transaction.transaction_date) || todayIsoLocal(),
           description: this.transaction.description || '',
-          installment_number: this.transaction.installment_number ?? null,
-          installment_of: this.transaction.installment_of ?? null,
         }
         this.amountDisplay = this.formatAmountBR(this.transaction.amount)
-        this.installmentNumberStr =
-          this.transaction.installment_number != null ? String(this.transaction.installment_number) : ''
-        this.installmentOfStr =
-          this.transaction.installment_of != null ? String(this.transaction.installment_of) : ''
       } else {
         this.form = emptyForm()
         this.amountDisplay = ''
-        this.installmentNumberStr = ''
-        this.installmentOfStr = ''
       }
       this.fieldErrors = {}
       this.$nextTick(() => this.$refs.form && this.$refs.form.resetValidation())
@@ -544,12 +480,6 @@ export default {
         description: this.form.description || null,
         category_id: parseInt(String(this.form.category_id), 10),
         credit_card_id: this.form.type === this.TX_EXPENSE && this.form.credit_card_id ? this.form.credit_card_id : null,
-      }
-      const inN = this.form.installment_number
-      const inO = this.form.installment_of
-      if (inN != null && inN !== '' && inO != null && inO !== '') {
-        payload.installment_number = Number(inN)
-        payload.installment_of = Number(inO)
       }
 
       try {
@@ -632,4 +562,5 @@ export default {
   align-self: center;
   margin-top: 2px;
 }
+
 </style>

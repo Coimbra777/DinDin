@@ -26,6 +26,8 @@ final class TransactionResource
             'credit_card_id' => $t->credit_card_id,
             'is_credit_card' => (bool) $t->is_credit_card,
             'category_id' => $t->category_id,
+            'parent_transaction_id' => $t->parent_transaction_id,
+            'recurring_transaction_id' => $t->recurring_transaction_id,
             'category' => $t->category ? [
                 'id' => $t->category->id,
                 'name' => $t->category->name,
