@@ -36,18 +36,27 @@ class UserAdminApiController extends Controller
     {
         $user->load('saasModules:id,name,slug');
 
+        $optionalModules = SaasModule::query()
+            ->where('slug', '!=', 'finance')
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug'])
+            ->values();
+
+        $optionalSlugs = $optionalModules->pluck('slug')->all();
+
         return response()->json([
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'is_admin' => (bool) $user->is_admin,
-                'module_ids' => $user->saasModules->pluck('id')->values()->all(),
+                'modules' => $user->saasModules
+                    ->pluck('slug')
+                    ->filter(fn (string $s) => in_array($s, $optionalSlugs, true))
+                    ->values()
+                    ->all(),
             ],
-            'all_modules' => SaasModule::query()
-                ->orderBy('name')
-                ->get(['id', 'name', 'slug'])
-                ->values(),
+            'all_modules' => $optionalModules,
         ]);
     }
 
@@ -62,9 +71,21 @@ class UserAdminApiController extends Controller
         $user->update([
             'is_admin' => $request->boolean('is_admin'),
         ]);
-        $user->saasModules()->sync($request->input('modules', []));
+
+        $slugs = array_values(array_unique(array_filter($request->input('modules', []))));
+        $ids = SaasModule::query()->whereIn('slug', $slugs)->pluck('id')->all();
+        $financeId = SaasModule::query()->where('slug', 'finance')->value('id');
+        if ($financeId !== null) {
+            $ids[] = (int) $financeId;
+        }
+        $user->saasModules()->sync(array_values(array_unique($ids)));
 
         $user->refresh()->load('saasModules:id,name,slug');
+
+        $optionalSlugs = SaasModule::query()
+            ->where('slug', '!=', 'finance')
+            ->pluck('slug')
+            ->all();
 
         return response()->json([
             'message' => 'Alterações guardadas.',
@@ -73,7 +94,11 @@ class UserAdminApiController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'is_admin' => (bool) $user->is_admin,
-                'module_ids' => $user->saasModules->pluck('id')->values()->all(),
+                'modules' => $user->saasModules
+                    ->pluck('slug')
+                    ->filter(fn (string $s) => in_array($s, $optionalSlugs, true))
+                    ->values()
+                    ->all(),
             ],
         ]);
     }

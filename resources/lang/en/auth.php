@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'failed' => 'We could not sign you in. Check your email or name and password, then try again.',
+    'failed' => 'We could not sign you in. Check your name, email or username and password, then try again.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
 
 ];

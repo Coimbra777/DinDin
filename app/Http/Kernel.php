@@ -75,5 +75,6 @@ class Kernel extends HttpKernel
         'session_api' => \Illuminate\Session\Middleware\StartSession::class,
         'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         'module' => \App\Http\Middleware\EnsureUserHasSaasModule::class,
+        'finance.module' => \App\Http\Middleware\EnsureFinanceModuleAccess::class,
     ];
 }

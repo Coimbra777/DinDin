@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Finance;
 
-use App\Models\Group;
+use App\Models\SaasModule;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 abstract class FinanceApiTestCase extends TestCase
@@ -21,32 +20,22 @@ abstract class FinanceApiTestCase extends TestCase
     }
 
     /**
-     * Utilizador com módulo CMS `finance` (necessário para RestrictedController).
+     * Utilizador com todos os módulos SaaS usados pela SPA/API de testes (pivot explícito).
      */
     protected function financeUser(array $overrides = []): User
     {
-        $group = Group::query()->create(['name' => 'Test Finance '.uniqid()]);
-        $moduleId = DB::table('modules')->insertGetId([
-            'name' => 'Finanças',
-            'father_path' => null,
-            'path' => 'finance',
-            'order' => 1,
-            'father_order' => 0,
-            'icon' => 'fa',
-            'has_son' => 0,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        DB::table('group_module')->insert([
-            'group_id' => $group->id,
-            'module_id' => $moduleId,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $user = User::factory()->create(array_merge(['group_id' => 0], $overrides));
 
-        return User::factory()->create(array_merge([
-            'group_id' => $group->id,
-        ], $overrides));
+        $ids = SaasModule::query()
+            ->whereIn('slug', ['finance', 'cards', 'reports', 'projections', 'planning'])
+            ->pluck('id')
+            ->all();
+
+        if ($ids !== []) {
+            $user->saasModules()->sync($ids);
+        }
+
+        return $user;
     }
 
     protected function financeApi(string $path = ''): string

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Cms\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Cms\CmsRegisterUserRequest;
 use App\Models\Group;
+use App\Models\SaasModule;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -39,7 +40,13 @@ class RegisterController extends Controller
             'password' => bcrypt($validated['password']),
             'username' => $username,
             'group_id' => $this->selfRegisteredGroupId(),
+            'is_admin' => false,
         ])));
+
+        $financeId = SaasModule::query()->where('slug', 'finance')->value('id');
+        if ($financeId !== null) {
+            $user->saasModules()->syncWithoutDetaching([(int) $financeId]);
+        }
 
         $this->guard()->login($user);
 

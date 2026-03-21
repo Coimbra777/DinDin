@@ -34,13 +34,17 @@
             hide-details="auto"
           />
 
-          <div class="text-subtitle-2 font-weight-medium mt-6 mb-2">Módulos</div>
+          <div class="text-subtitle-2 font-weight-medium mt-6 mb-2">Módulos extra</div>
+          <p class="text-caption finance-text-muted mb-2">
+            O acesso base (dashboard, transações, categorias, alertas, insights, simulador) é automático para todos.
+            Marque abaixo apenas os módulos adicionais permitidos.
+          </p>
           <v-list dense class="pa-0 transparent" :dark="$vuetify.theme.dark">
-            <v-list-item v-for="m in allModules" :key="m.id" class="px-0">
+            <v-list-item v-for="m in allModules" :key="m.slug" class="px-0">
               <v-list-item-action class="mr-3 my-0">
                 <v-checkbox
-                  v-model="selectedModuleIds"
-                  :value="m.id"
+                  v-model="selectedModules"
+                  :value="m.slug"
                   color="primary"
                   hide-details
                   dense
@@ -95,7 +99,9 @@ export default {
       displayEmail: '',
       isAdmin: false,
       allModules: [],
-      selectedModuleIds: [],
+      selectedModules: [],
+      /** Evita loop quando o switch de admin altera os checkboxes. */
+      _fromAdminSwitch: false,
     }
   },
   watch: {
@@ -105,19 +111,53 @@ export default {
         this.fetchUser()
       },
     },
+    isAdmin(val) {
+      if (this.loading) return
+      this._fromAdminSwitch = true
+      if (val) {
+        this.selectedModules = this.allModules.map((m) => m.slug)
+      } else {
+        this.selectedModules = []
+      }
+      this.$nextTick(() => {
+        this._fromAdminSwitch = false
+      })
+    },
+    selectedModules: {
+      deep: true,
+      handler(modules) {
+        if (this.loading || this._fromAdminSwitch) return
+        const slugs = this.allModules.map((m) => m.slug)
+        if (slugs.length === 0) return
+        const allOn = slugs.every((s) => modules.includes(s))
+        if (allOn && !this.isAdmin) {
+          this.isAdmin = true
+          return
+        }
+        if (this.isAdmin && !allOn) {
+          this.isAdmin = false
+        }
+      },
+    },
   },
   methods: {
     async fetchUser() {
       this.loading = true
       this.loadError = null
+      this.selectedModules = []
       try {
         const { data } = await axios.get(`${this.apiBase}/users/${this.userId}`)
         const u = data.user
         this.displayName = u.name
         this.displayEmail = u.email
-        this.isAdmin = !!u.is_admin
         this.allModules = data.all_modules || []
-        this.selectedModuleIds = (u.module_ids || []).slice()
+        this.isAdmin = !!u.is_admin
+        const fromApi = Array.isArray(u.modules) ? u.modules : []
+        if (this.isAdmin) {
+          this.selectedModules = this.allModules.map((m) => m.slug)
+        } else {
+          this.selectedModules = fromApi.slice()
+        }
       } catch (e) {
         this.loadError =
           (e.response && e.response.data && e.response.data.message) ||
@@ -131,8 +171,20 @@ export default {
       try {
         const { data } = await axios.post(`${this.apiBase}/users/${this.userId}/modules`, {
           is_admin: this.isAdmin,
-          modules: this.selectedModuleIds,
+          modules: this.selectedModules,
         })
+        if (data.user) {
+          this._fromAdminSwitch = true
+          this.isAdmin = !!data.user.is_admin
+          if (this.isAdmin) {
+            this.selectedModules = this.allModules.map((m) => m.slug)
+          } else if (Array.isArray(data.user.modules)) {
+            this.selectedModules = data.user.modules.slice()
+          }
+          this.$nextTick(() => {
+            this._fromAdminSwitch = false
+          })
+        }
         this.$emit('saved', (data && data.message) || 'Guardado com sucesso.')
       } catch (e) {
         let msg = 'Não foi possível guardar.'

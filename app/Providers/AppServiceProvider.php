@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\ModuleAccessContract;
+use App\Services\Saas\SaasModuleAccessService;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Schema;
@@ -42,5 +44,8 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register() {}
+    public function register(): void
+    {
+        $this->app->singleton(ModuleAccessContract::class, SaasModuleAccessService::class);
+    }
 }

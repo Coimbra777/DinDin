@@ -36,13 +36,13 @@ class SaasAccessTest extends TestCase
             ->assertOk();
     }
 
-    public function test_user_without_finance_entitlement_cannot_access_finance_api(): void
+    public function test_user_can_access_finance_api_with_base_entitlement_without_pivot(): void
     {
         $user = User::factory()->create(['group_id' => 0, 'is_admin' => false]);
 
         $this->actingAs($user)
             ->getJson('/api/finance/dashboard')
-            ->assertForbidden();
+            ->assertOk();
     }
 
     public function test_admin_accesses_finance_api_without_group_or_pivot(): void

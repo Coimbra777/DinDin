@@ -44,7 +44,7 @@
               prepend-inner-icon="mdi-account-outline"
               :rules="usernameRules"
               :error-messages="serverErrors.username"
-              label="E-mail ou nome"
+              label="Nome, e-mail ou utilizador"
               class="cms-auth-input mb-3"
               :dark="dark"
               :color="fieldColor"
@@ -138,7 +138,7 @@ export default {
       submitting: false,
       serverErrors: {},
       usernameRules: [
-        (v) => (v != null && String(v).trim() !== '') || 'Informe seu e-mail ou nome',
+        (v) => (v != null && String(v).trim() !== '') || 'Informe nome, e-mail ou utilizador',
         (v) => String(v || '').trim().length >= 2 || 'Mínimo 2 caracteres',
       ],
       passwordRules: [(v) => (v != null && String(v) !== '') || 'Informe a senha'],

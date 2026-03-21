@@ -5,9 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 
 /**
- * Placeholder middleware: module access for CMS and finance APIs is enforced in
- * {@see \App\Http\Controllers\Cms\RestrictedController} (constructor closure).
- * Register this only if you extract that logic into a dedicated middleware.
+ * Placeholder — acesso ao módulo financeiro: {@see EnsureFinanceModuleAccess} ({@code finance.module} nas rotas).
  */
 class GroupModuleChecker
 {

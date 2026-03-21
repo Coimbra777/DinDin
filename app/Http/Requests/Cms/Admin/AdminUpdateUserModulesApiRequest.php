@@ -18,7 +18,7 @@ class AdminUpdateUserModulesApiRequest extends FormRequest
         return [
             'is_admin' => ['required', 'boolean'],
             'modules' => ['present', 'array'],
-            'modules.*' => ['integer', 'exists:saas_modules,id'],
+            'modules.*' => ['string', 'distinct', 'exists:saas_modules,slug'],
         ];
     }
 

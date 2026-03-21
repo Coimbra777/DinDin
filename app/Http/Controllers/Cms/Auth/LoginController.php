@@ -54,7 +54,8 @@ class LoginController extends Controller
     }
 
     /**
-     * Campo do formulário continua a chamar-se "username" no POST (trait); aceita e-mail ou nome (`users.email` / `users.name`).
+     * Campo do formulário continua a chamar-se "username" no POST (trait);
+     * aceita nome, e-mail ou nome de utilizador (`users.name`, `users.email`, `users.username`).
      */
     protected function attemptLogin(Request $request): bool
     {
@@ -64,7 +65,8 @@ class LoginController extends Controller
         $user = User::query()
             ->where(function ($q) use ($login) {
                 $q->where('email', $login)
-                    ->orWhere('name', $login);
+                    ->orWhere('name', $login)
+                    ->orWhere('username', $login);
             })
             ->first();
 

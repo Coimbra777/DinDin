@@ -109,8 +109,14 @@
         </v-row>
 
         <v-fade-transition mode="out-in">
+          <div v-if="!canShowView(view)" key="denied" class="text-center py-12">
+            <p class="finance-text-muted">Sem permissão para esta área.</p>
+            <v-btn text color="primary" class="mt-2" @click="recoverToFirstAllowedView">
+              Ir para {{ firstAllowedNavTitle() }}
+            </v-btn>
+          </div>
           <!-- DASHBOARD (GET /api/dashboard + Chart.js) -->
-          <div v-if="view === 'dashboard'" key="dash">
+          <div v-else-if="view === 'dashboard'" key="dash">
             <dashboard
               :month="month"
               :api-base="apiBase"
@@ -418,6 +424,8 @@ export default {
     onboardingInitialCompleted: { type: Boolean, default: false },
     onboardingCompleteUrl: { type: String, required: true },
     isAdmin: { type: Boolean, default: false },
+    /** Slugs SaaS atribuídos ao utilizador (opcionais além do núcleo com `finance`). */
+    userModuleSlugs: { type: Array, default: () => [] },
   },
   data() {
     const v = VALID_VIEWS.includes(this.initialView) ? this.initialView : 'dashboard'
@@ -436,17 +444,21 @@ export default {
       insightsRefreshKey: 0,
       simulatorRefreshKey: 0,
       planningRefreshKey: 0,
-      navItems: [
-        { title: 'Dashboard', value: 'dashboard', icon: 'mdi-view-dashboard-outline' },
-        { title: 'Transações', value: 'transactions', icon: 'mdi-bank-transfer' },
-        { title: 'Categorias', value: 'categories', icon: 'mdi-shape-outline' },
-        { title: 'Cartões', value: 'cards', icon: 'mdi-credit-card-outline' },
-        { title: 'Projeção', value: 'projection', icon: 'mdi-chart-timeline-variant' },
-        { title: 'Relatórios', value: 'reports', icon: 'mdi-file-chart-outline' },
-        { title: 'Alertas', value: 'alerts', icon: 'mdi-bell-alert-outline' },
-        { title: 'Insights', value: 'insights', icon: 'mdi-lightbulb-outline' },
-        { title: 'Simulador', value: 'simulator', icon: 'mdi-calculator-variant' },
-        { title: 'Planejamento', value: 'planning', icon: 'mdi-calendar-check' },
+      /**
+       * core: visível para qualquer utilizador com módulo `finance` (entrada na app).
+       * !core: só com slug extra no pivot (checkbox no admin).
+       */
+      navItemsAll: [
+        { title: 'Dashboard', value: 'dashboard', icon: 'mdi-view-dashboard-outline', core: true },
+        { title: 'Transações', value: 'transactions', icon: 'mdi-bank-transfer', core: true },
+        { title: 'Categorias', value: 'categories', icon: 'mdi-shape-outline', core: true },
+        { title: 'Cartões', value: 'cards', icon: 'mdi-credit-card-outline', core: false, slug: 'cards' },
+        { title: 'Projeção', value: 'projection', icon: 'mdi-chart-timeline-variant', core: false, slug: 'projections' },
+        { title: 'Relatórios', value: 'reports', icon: 'mdi-file-chart-outline', core: false, slug: 'reports' },
+        { title: 'Alertas', value: 'alerts', icon: 'mdi-bell-alert-outline', core: true },
+        { title: 'Insights', value: 'insights', icon: 'mdi-lightbulb-outline', core: true },
+        { title: 'Simulador', value: 'simulator', icon: 'mdi-calculator-variant', core: true },
+        { title: 'Planejamento', value: 'planning', icon: 'mdi-calendar-check', core: false, slug: 'planning' },
       ],
       transactions: [],
       categories: [],
@@ -467,6 +479,14 @@ export default {
     }
   },
   computed: {
+    navItems() {
+      if (this.isAdmin) {
+        return this.navItemsAll
+      }
+      return this.navItemsAll.filter(
+        (item) => item.core || (item.slug && this.userModuleSlugs.includes(item.slug))
+      )
+    },
     categoryFilterItems() {
       return this.categories.map((c) => ({ text: c.name, value: c.id }))
     },
@@ -522,10 +542,35 @@ export default {
     }
   },
   mounted() {
+    if (!this.canShowView(this.view)) {
+      this.view = this.firstAllowedView()
+    }
     this.refreshAll()
   },
   methods: {
+    canShowView(value) {
+      const item = this.navItemsAll.find((i) => i.value === value)
+      if (!item) return false
+      if (this.isAdmin) return true
+      if (item.core) return true
+      return Boolean(item.slug && this.userModuleSlugs.includes(item.slug))
+    },
+    firstAllowedView() {
+      const items = this.navItems
+      return items.length ? items[0].value : 'dashboard'
+    },
+    firstAllowedNavTitle() {
+      const items = this.navItems
+      return items.length ? items[0].title : 'Dashboard'
+    },
+    recoverToFirstAllowedView() {
+      this.view = this.firstAllowedView()
+      if (this.$vuetify.breakpoint.smAndDown) {
+        this.navDrawer = false
+      }
+    },
     setViewOnly(value) {
+      if (!this.canShowView(value)) return
       this.view = value
     },
     onOnboardingStep(stepIndex) {
@@ -562,6 +607,10 @@ export default {
       await Promise.all([this.loadTransactions(), this.loadCategories(), this.loadCreditCards()])
     },
     goView(value) {
+      if (!this.canShowView(value)) {
+        this.showError('Sem permissão para este módulo.')
+        return
+      }
       this.view = value
       if (this.$vuetify.breakpoint.smAndDown) {
         this.navDrawer = false

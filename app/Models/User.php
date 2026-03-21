@@ -88,8 +88,8 @@ class User extends Authenticatable
     }
 
     /**
-     * Acesso a um módulo do catálogo SaaS (slug), com fallback legado para "finance"
-     * quando o utilizador ainda não tem nenhuma atribuição explícita (não quebra grupos CMS).
+     * Acesso a módulo SaaS: administradores — tudo; slug {@code finance} — qualquer utilizador
+     * (entrada na app Finanças); restantes — só se estiverem na pivot {@see saasModules()}.
      */
     public function canAccessSaasModule(string $slug): bool
     {
@@ -97,33 +97,10 @@ class User extends Authenticatable
             return true;
         }
 
-        if ($this->saasModules()->where('slug', $slug)->exists()) {
+        if ($slug === 'finance') {
             return true;
         }
 
-        if ($this->saasModules()->exists()) {
-            return false;
-        }
-
-        return $this->legacyGroupAllowsSaasSlug($slug);
-    }
-
-    private function legacyGroupAllowsSaasSlug(string $slug): bool
-    {
-        if ($slug !== 'finance') {
-            return false;
-        }
-
-        $group = $this->group;
-        if ($group === null) {
-            return false;
-        }
-
-        return $group->modules()
-            ->where(function ($q) {
-                $q->where('path', 'finance')
-                    ->orWhere('father_path', 'finance');
-            })
-            ->exists();
+        return $this->saasModules()->where('slug', $slug)->exists();
     }
 }

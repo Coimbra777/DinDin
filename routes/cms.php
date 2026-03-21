@@ -4,6 +4,10 @@
 |--------------------------------------------------------------------------
 | CMS / app autenticada — autenticação + finanças (sem CMS institucional antigo)
 |--------------------------------------------------------------------------
+|
+| Finanças (prefixo finance): middleware finance.module — espelho em routes/api.php
+| sob /api/* mantido por compatibilidade (@deprecated progressivo).
+|--------------------------------------------------------------------------
 */
 
 use App\Http\Controllers\Cms\Auth\ForgotPasswordController;
@@ -66,12 +70,14 @@ Route::middleware(['auth'])->group(function () {
         Route::put('users/{user}', [UserAdminController::class, 'update'])->name('users.update');
     });
 
-    Route::middleware(['module:finance'])->prefix('finance')->group(function () {
+    Route::middleware(['finance.module'])->prefix('finance')->group(function () {
         Route::prefix('api')->group(function () {
             Route::get('dashboard', [DashboardApiController::class, 'show'])->name('finance.api.dashboard');
             Route::get('user/onboarding', [FinanceOnboardingApiController::class, 'show'])->name('finance.api.user.onboarding');
             Route::post('user/onboarding/complete', [FinanceOnboardingApiController::class, 'complete'])->name('finance.api.user.onboarding.complete');
-            Route::get('projection', [ProjectionApiController::class, 'show'])->name('finance.api.projection');
+            Route::get('projection', [ProjectionApiController::class, 'show'])
+                ->middleware('module:projections')
+                ->name('finance.api.projection');
             Route::get('summary', [SummaryApiController::class, 'show'])->name('finance.api.summary');
             Route::get('transactions', [TransactionApiController::class, 'index'])->name('finance.api.transactions');
             Route::get('transactions/recent', [TransactionApiController::class, 'recent'])->name('finance.api.transactions.recent');
@@ -82,13 +88,17 @@ Route::middleware(['auth'])->group(function () {
             Route::post('transactions', [TransactionApiController::class, 'store'])->name('finance.api.transactions.store');
             Route::put('transactions/{transaction}', [TransactionApiController::class, 'update'])->name('finance.api.transactions.update');
             Route::delete('transactions/{transaction}', [TransactionApiController::class, 'destroy'])->name('finance.api.transactions.destroy');
-            Route::get('credit-cards', [CreditCardApiController::class, 'index'])->name('finance.api.credit-cards.index');
-            Route::post('credit-cards', [CreditCardApiController::class, 'store'])->name('finance.api.credit-cards.store');
-            Route::put('credit-cards/{finance_credit_card}', [CreditCardApiController::class, 'update'])->name('finance.api.credit-cards.update');
-            Route::delete('credit-cards/{finance_credit_card}', [CreditCardApiController::class, 'destroy'])->name('finance.api.credit-cards.destroy');
-            Route::get('credit-cards/{finance_credit_card}/bill', [CreditCardApiController::class, 'bill'])->name('finance.api.credit-cards.bill');
-            Route::get('reports/categories', [ReportApiController::class, 'categories'])->name('finance.api.reports.categories');
-            Route::get('reports/trend', [ReportApiController::class, 'trend'])->name('finance.api.reports.trend');
+            Route::middleware('module:cards')->group(function () {
+                Route::get('credit-cards', [CreditCardApiController::class, 'index'])->name('finance.api.credit-cards.index');
+                Route::post('credit-cards', [CreditCardApiController::class, 'store'])->name('finance.api.credit-cards.store');
+                Route::put('credit-cards/{finance_credit_card}', [CreditCardApiController::class, 'update'])->name('finance.api.credit-cards.update');
+                Route::delete('credit-cards/{finance_credit_card}', [CreditCardApiController::class, 'destroy'])->name('finance.api.credit-cards.destroy');
+                Route::get('credit-cards/{finance_credit_card}/bill', [CreditCardApiController::class, 'bill'])->name('finance.api.credit-cards.bill');
+            });
+            Route::middleware('module:reports')->group(function () {
+                Route::get('reports/categories', [ReportApiController::class, 'categories'])->name('finance.api.reports.categories');
+                Route::get('reports/trend', [ReportApiController::class, 'trend'])->name('finance.api.reports.trend');
+            });
             Route::prefix('goals')->group(function () {
                 require base_path('routes/api/goals.php');
             });
@@ -101,7 +111,7 @@ Route::middleware(['auth'])->group(function () {
             Route::prefix('credit-simulator')->group(function () {
                 require base_path('routes/api/credit-simulator.php');
             });
-            Route::prefix('planning')->group(function () {
+            Route::prefix('planning')->middleware('module:planning')->group(function () {
                 require base_path('routes/api/planning.php');
             });
         });

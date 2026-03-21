@@ -19,6 +19,19 @@ import '../../sass/finance-standalone.scss'
 Vue.use(Vuetify)
 Vue.prototype.$formatCurrencyBRL = formatCurrencyBRL
 
+function parseUserModuleSlugs() {
+  const script = document.getElementById('finance-user-module-slugs')
+  if (script && script.textContent) {
+    try {
+      const parsed = JSON.parse(script.textContent.trim())
+      return Array.isArray(parsed) ? parsed.map(String) : []
+    } catch (e) {
+      return []
+    }
+  }
+  return []
+}
+
 const el = document.getElementById('finance-app')
 if (el) {
   const initialDark = getInitialDark()
@@ -78,6 +91,7 @@ if (el) {
           onboardingInitialCompleted: el.dataset.onboardingCompleted === '1',
           onboardingCompleteUrl: el.dataset.onboardingCompleteUrl || '',
           isAdmin: el.dataset.isAdmin === '1',
+          userModuleSlugs: parseUserModuleSlugs(),
         },
       }),
   }).$mount(el)

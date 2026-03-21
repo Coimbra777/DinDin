@@ -9,16 +9,21 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserHasSaasModule
+/**
+ * Garante acesso ao módulo financeiro (slug SaaS {@code finance}).
+ * O acesso base a {@code finance} é concedido a qualquer utilizador autenticado; extras usam a pivot.
+ * Ver {@see ModuleAccessContract}.
+ */
+final class EnsureFinanceModuleAccess
 {
     public function __construct(
         private readonly ModuleAccessContract $moduleAccess,
     ) {}
 
-    public function handle(Request $request, Closure $next, string $slug): Response
+    public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        if ($user === null || ! $this->moduleAccess->can($user, $slug)) {
+        if ($user === null || ! $this->moduleAccess->can($user, 'finance')) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json(['message' => 'Módulo não autorizado'], 403);
             }
