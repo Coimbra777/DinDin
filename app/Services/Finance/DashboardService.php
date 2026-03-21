@@ -35,10 +35,8 @@ final class DashboardService
         $acumuladoAteInicioMes = Transaction::cumulativeStatsThroughMonthEnd($userId, $mesAnterior);
 
         $forecast = $this->getMonthlyForecast($userId, $month);
-        $saldoPrevistoAcumuladoFimMes = round(
-            $acumuladoAteInicioMes->saldo_caixa + $forecast['saldo_previsto_mes'],
-            2
-        );
+        // Igual ao saldo caixa acumulado ao fim do mês (realizado); evita discrepância com saldo_acumulado.
+        $saldoPrevistoAcumuladoFimMes = round($acumulado->saldo_caixa, 2);
 
         $forecastType = self::FORECAST_TYPE_REALIZED_ONLY;
 

@@ -32,12 +32,16 @@
               border="left"
               colored-border
               :type="alertType(a.severity)"
-              class="mb-0 text-body-2"
+              class="mb-0 finance-alert-item"
               text
             >
-              {{ a.message }}
+              <div class="text-subtitle-2 font-weight-bold">{{ displayTitle(a) }}</div>
+              <div class="text-body-2 mt-1">{{ a.message }}</div>
+              <div v-if="a.action_hint" class="text-caption mt-2 finance-alert-hint">
+                {{ a.action_hint }}
+              </div>
               <template v-if="a.meta && formatMeta(a.meta)">
-                <div class="text-caption mt-1 secondary--text">
+                <div class="text-caption mt-2 secondary--text">
                   {{ formatMeta(a.meta) }}
                 </div>
               </template>
@@ -82,6 +86,10 @@ export default {
       if (severity === 'warning') return 'warning'
       return 'info'
     },
+    displayTitle(a) {
+      if (a.title) return a.title
+      return 'Alerta'
+    },
     formatMeta(meta) {
       const parts = []
       if (meta.saldo_com_cartao != null) {
@@ -92,6 +100,14 @@ export default {
       }
       if (meta.fatura_total != null && meta.limite != null) {
         parts.push(`Fatura ${this.$formatCurrencyBRL(meta.fatura_total)} / limite ${this.$formatCurrencyBRL(meta.limite)}`)
+      }
+      if (meta.shortfall != null && meta.projected_total != null) {
+        parts.push(
+          `Projeção no prazo: ${this.$formatCurrencyBRL(meta.projected_total)} · faltariam ${this.$formatCurrencyBRL(meta.shortfall)}`
+        )
+      }
+      if (meta.days_remaining != null) {
+        parts.push(`${meta.days_remaining} dias até o prazo da meta`)
       }
       return parts.join(' · ')
     },
@@ -119,5 +135,15 @@ export default {
   max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
+}
+.finance-alert-hint {
+  font-weight: 500;
+  opacity: 0.95;
+}
+.theme--light .finance-alert-hint {
+  color: rgba(0, 0, 0, 0.72) !important;
+}
+.theme--dark .finance-alert-hint {
+  color: rgba(255, 255, 255, 0.85) !important;
 }
 </style>

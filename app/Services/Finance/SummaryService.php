@@ -25,7 +25,10 @@ final class SummaryService
         $mesAnterior = Carbon::parse($month.'-01')->subMonth()->format('Y-m');
         $ateInicioMes = Transaction::cumulativeStatsThroughMonthEnd($userId, $mesAnterior);
         $forecast = $this->dashboard->getMonthlyForecast($userId, $month);
-        $previstoAcumuladoFim = round($ateInicioMes->saldo_caixa + $forecast['saldo_previsto_mes'], 2);
+
+        // Mesma base que "Saldo acumulado": caixa até o último dia do mês (só lançamentos), sem extrapolação.
+        // Não derivar por (início do mês + fluxo do mês): pode divergir de cumulativeStats por detalhe de query/agregação.
+        $saldoCaixaAteFimMes = round($acumulado->saldo_caixa, 2);
 
         return [
             'forecast_type' => DashboardService::FORECAST_TYPE_REALIZED_ONLY,
@@ -37,10 +40,10 @@ final class SummaryService
             'expense_credit_card_month' => $period['expense_credit_card'],
             'available_this_month' => $period['available'],
             'available_with_card_month' => $period['available_with_card'],
-            'saldo_acumulado_ate_mes' => round($acumulado->saldo_caixa, 2),
+            'saldo_acumulado_ate_mes' => $saldoCaixaAteFimMes,
             'saldo_acumulado_com_cartao_ate_mes' => round($acumulado->saldo_com_cartao, 2),
             'acumulado_ate_inicio_mes' => round($ateInicioMes->saldo_caixa, 2),
-            'saldo_previsto_acumulado_fim_mes' => $previstoAcumuladoFim,
+            'saldo_previsto_acumulado_fim_mes' => $saldoCaixaAteFimMes,
         ];
     }
 }

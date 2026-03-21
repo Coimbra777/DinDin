@@ -1,6 +1,11 @@
 <template>
   <v-app class="finance-v-app">
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" bottom timeout="3800">
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      bottom
+      timeout="3800"
+    >
       {{ snackbar.text }}
       <template slot="action" slot-scope="{ attrs }">
         <v-btn text v-bind="attrs" @click="snackbar.show = false">OK</v-btn>
@@ -18,7 +23,9 @@
       class="finance-drawer"
     >
       <div class="finance-drawer__brand pa-4">
-        <div class="text-subtitle-1 font-weight-black finance-drawer__title">Finanças</div>
+        <div class="text-subtitle-1 font-weight-black finance-drawer__title">
+          Finanças
+        </div>
         <div class="text-caption finance-text-muted">Menu</div>
       </div>
       <v-divider />
@@ -28,16 +35,24 @@
           :key="item.value"
           link
           rounded
-          :data-tour="item.value === 'categories' ? 'nav-categories' : undefined"
+          :data-tour="
+            item.value === 'categories' ? 'nav-categories' : undefined
+          "
           :class="{ 'primary white--text': view === item.value }"
           @click="goView(item.value)"
         >
           <v-list-item-icon class="mr-3">
-            <v-icon :color="view === item.value ? 'white' : 'secondary'">{{ item.icon }}</v-icon>
+            <v-icon :color="view === item.value ? 'white' : 'secondary'">{{
+              item.icon
+            }}</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-title
-              :class="view === item.value ? 'white--text font-weight-medium' : 'secondary--text'"
+              :class="
+                view === item.value
+                  ? 'white--text font-weight-medium'
+                  : 'secondary--text'
+              "
             >
               {{ item.title }}
             </v-list-item-title>
@@ -50,14 +65,23 @@
               <v-icon color="secondary">mdi-shield-account-outline</v-icon>
             </v-list-item-icon>
             <v-list-item-content>
-              <v-list-item-title class="secondary--text font-weight-medium">Administração</v-list-item-title>
+              <v-list-item-title class="secondary--text font-weight-medium"
+                >Administração</v-list-item-title
+              >
             </v-list-item-content>
           </v-list-item>
         </template>
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app :dark="$vuetify.theme.dark" flat color="surface" elevation="0" class="finance-app-bar">
+    <v-app-bar
+      app
+      :dark="$vuetify.theme.dark"
+      flat
+      color="surface"
+      elevation="0"
+      class="finance-app-bar"
+    >
       <v-app-bar-nav-icon
         v-if="$vuetify.breakpoint.smAndDown"
         class="mr-1"
@@ -68,7 +92,11 @@
         Minhas finanças
       </v-toolbar-title>
       <v-spacer />
-      <span v-if="userName" class="text-caption finance-text-muted mr-2 d-none d-sm-inline text-truncate" style="max-width: 140px">
+      <span
+        v-if="userName"
+        class="text-caption finance-text-muted mr-2 d-none d-sm-inline text-truncate"
+        style="max-width: 140px"
+      >
         {{ userName }}
       </span>
       <v-btn
@@ -97,19 +125,31 @@
               rounded
               class="finance-month-bar pa-3 pa-sm-4 d-flex flex-column flex-md-row align-md-center flex-wrap"
             >
-              <div class="finance-month-bar__meta mr-md-6 mb-3 mb-md-0 flex-shrink-0">
+              <div
+                class="finance-month-bar__meta mr-md-6 mb-3 mb-md-0 flex-shrink-0"
+              >
                 <div class="d-flex align-center mb-1">
-                  <v-icon color="primary" class="mr-2" size="22">mdi-calendar-month</v-icon>
-                  <span class="text-overline secondary--text text-uppercase letter-wider font-weight-bold">
+                  <v-icon color="primary" class="mr-2" size="22"
+                    >mdi-calendar-month</v-icon
+                  >
+                  <span
+                    class="text-overline secondary--text text-uppercase letter-wider font-weight-bold"
+                  >
                     Período
                   </span>
                 </div>
-                <div class="finance-month-bar__hint text-caption finance-text-muted">
-                  Escolha o mês dos dados (dashboard, movimentações e relatórios).
+                <div
+                  class="finance-month-bar__hint text-caption finance-text-muted"
+                >
+                  Escolha o mês dos dados (dashboard, movimentações e
+                  relatórios).
                 </div>
               </div>
 
-              <div class="finance-month-bar__controls d-flex align-center flex-grow-1" style="gap: 10px">
+              <div
+                class="finance-month-bar__controls d-flex align-center flex-grow-1"
+                style="gap: 10px"
+              >
                 <v-tooltip bottom>
                   <template #activator="{ on, attrs }">
                     <v-btn
@@ -147,7 +187,9 @@
                   <template #item="{ item, on, attrs }">
                     <v-list-item v-bind="attrs" v-on="on">
                       <v-list-item-content>
-                        <v-list-item-title class="text-body-2 font-weight-medium">
+                        <v-list-item-title
+                          class="text-body-2 font-weight-medium"
+                        >
                           {{ item.text }}
                         </v-list-item-title>
                         <v-list-item-subtitle class="text-caption">
@@ -161,10 +203,15 @@
                       v-if="item && item.text"
                       class="d-flex flex-column align-start py-1 finance-month-select__selection"
                     >
-                      <span class="text-body-2 font-weight-medium text-truncate" style="max-width: 100%">
+                      <span
+                        class="text-body-2 font-weight-medium text-truncate"
+                        style="max-width: 100%"
+                      >
                         {{ item.text }}
                       </span>
-                      <span class="text-caption finance-text-muted">{{ item.short }}</span>
+                      <span class="text-caption finance-text-muted">{{
+                        item.short
+                      }}</span>
                     </span>
                     <span v-else class="text-body-2">{{ monthLabelPt }}</span>
                   </template>
@@ -197,7 +244,12 @@
         <v-fade-transition mode="out-in">
           <div v-if="!canShowView(view)" key="denied" class="text-center py-12">
             <p class="finance-text-muted">Sem permissão para esta área.</p>
-            <v-btn text color="primary" class="mt-2" @click="recoverToFirstAllowedView">
+            <v-btn
+              text
+              color="primary"
+              class="mt-2"
+              @click="recoverToFirstAllowedView"
+            >
               Ir para {{ firstAllowedNavTitle() }}
             </v-btn>
           </div>
@@ -229,47 +281,114 @@
                 />
               </v-col>
             </v-row>
-            <v-row v-if="txSummary" dense class="mb-4">
-              <v-col cols="12" sm="4">
-                <v-card class="rounded-xl" flat outlined>
-                  <v-card-text class="py-3 px-4">
-                    <div class="text-overline secondary--text text-uppercase letter-wider">Saldo acumulado</div>
+            <v-row
+              v-if="txSummary"
+              dense
+              class="mb-4 tx-summary-cards-row"
+              align="stretch"
+            >
+              <v-col cols="12" sm="4" class="d-flex">
+                <v-card
+                  class="rounded-xl tx-summary-card flex-grow-1 d-flex flex-column"
+                  flat
+                  outlined
+                >
+                  <v-card-text class="py-3 px-4 flex-grow-1 d-flex flex-column">
+                    <div
+                      class="text-overline secondary--text text-uppercase letter-wider"
+                    >
+                      Saldo acumulado
+                    </div>
                     <div
                       class="text-h6 font-weight-bold tabular-nums"
                       :class="txSaldoAcumuladoClass"
                     >
                       {{ formatBRL(txSummary.saldo_acumulado_ate_mes) }}
                     </div>
-                    <div class="text-caption secondary--text">Até {{ monthLabelPt }}</div>
+                    <div class="text-caption secondary--text mt-auto">
+                      Até {{ monthLabelPt }}
+                    </div>
                   </v-card-text>
                 </v-card>
               </v-col>
-              <v-col cols="12" sm="4">
-                <v-card class="rounded-xl" flat outlined>
-                  <v-card-text class="py-3 px-4">
-                    <div class="text-overline secondary--text text-uppercase letter-wider">Resultado do mês</div>
+              <v-col cols="12" sm="4" class="d-flex">
+                <v-card
+                  class="rounded-xl tx-summary-card flex-grow-1 d-flex flex-column"
+                  flat
+                  outlined
+                >
+                  <v-card-text class="py-3 px-4 flex-grow-1 d-flex flex-column">
+                    <div
+                      class="text-overline secondary--text text-uppercase letter-wider"
+                    >
+                      Resultado do mês
+                    </div>
                     <div
                       class="text-h6 font-weight-bold tabular-nums"
                       :class="txResultadoMesClass"
                     >
                       {{ formatBRL(txSummary.available_this_month) }}
                     </div>
-                    <div class="text-caption secondary--text">Receitas − despesas à vista</div>
+                    <div class="text-caption secondary--text mt-auto">
+                      Receitas − despesas
+                    </div>
                   </v-card-text>
                 </v-card>
               </v-col>
-              <v-col cols="12" sm="4">
-                <v-card class="rounded-xl" flat outlined>
-                  <v-card-text class="py-3 px-4">
-                    <div class="text-overline secondary--text text-uppercase letter-wider">Projeção ao fim do mês</div>
+              <v-col cols="12" sm="4" class="d-flex">
+                <v-card
+                  class="rounded-xl tx-summary-card tx-summary-composicao flex-grow-1 d-flex flex-column"
+                  flat
+                  outlined
+                >
+                  <v-card-text class="py-3 px-4 flex-grow-1 d-flex flex-column">
                     <div
-                      class="text-h6 font-weight-bold tabular-nums"
-                      :class="txProjecaoClass"
+                      class="text-overline secondary--text text-uppercase letter-wider"
                     >
-                      {{ formatBRL(txSummary.saldo_previsto_acumulado_fim_mes) }}
+                      Saldo em caixa (como fecha)
                     </div>
-                    <div class="text-caption secondary--text">
-                      Acumulado com base no já registrado (caixa), sem projeção extra
+                    <div class="text-caption secondary--text mb-2">
+                      Acumulado dos meses anteriores + resultado deste mês
+                    </div>
+                    <div
+                      class="d-flex justify-space-between align-baseline text-body-2 mb-1"
+                    >
+                      <span class="secondary--text pr-2"
+                        >Até fim de {{ monthLabelPreviousPt }}</span
+                      >
+                      <span
+                        class="tabular-nums font-weight-medium text-right"
+                        >{{
+                          formatBRL(txSummary.acumulado_ate_inicio_mes)
+                        }}</span
+                      >
+                    </div>
+                    <div
+                      class="d-flex justify-space-between align-baseline text-body-2"
+                    >
+                      <span class="secondary--text pr-2"
+                        >+ Este mês (à vista)</span
+                      >
+                      <span
+                        class="tabular-nums font-weight-medium text-right"
+                        :class="txResultadoMesClass"
+                        >{{ formatBRL(txSummary.available_this_month) }}</span
+                      >
+                    </div>
+                    <div class="mt-auto pt-2">
+                      <v-divider class="mb-2" />
+                      <div class="d-flex justify-space-between align-center">
+                        <span class="text-caption secondary--text"
+                          >= Até {{ monthLabelPt }}</span
+                        >
+                        <span
+                          class="text-h6 font-weight-bold tabular-nums"
+                          :class="txSaldoAcumuladoClass"
+                          >{{
+                            formatBRL(txSummary.saldo_acumulado_ate_mes)
+                          }}</span
+                        >
+                      </div>
                     </div>
                   </v-card-text>
                 </v-card>
@@ -284,10 +403,15 @@
               @duplicate="openDuplicateDialog"
             />
             <div
-              v-if="transactionsMeta && transactions.length && transactionsMeta.total > 0"
+              v-if="
+                transactionsMeta &&
+                transactions.length &&
+                transactionsMeta.total > 0
+              "
               class="text-center text-caption secondary--text mt-2 mb-1"
             >
-              A mostrar {{ transactionsMeta.from }}–{{ transactionsMeta.to }} de {{ transactionsMeta.total }}
+              A mostrar {{ transactionsMeta.from }}–{{ transactionsMeta.to }} de
+              {{ transactionsMeta.total }}
               movimentações
             </div>
             <div v-if="canLoadMoreTransactions" class="text-center mb-4">
@@ -311,7 +435,12 @@
                 <v-icon left color="primary">mdi-shape-outline</v-icon>
                 Suas categorias
                 <v-spacer />
-                <v-btn color="primary" depressed rounded @click="openCategoryCreate">
+                <v-btn
+                  color="primary"
+                  depressed
+                  rounded
+                  @click="openCategoryCreate"
+                >
                   <v-icon left small>mdi-plus</v-icon>
                   Nova
                 </v-btn>
@@ -320,31 +449,67 @@
               <v-card-text v-if="loading.categories" class="text-center py-8">
                 <v-progress-circular indeterminate color="primary" />
               </v-card-text>
-              <v-card-text v-else-if="categories.length === 0" class="text-center finance-text-muted py-10">
-                Nenhuma categoria. Crie a primeira para organizar suas transações.
+              <v-card-text
+                v-else-if="categories.length === 0"
+                class="text-center finance-text-muted py-10"
+              >
+                Nenhuma categoria. Crie a primeira para organizar suas
+                transações.
               </v-card-text>
               <v-list v-else two-line class="py-0">
                 <template v-for="(c, i) in categories">
-                  <v-list-item :key="c.id" :class="{ 'finance-cat-row--alt': i % 2 === 0 }">
+                  <v-list-item
+                    :key="c.id"
+                    :class="{ 'finance-cat-row--alt': i % 2 === 0 }"
+                  >
                     <v-list-item-avatar>
                       <v-avatar :color="chipBg(c)" size="40">
                         <v-icon dark small>mdi-tag</v-icon>
                       </v-avatar>
                     </v-list-item-avatar>
                     <v-list-item-content>
-                      <v-list-item-title class="font-weight-medium">{{ c.name }}</v-list-item-title>
+                      <v-list-item-title class="font-weight-medium">{{
+                        c.name
+                      }}</v-list-item-title>
                       <v-list-item-subtitle class="text-caption">
-                        <span :class="c.type === 'income' ? 'success--text' : 'error--text'">{{ categoryTypeLabel(c) }}</span>
-                        <span v-if="c.type === 'expense' && c.group" class="text--secondary"> · {{ c.group }}</span>
-                        <span v-if="c.color" class="text--secondary"> · {{ c.color }}</span>
+                        <span
+                          :class="
+                            c.type === 'income'
+                              ? 'success--text'
+                              : 'error--text'
+                          "
+                          >{{ categoryTypeLabel(c) }}</span
+                        >
+                        <span
+                          v-if="c.type === 'expense' && c.group"
+                          class="text--secondary"
+                        >
+                          · {{ c.group }}</span
+                        >
+                        <span v-if="c.color" class="text--secondary">
+                          · {{ c.color }}</span
+                        >
                       </v-list-item-subtitle>
                     </v-list-item-content>
                     <v-list-item-action class="flex-row mx-0">
-                      <v-btn icon small @click="openCategoryEdit(c)"><v-icon small color="secondary">mdi-pencil</v-icon></v-btn>
-                      <v-btn icon small color="error" @click="askDeleteCategory(c)"><v-icon small>mdi-delete-outline</v-icon></v-btn>
+                      <v-btn icon small @click="openCategoryEdit(c)"
+                        ><v-icon small color="secondary"
+                          >mdi-pencil</v-icon
+                        ></v-btn
+                      >
+                      <v-btn
+                        icon
+                        small
+                        color="error"
+                        @click="askDeleteCategory(c)"
+                        ><v-icon small>mdi-delete-outline</v-icon></v-btn
+                      >
                     </v-list-item-action>
                   </v-list-item>
-                  <v-divider v-if="i < categories.length - 1" :key="'d' + c.id" />
+                  <v-divider
+                    v-if="i < categories.length - 1"
+                    :key="'d' + c.id"
+                  />
                 </template>
               </v-list>
             </v-card>
@@ -502,17 +667,23 @@
       content-class="duplicate-transaction-dialog"
     >
       <v-card class="rounded-lg duplicate-transaction-card">
-        <v-card-title class="headline pb-2 px-4 pt-4">Duplicar transação</v-card-title>
+        <v-card-title class="headline pb-2 px-4 pt-4"
+          >Duplicar transação</v-card-title
+        >
         <v-card-text class="pa-4 pt-2 d-flex flex-column">
           <p class="body-2 finance-text-muted mb-0">
-            Cópias nos meses seguintes à data deste lançamento, com o mesmo valor, categoria e tipo. A transação original
-            não é alterada.
+            Cópias nos meses seguintes à data deste lançamento, com o mesmo
+            valor, categoria e tipo. A transação original não é alterada.
           </p>
 
           <v-row dense class="mt-4">
             <v-col cols="12" class="d-flex flex-column">
-              <span class="text-subtitle-2 font-weight-medium mb-1">Quantos meses à frente?</span>
-              <span class="text-caption finance-text-muted mb-2">Arraste o controle ou digite de 1 a 60.</span>
+              <span class="text-subtitle-2 font-weight-medium mb-1"
+                >Quantos meses à frente?</span
+              >
+              <span class="text-caption finance-text-muted mb-2"
+                >Arraste o controle ou digite de 1 a 60.</span
+              >
               <v-slider
                 v-model="duplicateSliderModel"
                 class="duplicate-transaction-slider mt-1"
@@ -549,7 +720,9 @@
                 max="60"
                 hide-details="auto"
                 :value="duplicateMonthsFieldDisplay"
-                :error-messages="duplicateMonthsError ? [duplicateMonthsError] : []"
+                :error-messages="
+                  duplicateMonthsError ? [duplicateMonthsError] : []
+                "
                 :disabled="duplicateDialog.loading"
                 @input="onDuplicateMonthsInput"
               />
@@ -559,7 +732,9 @@
                 class="mt-1 flex-shrink-0"
                 type="button"
                 aria-label="Aumentar meses"
-                :disabled="duplicateDialog.loading || duplicateSliderModel >= 60"
+                :disabled="
+                  duplicateDialog.loading || duplicateSliderModel >= 60
+                "
                 @click="bumpDuplicateMonths(1)"
               >
                 <v-icon small>mdi-plus</v-icon>
@@ -577,7 +752,7 @@
                   :disabled="duplicateDialog.loading"
                   @click="setDuplicateMonths(preset)"
                 >
-                  {{ preset }} {{ preset === 1 ? 'mês' : 'meses' }}
+                  {{ preset }} {{ preset === 1 ? "mês" : "meses" }}
                 </v-chip>
               </div>
             </v-col>
@@ -593,17 +768,33 @@
             >
               <div class="body-2 font-weight-medium primary--text">
                 Isso criará {{ duplicateTransactionPreviewCount }}
-                {{ duplicateTransactionPreviewCount === 1 ? 'transação futura' : 'transações futuras' }}.
+                {{
+                  duplicateTransactionPreviewCount === 1
+                    ? "transação futura"
+                    : "transações futuras"
+                }}.
               </div>
-              <div v-if="duplicatePreviewMonthsLine" class="text-caption finance-text-muted mt-2 mb-0">
+              <div
+                v-if="duplicatePreviewMonthsLine"
+                class="text-caption finance-text-muted mt-2 mb-0"
+              >
                 Meses: {{ duplicatePreviewMonthsLine }}
               </div>
             </v-sheet>
           </transition>
         </v-card-text>
         <v-divider />
-        <v-card-actions class="pa-4 d-flex flex-wrap justify-end" style="gap: 8px">
-          <v-btn text color="secondary" class="text-none" :disabled="duplicateDialog.loading" @click="closeDuplicateDialog">
+        <v-card-actions
+          class="pa-4 d-flex flex-wrap justify-end"
+          style="gap: 8px"
+        >
+          <v-btn
+            text
+            color="secondary"
+            class="text-none"
+            :disabled="duplicateDialog.loading"
+            @click="closeDuplicateDialog"
+          >
             Cancelar
           </v-btn>
           <v-btn
@@ -625,11 +816,21 @@
     <v-dialog v-model="deleteDialog.open" max-width="400" persistent>
       <v-card class="rounded-lg">
         <v-card-title class="headline">Excluir transação?</v-card-title>
-        <v-card-text class="finance-text-muted">Esta ação não pode ser desfeita.</v-card-text>
+        <v-card-text class="finance-text-muted"
+          >Esta ação não pode ser desfeita.</v-card-text
+        >
         <v-card-actions>
-          <v-btn text color="secondary" @click="deleteDialog.open = false">Cancelar</v-btn>
+          <v-btn text color="secondary" @click="deleteDialog.open = false"
+            >Cancelar</v-btn
+          >
           <v-spacer />
-          <v-btn color="error" depressed :loading="deleteDialog.loading" @click="confirmDelete">Excluir</v-btn>
+          <v-btn
+            color="error"
+            depressed
+            :loading="deleteDialog.loading"
+            @click="confirmDelete"
+            >Excluir</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -639,11 +840,21 @@
     <v-dialog v-model="deleteCatDialog.open" max-width="400" persistent>
       <v-card class="rounded-lg">
         <v-card-title class="headline">Excluir categoria?</v-card-title>
-        <v-card-text class="finance-text-muted">Transações associadas ficam sem categoria.</v-card-text>
+        <v-card-text class="finance-text-muted"
+          >Transações associadas ficam sem categoria.</v-card-text
+        >
         <v-card-actions>
-          <v-btn text color="secondary" @click="deleteCatDialog.open = false">Cancelar</v-btn>
+          <v-btn text color="secondary" @click="deleteCatDialog.open = false"
+            >Cancelar</v-btn
+          >
           <v-spacer />
-          <v-btn color="error" depressed :loading="deleteCatDialog.loading" @click="confirmDeleteCategory">Excluir</v-btn>
+          <v-btn
+            color="error"
+            depressed
+            :loading="deleteCatDialog.loading"
+            @click="confirmDeleteCategory"
+            >Excluir</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -659,41 +870,46 @@
 </template>
 
 <script>
-import axios from 'axios'
-import Dashboard from '../../components/Dashboard.vue'
-import TransactionList from '../../components/TransactionList.vue'
-import TransactionForm from '../../components/TransactionForm.vue'
-import CategoryFormDialog from '../../components/CategoryFormDialog.vue'
-import CreditCardsPage from '../cards/CreditCardsPage.vue'
-import ReportsPage from '../reports/ReportsPage.vue'
-import ProjectionPage from '../projection/ProjectionPage.vue'
-import AlertsPage from '../alerts/AlertsPage.vue'
-import InsightsPage from '../insights/InsightsPage.vue'
-import CreditSimulatorPage from '../simulator/CreditSimulatorPage.vue'
-import PlanningPage from '../planning/PlanningPage.vue'
-import GoalsPage from '../goals/GoalsPage.vue'
-import FinanceThemeToggle from '../../components/FinanceThemeToggle.vue'
-import FinanceHelpModal from '../../components/FinanceHelpModal.vue'
-import OnboardingTour from '../../components/OnboardingTour.vue'
-import { addMonthsToYearMonth, monthChoices, normalizeMonth, toIsoDateOnly } from '../../format'
-import { applyBodyThemeClass, getStoredTheme } from '../../financeTheme'
+import axios from "axios";
+import Dashboard from "../../components/Dashboard.vue";
+import TransactionList from "../../components/TransactionList.vue";
+import TransactionForm from "../../components/TransactionForm.vue";
+import CategoryFormDialog from "../../components/CategoryFormDialog.vue";
+import CreditCardsPage from "../cards/CreditCardsPage.vue";
+import ReportsPage from "../reports/ReportsPage.vue";
+import ProjectionPage from "../projection/ProjectionPage.vue";
+import AlertsPage from "../alerts/AlertsPage.vue";
+import InsightsPage from "../insights/InsightsPage.vue";
+import CreditSimulatorPage from "../simulator/CreditSimulatorPage.vue";
+import PlanningPage from "../planning/PlanningPage.vue";
+import GoalsPage from "../goals/GoalsPage.vue";
+import FinanceThemeToggle from "../../components/FinanceThemeToggle.vue";
+import FinanceHelpModal from "../../components/FinanceHelpModal.vue";
+import OnboardingTour from "../../components/OnboardingTour.vue";
+import {
+  addMonthsToYearMonth,
+  monthChoices,
+  normalizeMonth,
+  toIsoDateOnly,
+} from "../../format";
+import { applyBodyThemeClass, getStoredTheme } from "../../financeTheme";
 
 const VALID_VIEWS = [
-  'dashboard',
-  'transactions',
-  'categories',
-  'goals',
-  'cards',
-  'projection',
-  'reports',
-  'alerts',
-  'insights',
-  'simulator',
-  'planning',
-]
+  "dashboard",
+  "transactions",
+  "categories",
+  "goals",
+  "cards",
+  "projection",
+  "reports",
+  "alerts",
+  "insights",
+  "simulator",
+  "planning",
+];
 
 export default {
-  name: 'FinanceApp',
+  name: "FinanceApp",
   components: {
     Dashboard,
     TransactionList,
@@ -712,10 +928,10 @@ export default {
     OnboardingTour,
   },
   props: {
-    initialView: { type: String, default: 'dashboard' },
-    initialMonth: { type: String, default: '' },
+    initialView: { type: String, default: "dashboard" },
+    initialMonth: { type: String, default: "" },
     apiBase: { type: String, required: true },
-    userName: { type: String, default: '' },
+    userName: { type: String, default: "" },
     onboardingInitialCompleted: { type: Boolean, default: false },
     onboardingCompleteUrl: { type: String, required: true },
     isAdmin: { type: Boolean, default: false },
@@ -723,7 +939,9 @@ export default {
     userModuleSlugs: { type: Array, default: () => [] },
   },
   data() {
-    const v = VALID_VIEWS.includes(this.initialView) ? this.initialView : 'dashboard'
+    const v = VALID_VIEWS.includes(this.initialView)
+      ? this.initialView
+      : "dashboard";
     return {
       onboardingCompletedLocal: this.onboardingInitialCompleted,
       onboardingTourOpen: !this.onboardingInitialCompleted,
@@ -745,17 +963,76 @@ export default {
        * !core: só com slug extra no pivot (checkbox no admin).
        */
       navItemsAll: [
-        { title: 'Dashboard', value: 'dashboard', icon: 'mdi-view-dashboard-outline', core: true },
-        { title: 'Movimentações', value: 'transactions', icon: 'mdi-bank-transfer', core: true },
-        { title: 'Categorias', value: 'categories', icon: 'mdi-shape-outline', core: true },
-        { title: 'Metas', value: 'goals', icon: 'mdi-flag-checkered', core: true },
-        { title: 'Cartões', value: 'cards', icon: 'mdi-credit-card-outline', core: false, slug: 'cards' },
-        { title: 'Projeção', value: 'projection', icon: 'mdi-chart-timeline-variant', core: false, slug: 'projections' },
-        { title: 'Relatórios', value: 'reports', icon: 'mdi-file-chart-outline', core: false, slug: 'reports' },
-        { title: 'Alertas', value: 'alerts', icon: 'mdi-bell-alert-outline', core: true },
-        { title: 'Insights', value: 'insights', icon: 'mdi-lightbulb-outline', core: true },
-        { title: 'Simulador', value: 'simulator', icon: 'mdi-calculator-variant', core: true },
-        { title: 'Planejamento', value: 'planning', icon: 'mdi-calendar-check', core: false, slug: 'planning' },
+        {
+          title: "Dashboard",
+          value: "dashboard",
+          icon: "mdi-view-dashboard-outline",
+          core: true,
+        },
+        {
+          title: "Movimentações",
+          value: "transactions",
+          icon: "mdi-bank-transfer",
+          core: true,
+        },
+        {
+          title: "Categorias",
+          value: "categories",
+          icon: "mdi-shape-outline",
+          core: true,
+        },
+        {
+          title: "Metas",
+          value: "goals",
+          icon: "mdi-flag-checkered",
+          core: true,
+        },
+        {
+          title: "Cartões",
+          value: "cards",
+          icon: "mdi-credit-card-outline",
+          core: false,
+          slug: "cards",
+        },
+        {
+          title: "Projeção",
+          value: "projection",
+          icon: "mdi-chart-timeline-variant",
+          core: false,
+          slug: "projections",
+        },
+        {
+          title: "Relatórios",
+          value: "reports",
+          icon: "mdi-file-chart-outline",
+          core: false,
+          slug: "reports",
+        },
+        {
+          title: "Alertas",
+          value: "alerts",
+          icon: "mdi-bell-alert-outline",
+          core: true,
+        },
+        {
+          title: "Insights",
+          value: "insights",
+          icon: "mdi-lightbulb-outline",
+          core: true,
+        },
+        {
+          title: "Simulador",
+          value: "simulator",
+          icon: "mdi-calculator-variant",
+          core: true,
+        },
+        {
+          title: "Planejamento",
+          value: "planning",
+          icon: "mdi-calendar-check",
+          core: false,
+          slug: "planning",
+        },
       ],
       transactions: [],
       transactionsPage: 1,
@@ -769,7 +1046,7 @@ export default {
         transactions: false,
         categories: false,
       },
-      snackbar: { show: false, text: '', color: 'primary' },
+      snackbar: { show: false, text: "", color: "primary" },
       formOpen: false,
       editTransaction: null,
       duplicateDialog: { open: false, loading: false, item: null, months: 1 },
@@ -780,512 +1057,551 @@ export default {
       editCategory: null,
       deleteCatDialog: { open: false, loading: false, item: null },
       helpDialog: false,
-    }
+    };
   },
   computed: {
     navItems() {
       if (this.isAdmin) {
-        return this.navItemsAll
+        return this.navItemsAll;
       }
       return this.navItemsAll.filter(
-        (item) => item.core || (item.slug && this.userModuleSlugs.includes(item.slug))
-      )
+        (item) =>
+          item.core || (item.slug && this.userModuleSlugs.includes(item.slug)),
+      );
     },
     categoryFilterItems() {
-      return this.categories.map((c) => ({ text: c.name, value: c.id }))
+      return this.categories.map((c) => ({ text: c.name, value: c.id }));
     },
     monthLabelPt() {
-      if (!this.month || !/^\d{4}-\d{2}$/.test(this.month)) return '—'
-      const [y, m] = this.month.split('-')
-      return `${m}/${y}`
+      if (!this.month || !/^\d{4}-\d{2}$/.test(this.month)) return "—";
+      const [y, m] = this.month.split("-");
+      return `${m}/${y}`;
+    },
+    /** Mês anterior ao selecionado (rótulo mm/aaaa), alinhado a `acumulado_ate_inicio_mes`. */
+    monthLabelPreviousPt() {
+      if (!this.month || !/^\d{4}-\d{2}$/.test(this.month)) return "—";
+      const prev = addMonthsToYearMonth(this.month, -1);
+      if (!prev) return "—";
+      const [y, m] = prev.split("-");
+      return `${m}/${y}`;
     },
     txSaldoAcumuladoClass() {
-      const n = Number(this.txSummary && this.txSummary.saldo_acumulado_ate_mes)
-      if (n > 0) return 'success--text'
-      if (n < 0) return 'error--text'
-      return ''
+      const n = Number(
+        this.txSummary && this.txSummary.saldo_acumulado_ate_mes,
+      );
+      if (n > 0) return "success--text";
+      if (n < 0) return "error--text";
+      return "";
     },
     txResultadoMesClass() {
-      const n = Number(this.txSummary && this.txSummary.available_this_month)
-      if (n > 0) return 'success--text'
-      if (n < 0) return 'error--text'
-      return ''
-    },
-    txProjecaoClass() {
-      const n = Number(this.txSummary && this.txSummary.saldo_previsto_acumulado_fim_mes)
-      if (n > 0) return 'success--text'
-      if (n < 0) return 'error--text'
-      return ''
+      const n = Number(this.txSummary && this.txSummary.available_this_month);
+      if (n > 0) return "success--text";
+      if (n < 0) return "error--text";
+      return "";
     },
     showMonthSelector() {
-      return ['dashboard', 'transactions', 'reports', 'alerts', 'insights'].includes(this.view)
+      return [
+        "dashboard",
+        "transactions",
+        "reports",
+        "alerts",
+        "insights",
+      ].includes(this.view);
     },
     showTransactionFab() {
-      return ['dashboard', 'transactions'].includes(this.view)
+      return ["dashboard", "transactions"].includes(this.view);
     },
     canLoadMoreTransactions() {
-      const m = this.transactionsMeta
-      if (!m || !m.last_page) return false
-      return m.current_page < m.last_page
+      const m = this.transactionsMeta;
+      if (!m || !m.last_page) return false;
+      return m.current_page < m.last_page;
     },
     canShiftMonthOlder() {
-      const prev = addMonthsToYearMonth(this.month, -1)
-      return prev !== '' && this.monthItems.some((x) => x.value === prev)
+      const prev = addMonthsToYearMonth(this.month, -1);
+      return prev !== "" && this.monthItems.some((x) => x.value === prev);
     },
     canShiftMonthNewer() {
-      const next = addMonthsToYearMonth(this.month, 1)
-      return next !== '' && this.monthItems.some((x) => x.value === next)
+      const next = addMonthsToYearMonth(this.month, 1);
+      return next !== "" && this.monthItems.some((x) => x.value === next);
     },
     duplicateSliderModel: {
       get() {
-        const m = parseInt(String(this.duplicateDialog.months), 10)
-        if (!Number.isFinite(m)) return 1
-        return Math.min(60, Math.max(1, m))
+        const m = parseInt(String(this.duplicateDialog.months), 10);
+        if (!Number.isFinite(m)) return 1;
+        return Math.min(60, Math.max(1, m));
       },
       set(v) {
-        const n = typeof v === 'number' ? v : parseInt(String(v), 10)
+        const n = typeof v === "number" ? v : parseInt(String(v), 10);
         if (Number.isFinite(n)) {
-          this.duplicateDialog.months = Math.min(60, Math.max(1, n))
+          this.duplicateDialog.months = Math.min(60, Math.max(1, n));
         }
       },
     },
     duplicateMonthsFieldDisplay() {
-      const m = this.duplicateDialog.months
-      if (m === '' || m === null || m === undefined) return ''
-      return String(m)
+      const m = this.duplicateDialog.months;
+      if (m === "" || m === null || m === undefined) return "";
+      return String(m);
     },
     duplicateMonthsError() {
-      if (!this.duplicateDialog.open) return ''
-      const raw = this.duplicateDialog.months
-      if (raw === '' || raw === null || raw === undefined) {
-        return 'Informe um valor entre 1 e 60.'
+      if (!this.duplicateDialog.open) return "";
+      const raw = this.duplicateDialog.months;
+      if (raw === "" || raw === null || raw === undefined) {
+        return "Informe um valor entre 1 e 60.";
       }
-      const m = parseInt(String(raw), 10)
+      const m = parseInt(String(raw), 10);
       if (!Number.isFinite(m)) {
-        return 'Use um número inteiro.'
+        return "Use um número inteiro.";
       }
       if (m < 1) {
-        return 'O mínimo é 1 mês.'
+        return "O mínimo é 1 mês.";
       }
       if (m > 60) {
-        return 'No máximo 60 meses por vez.'
+        return "No máximo 60 meses por vez.";
       }
-      return ''
+      return "";
     },
     duplicateTransactionPreviewCount() {
       if (this.duplicateMonthsError) {
-        return null
+        return null;
       }
-      return parseInt(String(this.duplicateDialog.months), 10)
+      return parseInt(String(this.duplicateDialog.months), 10);
     },
     duplicatePreviewMonthLabels() {
-      const n = this.duplicateTransactionPreviewCount
-      const item = this.duplicateDialog.item
+      const n = this.duplicateTransactionPreviewCount;
+      const item = this.duplicateDialog.item;
       if (!n || !item) {
-        return []
+        return [];
       }
-      const iso = toIsoDateOnly(item.transaction_date)
+      const iso = toIsoDateOnly(item.transaction_date);
       if (!iso) {
-        return []
+        return [];
       }
-      const [ys, ms, ds] = iso.split('-').map((x) => parseInt(x, 10))
-      const out = []
+      const [ys, ms, ds] = iso.split("-").map((x) => parseInt(x, 10));
+      const out = [];
       for (let i = 1; i <= n; i += 1) {
-        const dt = new Date(ys, ms - 1, ds)
-        dt.setMonth(dt.getMonth() + i)
-        const label = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' }).format(dt)
-        out.push(label.replace(/\./g, '').replace(/\s{2,}/g, ' ').trim())
+        const dt = new Date(ys, ms - 1, ds);
+        dt.setMonth(dt.getMonth() + i);
+        const label = new Intl.DateTimeFormat("pt-BR", {
+          month: "short",
+          year: "numeric",
+        }).format(dt);
+        out.push(
+          label
+            .replace(/\./g, "")
+            .replace(/\s{2,}/g, " ")
+            .trim(),
+        );
       }
-      return out
+      return out;
     },
     duplicatePreviewMonthsLine() {
-      const labels = this.duplicatePreviewMonthLabels
+      const labels = this.duplicatePreviewMonthLabels;
       if (!labels.length) {
-        return ''
+        return "";
       }
-      const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
-      const maxInline = 6
+      const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+      const maxInline = 6;
       if (labels.length <= maxInline) {
-        return labels.map(cap).join(' · ')
+        return labels.map(cap).join(" · ");
       }
-      const head = labels.slice(0, 3).map(cap).join(' · ')
-      const rest = labels.length - 3
-      return `${head} · … (+${rest} ${rest === 1 ? 'mês' : 'meses'})`
+      const head = labels.slice(0, 3).map(cap).join(" · ");
+      const rest = labels.length - 3;
+      return `${head} · … (+${rest} ${rest === 1 ? "mês" : "meses"})`;
     },
     canConfirmDuplicate() {
-      return !this.duplicateDialog.loading && this.duplicateMonthsError === '' && this.duplicateTransactionPreviewCount !== null
+      return (
+        !this.duplicateDialog.loading &&
+        this.duplicateMonthsError === "" &&
+        this.duplicateTransactionPreviewCount !== null
+      );
     },
   },
   watch: {
     categoryDialog(val) {
-      if (!val) this.categoryDialogInitialType = null
+      if (!val) this.categoryDialogInitialType = null;
     },
     view(v) {
-      if (v === 'categories') this.loadCategories()
-      if (v === 'cards') {
-        this.creditCardsRefreshKey += 1
-        this.loadCreditCards()
+      if (v === "categories") this.loadCategories();
+      if (v === "cards") {
+        this.creditCardsRefreshKey += 1;
+        this.loadCreditCards();
       }
-      if (v === 'reports') {
-        this.reportsRefreshKey += 1
+      if (v === "reports") {
+        this.reportsRefreshKey += 1;
       }
-      if (v === 'projection') {
-        this.projectionRefreshKey += 1
+      if (v === "projection") {
+        this.projectionRefreshKey += 1;
       }
-      if (v === 'alerts') {
-        this.alertsRefreshKey += 1
+      if (v === "alerts") {
+        this.alertsRefreshKey += 1;
       }
-      if (v === 'insights') {
-        this.insightsRefreshKey += 1
+      if (v === "insights") {
+        this.insightsRefreshKey += 1;
       }
-      if (v === 'simulator') {
-        this.simulatorRefreshKey += 1
+      if (v === "simulator") {
+        this.simulatorRefreshKey += 1;
       }
-      if (v === 'planning') {
-        this.planningRefreshKey += 1
+      if (v === "planning") {
+        this.planningRefreshKey += 1;
       }
-      if (v === 'goals') {
-        this.goalsRefreshKey += 1
+      if (v === "goals") {
+        this.goalsRefreshKey += 1;
       }
     },
   },
   created() {
-    applyBodyThemeClass(this.$vuetify.theme.dark)
-    if (typeof window !== 'undefined' && window.matchMedia && getStoredTheme() === null) {
-      this._schemeMq = window.matchMedia('(prefers-color-scheme: dark)')
+    applyBodyThemeClass(this.$vuetify.theme.dark);
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      getStoredTheme() === null
+    ) {
+      this._schemeMq = window.matchMedia("(prefers-color-scheme: dark)");
       this._onSchemeChange = () => {
-        if (getStoredTheme() !== null) return
-        this.$vuetify.theme.dark = this._schemeMq.matches
-        applyBodyThemeClass(this.$vuetify.theme.dark)
-      }
-      this._schemeMq.addEventListener('change', this._onSchemeChange)
+        if (getStoredTheme() !== null) return;
+        this.$vuetify.theme.dark = this._schemeMq.matches;
+        applyBodyThemeClass(this.$vuetify.theme.dark);
+      };
+      this._schemeMq.addEventListener("change", this._onSchemeChange);
     }
   },
   beforeDestroy() {
     if (this._schemeMq && this._onSchemeChange) {
-      this._schemeMq.removeEventListener('change', this._onSchemeChange)
+      this._schemeMq.removeEventListener("change", this._onSchemeChange);
     }
   },
   mounted() {
     if (!this.canShowView(this.view)) {
-      this.view = this.firstAllowedView()
+      this.view = this.firstAllowedView();
     }
-    this.refreshAll()
+    this.refreshAll();
   },
   methods: {
     canShowView(value) {
-      const item = this.navItemsAll.find((i) => i.value === value)
-      if (!item) return false
-      if (this.isAdmin) return true
-      if (item.core) return true
-      return Boolean(item.slug && this.userModuleSlugs.includes(item.slug))
+      const item = this.navItemsAll.find((i) => i.value === value);
+      if (!item) return false;
+      if (this.isAdmin) return true;
+      if (item.core) return true;
+      return Boolean(item.slug && this.userModuleSlugs.includes(item.slug));
     },
     firstAllowedView() {
-      const items = this.navItems
-      return items.length ? items[0].value : 'dashboard'
+      const items = this.navItems;
+      return items.length ? items[0].value : "dashboard";
     },
     firstAllowedNavTitle() {
-      const items = this.navItems
-      return items.length ? items[0].title : 'Dashboard'
+      const items = this.navItems;
+      return items.length ? items[0].title : "Dashboard";
     },
     recoverToFirstAllowedView() {
-      this.view = this.firstAllowedView()
+      this.view = this.firstAllowedView();
       if (this.$vuetify.breakpoint.smAndDown) {
-        this.navDrawer = false
+        this.navDrawer = false;
       }
     },
     setViewOnly(value) {
-      if (!this.canShowView(value)) return
-      this.view = value
+      if (!this.canShowView(value)) return;
+      this.view = value;
     },
     onOnboardingStep(stepIndex) {
       if (stepIndex === 2) {
-        this.setViewOnly('dashboard')
-        if (this.$vuetify.breakpoint.smAndDown) this.navDrawer = true
-        return
+        this.setViewOnly("dashboard");
+        if (this.$vuetify.breakpoint.smAndDown) this.navDrawer = true;
+        return;
       }
-      this.setViewOnly('dashboard')
-      if (this.$vuetify.breakpoint.smAndDown) this.navDrawer = false
-      if (stepIndex === 3) this.dashboardRefreshKey += 1
+      this.setViewOnly("dashboard");
+      if (this.$vuetify.breakpoint.smAndDown) this.navDrawer = false;
+      if (stepIndex === 3) this.dashboardRefreshKey += 1;
     },
     logout() {
-      const f = document.getElementById('finance-logout-form')
-      if (f) f.submit()
+      const f = document.getElementById("finance-logout-form");
+      if (f) f.submit();
     },
     chipBg(c) {
-      if (c.color && /^#[0-9A-Fa-f]{6}$/.test(c.color)) return c.color
-      return 'secondary'
+      if (c.color && /^#[0-9A-Fa-f]{6}$/.test(c.color)) return c.color;
+      return "secondary";
     },
     categoryTypeLabel(c) {
-      if (c.type === 'income') return 'Receita'
-      return 'Despesa'
+      if (c.type === "income") return "Receita";
+      return "Despesa";
     },
     async refreshAll() {
-      this.dashboardRefreshKey += 1
-      this.creditCardsRefreshKey += 1
-      this.reportsRefreshKey += 1
-      this.projectionRefreshKey += 1
-      this.alertsRefreshKey += 1
-      this.insightsRefreshKey += 1
-      this.simulatorRefreshKey += 1
-      this.planningRefreshKey += 1
-      this.goalsRefreshKey += 1
+      this.dashboardRefreshKey += 1;
+      this.creditCardsRefreshKey += 1;
+      this.reportsRefreshKey += 1;
+      this.projectionRefreshKey += 1;
+      this.alertsRefreshKey += 1;
+      this.insightsRefreshKey += 1;
+      this.simulatorRefreshKey += 1;
+      this.planningRefreshKey += 1;
+      this.goalsRefreshKey += 1;
       await Promise.all([
         this.loadTransactions({ reset: true }),
         this.loadCategories(),
         this.loadCreditCards(),
-      ])
+      ]);
     },
     goView(value) {
       if (!this.canShowView(value)) {
-        this.showError('Sem permissão para este módulo.')
-        return
+        this.showError("Sem permissão para este módulo.");
+        return;
       }
-      this.view = value
+      this.view = value;
       if (this.$vuetify.breakpoint.smAndDown) {
-        this.navDrawer = false
+        this.navDrawer = false;
       }
     },
     /** Troca de mês: lista de transações + Dashboard observa `month` (sem segundo fetch por key). */
     async onMonthChange() {
-      await this.loadTransactions({ reset: true })
+      await this.loadTransactions({ reset: true });
     },
     onGoalsSaved() {
-      this.toast('Metas atualizadas.', 'success')
-      this.goalsRefreshKey += 1
+      this.toast("Metas atualizadas.", "success");
+      this.goalsRefreshKey += 1;
     },
     shiftMonthOlder() {
-      const prev = addMonthsToYearMonth(this.month, -1)
+      const prev = addMonthsToYearMonth(this.month, -1);
       if (prev && this.monthItems.some((x) => x.value === prev)) {
-        this.month = prev
-        this.onMonthChange()
+        this.month = prev;
+        this.onMonthChange();
       }
     },
     shiftMonthNewer() {
-      const next = addMonthsToYearMonth(this.month, 1)
+      const next = addMonthsToYearMonth(this.month, 1);
       if (next && this.monthItems.some((x) => x.value === next)) {
-        this.month = next
-        this.onMonthChange()
+        this.month = next;
+        this.onMonthChange();
       }
     },
     formatBRL(v) {
-      return this.$formatCurrencyBRL(v)
+      return this.$formatCurrencyBRL(v);
     },
     /**
      * Lista paginada (page, per_page) na API; reset=true volta à página 1 e substitui a lista.
      */
     async loadTransactions(options = {}) {
-      const reset = options.reset !== false
+      const reset = options.reset !== false;
       if (reset) {
-        this.transactionsPage = 1
-        this.transactionsMeta = null
+        this.transactionsPage = 1;
+        this.transactionsMeta = null;
       }
-      this.loading.transactions = !reset ? false : true
-      this.loadingMoreTransactions = !reset
+      this.loading.transactions = !reset ? false : true;
+      this.loadingMoreTransactions = !reset;
       try {
         const params = {
           month: this.month,
           page: this.transactionsPage,
           per_page: 20,
-        }
-        if (this.filterCategoryId) params.category_id = this.filterCategoryId
+        };
+        if (this.filterCategoryId) params.category_id = this.filterCategoryId;
         const [txOut, sumOut] = await Promise.allSettled([
           axios.get(`${this.apiBase}/transactions`, { params }),
-          axios.get(`${this.apiBase}/summary`, { params: { month: this.month } }),
-        ])
-        if (txOut.status === 'fulfilled') {
-          const body = txOut.value.data
-          const chunk = body.data || []
-          this.transactionsMeta = body.meta || null
+          axios.get(`${this.apiBase}/summary`, {
+            params: { month: this.month },
+          }),
+        ]);
+        if (txOut.status === "fulfilled") {
+          const body = txOut.value.data;
+          const chunk = body.data || [];
+          this.transactionsMeta = body.meta || null;
           if (reset) {
-            this.transactions = chunk
+            this.transactions = chunk;
           } else {
-            this.transactions = [...this.transactions, ...chunk]
+            this.transactions = [...this.transactions, ...chunk];
           }
         } else {
           if (reset) {
-            this.transactions = []
-            this.transactionsMeta = null
+            this.transactions = [];
+            this.transactionsMeta = null;
           }
         }
-        if (sumOut.status === 'fulfilled') {
-          this.txSummary = sumOut.value.data || null
+        if (sumOut.status === "fulfilled") {
+          this.txSummary = sumOut.value.data || null;
         } else {
-          this.txSummary = null
+          this.txSummary = null;
         }
       } finally {
-        this.loading.transactions = false
-        this.loadingMoreTransactions = false
+        this.loading.transactions = false;
+        this.loadingMoreTransactions = false;
       }
     },
     async loadMoreTransactions() {
-      if (!this.canLoadMoreTransactions) return
-      this.transactionsPage += 1
-      await this.loadTransactions({ reset: false })
+      if (!this.canLoadMoreTransactions) return;
+      this.transactionsPage += 1;
+      await this.loadTransactions({ reset: false });
     },
     async loadCategories() {
-      this.loading.categories = true
+      this.loading.categories = true;
       try {
-        const { data } = await axios.get(`${this.apiBase}/categories`)
-        this.categories = data.data || []
+        const { data } = await axios.get(`${this.apiBase}/categories`);
+        this.categories = data.data || [];
       } catch (e) {
-        this.categories = []
+        this.categories = [];
       } finally {
-        this.loading.categories = false
+        this.loading.categories = false;
       }
     },
     async loadCreditCards() {
       try {
-        const { data } = await axios.get(`${this.apiBase}/credit-cards`)
-        this.creditCards = data.data || []
+        const { data } = await axios.get(`${this.apiBase}/credit-cards`);
+        this.creditCards = data.data || [];
       } catch (e) {
-        this.creditCards = []
+        this.creditCards = [];
       }
     },
     onCreditCardPanelSaved() {
-      this.loadCreditCards()
-      this.dashboardRefreshKey += 1
+      this.loadCreditCards();
+      this.dashboardRefreshKey += 1;
     },
     openCreate() {
-      this.editTransaction = null
-      this.formOpen = true
+      this.editTransaction = null;
+      this.formOpen = true;
     },
     openEdit(item) {
-      this.editTransaction = { ...item }
-      this.formOpen = true
+      this.editTransaction = { ...item };
+      this.formOpen = true;
     },
     openDuplicateDialog(transaction) {
-      this.duplicateDialog.item = transaction
-      this.duplicateDialog.months = 1
-      this.duplicateDialog.open = true
+      this.duplicateDialog.item = transaction;
+      this.duplicateDialog.months = 1;
+      this.duplicateDialog.open = true;
     },
     closeDuplicateDialog() {
-      this.duplicateDialog.open = false
+      this.duplicateDialog.open = false;
     },
     setDuplicateMonths(n) {
-      const v = parseInt(String(n), 10)
+      const v = parseInt(String(n), 10);
       if (Number.isFinite(v)) {
-        this.duplicateDialog.months = Math.min(60, Math.max(1, v))
+        this.duplicateDialog.months = Math.min(60, Math.max(1, v));
       }
     },
     bumpDuplicateMonths(delta) {
-      let m = parseInt(String(this.duplicateDialog.months), 10)
+      let m = parseInt(String(this.duplicateDialog.months), 10);
       if (!Number.isFinite(m)) {
-        m = 1
+        m = 1;
       }
-      this.duplicateDialog.months = Math.min(60, Math.max(1, m + delta))
+      this.duplicateDialog.months = Math.min(60, Math.max(1, m + delta));
     },
     onDuplicateMonthsInput(val) {
-      if (val === '' || val === null || val === undefined) {
-        this.duplicateDialog.months = ''
-        return
+      if (val === "" || val === null || val === undefined) {
+        this.duplicateDialog.months = "";
+        return;
       }
-      const m = parseInt(String(val), 10)
+      const m = parseInt(String(val), 10);
       if (!Number.isFinite(m)) {
-        this.duplicateDialog.months = val
-        return
+        this.duplicateDialog.months = val;
+        return;
       }
-      this.duplicateDialog.months = Math.min(60, Math.max(1, m))
+      this.duplicateDialog.months = Math.min(60, Math.max(1, m));
     },
     async confirmDuplicate() {
-      if (!this.duplicateDialog.item) return
-      let m = parseInt(String(this.duplicateDialog.months), 10)
-      if (!Number.isFinite(m) || m < 1) m = 1
-      if (m > 60) m = 60
-      this.duplicateDialog.loading = true
+      if (!this.duplicateDialog.item) return;
+      let m = parseInt(String(this.duplicateDialog.months), 10);
+      if (!Number.isFinite(m) || m < 1) m = 1;
+      if (m > 60) m = 60;
+      this.duplicateDialog.loading = true;
       try {
         const { data } = await axios.post(
           `${this.apiBase}/transactions/${this.duplicateDialog.item.id}/duplicate`,
-          { months: m }
-        )
-        const n = (data && data.count) || 0
-        this.duplicateDialog.open = false
-        this.toast(n ? `${n} cópia(s) criada(s).` : 'Cópias criadas.', 'success')
-        this.refreshAll()
+          { months: m },
+        );
+        const n = (data && data.count) || 0;
+        this.duplicateDialog.open = false;
+        this.toast(
+          n ? `${n} cópia(s) criada(s).` : "Cópias criadas.",
+          "success",
+        );
+        this.refreshAll();
       } catch (e) {
-        const d = e.response && e.response.data
+        const d = e.response && e.response.data;
         let msg =
           (d && d.message) ||
           (d && d.errors && d.errors.months && d.errors.months[0]) ||
-          'Não foi possível duplicar.'
-        this.showError(msg)
+          "Não foi possível duplicar.";
+        this.showError(msg);
       } finally {
-        this.duplicateDialog.loading = false
-        this.duplicateDialog.item = null
+        this.duplicateDialog.loading = false;
+        this.duplicateDialog.item = null;
       }
     },
     askDelete(item) {
-      this.deleteDialog.item = item
-      this.deleteDialog.open = true
+      this.deleteDialog.item = item;
+      this.deleteDialog.open = true;
     },
     async confirmDelete() {
-      if (!this.deleteDialog.item) return
-      this.deleteDialog.loading = true
+      if (!this.deleteDialog.item) return;
+      this.deleteDialog.loading = true;
       try {
-        await axios.delete(`${this.apiBase}/transactions/${this.deleteDialog.item.id}`)
-        this.deleteDialog.open = false
-        this.toast('Transação removida.', 'success')
-        this.refreshAll()
+        await axios.delete(
+          `${this.apiBase}/transactions/${this.deleteDialog.item.id}`,
+        );
+        this.deleteDialog.open = false;
+        this.toast("Transação removida.", "success");
+        this.refreshAll();
       } catch (e) {
-        this.showError('Não foi possível excluir.')
+        this.showError("Não foi possível excluir.");
       } finally {
-        this.deleteDialog.loading = false
-        this.deleteDialog.item = null
+        this.deleteDialog.loading = false;
+        this.deleteDialog.item = null;
       }
     },
     onCreateCategoryFromTransaction(payload) {
-      this.editCategory = null
-      this.categoryDialogInitialType = (payload && payload.type) || null
-      this.categoryDialog = true
+      this.editCategory = null;
+      this.categoryDialogInitialType = (payload && payload.type) || null;
+      this.categoryDialog = true;
     },
     openCategoryCreate() {
-      this.editCategory = null
-      this.categoryDialogInitialType = null
-      this.categoryDialog = true
+      this.editCategory = null;
+      this.categoryDialogInitialType = null;
+      this.categoryDialog = true;
     },
     openCategoryEdit(c) {
-      this.editCategory = { ...c }
-      this.categoryDialogInitialType = null
-      this.categoryDialog = true
+      this.editCategory = { ...c };
+      this.categoryDialogInitialType = null;
+      this.categoryDialog = true;
     },
     askDeleteCategory(c) {
-      this.deleteCatDialog.item = c
-      this.deleteCatDialog.open = true
+      this.deleteCatDialog.item = c;
+      this.deleteCatDialog.open = true;
     },
     async confirmDeleteCategory() {
-      if (!this.deleteCatDialog.item) return
-      this.deleteCatDialog.loading = true
+      if (!this.deleteCatDialog.item) return;
+      this.deleteCatDialog.loading = true;
       try {
-        await axios.delete(`${this.apiBase}/categories/${this.deleteCatDialog.item.id}`)
-        this.deleteCatDialog.open = false
-        this.toast('Categoria removida.', 'success')
-        await this.loadCategories()
-        this.refreshAll()
+        await axios.delete(
+          `${this.apiBase}/categories/${this.deleteCatDialog.item.id}`,
+        );
+        this.deleteCatDialog.open = false;
+        this.toast("Categoria removida.", "success");
+        await this.loadCategories();
+        this.refreshAll();
       } catch (e) {
-        this.showError('Não foi possível excluir a categoria.')
+        this.showError("Não foi possível excluir a categoria.");
       } finally {
-        this.deleteCatDialog.loading = false
-        this.deleteCatDialog.item = null
+        this.deleteCatDialog.loading = false;
+        this.deleteCatDialog.item = null;
       }
     },
     onCategorySaved() {
-      this.toast('Categoria guardada.', 'success')
-      this.editCategory = null
-      this.loadCategories().then(() => this.refreshAll())
+      this.toast("Categoria guardada.", "success");
+      this.editCategory = null;
+      this.loadCategories().then(() => this.refreshAll());
     },
     onSaved() {
-      this.toast(this.editTransaction ? 'Transação atualizada.' : 'Transação criada.', 'success')
-      this.editTransaction = null
-      this.refreshAll()
+      this.toast(
+        this.editTransaction ? "Transação atualizada." : "Transação criada.",
+        "success",
+      );
+      this.editTransaction = null;
+      this.refreshAll();
     },
-    toast(text, color = 'primary') {
-      this.snackbar = { show: true, text, color }
+    toast(text, color = "primary") {
+      this.snackbar = { show: true, text, color };
     },
     showError(msg) {
-      this.snackbar = { show: true, text: msg, color: 'error' }
+      this.snackbar = { show: true, text: msg, color: "error" };
     },
   },
-}
+};
 </script>
 
 <style scoped>
@@ -1296,9 +1612,7 @@ export default {
   bottom: 24px !important;
   right: 24px !important;
   z-index: 24;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 .finance-fab--primary-action:hover {
   transform: scale(1.04);
@@ -1311,9 +1625,7 @@ export default {
 
 .duplicate-preview-fade-enter-active,
 .duplicate-preview-fade-leave-active {
-  transition:
-    opacity 0.22s ease,
-    transform 0.22s ease;
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
 .duplicate-preview-fade-enter,
 .duplicate-preview-fade-leave-to {
@@ -1321,7 +1633,10 @@ export default {
   transform: translateY(-6px);
 }
 
-.duplicate-transaction-card .duplicate-transaction-slider ::v-deep .v-slider__thumb-label {
+.duplicate-transaction-card
+  .duplicate-transaction-slider
+  ::v-deep
+  .v-slider__thumb-label {
   font-size: 12px;
   font-weight: 600;
 }
@@ -1358,5 +1673,11 @@ export default {
 }
 .finance-month-select__selection {
   line-height: 1.3;
+}
+
+/* Três cartões de resumo na mesma altura (sm+); coluna empilha em xs */
+.tx-summary-cards-row .tx-summary-card {
+  width: 100%;
+  min-height: 100%;
 }
 </style>

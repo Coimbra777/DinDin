@@ -46,7 +46,7 @@ const STEPS = [
   },
   {
     title: 'Entradas e saídas',
-    text: 'Receitas e despesas do mês aparecem ao lado; o saldo grande é o acumulado até esse mês. A projeção mostra quanto deve sobrar no acumulado ao fim do mês.',
+    text: 'Em Movimentações, o saldo em caixa é a soma do que já acumulou até o mês anterior com o resultado à vista do mês escolhido. O cartão entra só nas despesas marcadas como cartão.',
     selector: '[data-tour="dashboard-income-expense"]',
   },
   {

@@ -90,6 +90,45 @@ class TransactionApiTest extends FinanceApiTestCase
         $this->assertEquals(100.5, (float) $summary['expense_month']);
     }
 
+    public function test_summary_saldo_previsto_acumulado_equals_saldo_acumulado_caixa(): void
+    {
+        $user = $this->financeUser();
+        $cat = Category::factory()->expense()->create(['user_id' => $user->id]);
+        $catIn = Category::factory()->income()->create(['user_id' => $user->id]);
+
+        Transaction::factory()->forUserId($user->id)->create([
+            'category_id' => $catIn->id,
+            'type' => Transaction::TYPE_INCOME,
+            'amount' => 5000,
+            'transaction_date' => '2026-01-10',
+            'is_credit_card' => false,
+        ]);
+        Transaction::factory()->forUserId($user->id)->create([
+            'category_id' => $cat->id,
+            'type' => Transaction::TYPE_EXPENSE,
+            'amount' => 2000,
+            'transaction_date' => '2026-02-05',
+            'is_credit_card' => false,
+        ]);
+        Transaction::factory()->forUserId($user->id)->create([
+            'category_id' => $cat->id,
+            'type' => Transaction::TYPE_EXPENSE,
+            'amount' => 500,
+            'transaction_date' => '2026-03-12',
+            'is_credit_card' => false,
+        ]);
+
+        $summary = $this->actingAs($user)
+            ->getJson($this->financeApi('summary').'?month=2026-03')
+            ->assertOk()
+            ->json();
+
+        $acum = (float) $summary['saldo_acumulado_ate_mes'];
+        $prev = (float) $summary['saldo_previsto_acumulado_fim_mes'];
+        self::assertSame(2500.0, $acum);
+        self::assertSame($acum, $prev);
+    }
+
     public function test_duplicate_transaction_creates_copies_in_following_months(): void
     {
         $user = $this->financeUser();

@@ -8,7 +8,6 @@ use App\Http\Controllers\Cms\RestrictedController;
 use App\Http\Requests\Goals\StoreFinanceGoalRequest;
 use App\Http\Requests\Goals\UpdateFinanceGoalRequest;
 use App\Models\Finance\FinanceGoal;
-use App\Services\Finance\FinanceGoalResource;
 use App\Services\Finance\FinanceGoalService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -65,10 +64,7 @@ class FinanceGoalApiController extends RestrictedController
             ], 422);
         }
         $goal = $this->goals->syncCurrentFromLinkedIncome($finance_goal);
-        $goal->load('incomeCategory');
 
-        return response()->json(
-            FinanceGoalResource::toArray($goal, $this->goals->progressPercent($goal))
-        );
+        return response()->json($this->goals->show($goal));
     }
 }
