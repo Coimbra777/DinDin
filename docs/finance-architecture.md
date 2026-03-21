@@ -33,6 +33,7 @@ Form requests: `app/Http/Requests/Goals/`, `app/Http/Requests/Finance/`.
 | `credit-simulator` | POST `simulate` — simula parcelas |
 | `planning` | CRUD — planeamento mensal (`finance_monthly_plans`) |
 | `goals` | CRUD — metas (`finance_goals`) |
+| `projection` | GET — JSON `{ months[] }`: cada mês futuro com totais reais (`aggregateMonthStats`, igual a `GET /transactions?month=`) e saldo caixa acumulado desde o fim do mês atual |
 
 Ver **`docs/finance-multi-user.md`** para isolamento por `user_id`.
 

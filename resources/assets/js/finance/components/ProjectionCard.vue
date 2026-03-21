@@ -4,24 +4,25 @@
       <v-card-text class="pb-2 pt-5 px-4 px-sm-5">
         <div class="d-flex align-center flex-wrap mb-2">
           <v-icon color="secondary" class="mr-2">mdi-chart-timeline-variant</v-icon>
-          <span class="text-h6 font-weight-bold">Projeção de receitas</span>
+          <span class="text-h6 font-weight-bold">Projeção financeira</span>
           <v-chip x-small outlined class="ml-2" color="secondary">12 meses</v-chip>
           <v-spacer />
-          <v-tooltip bottom max-width="300">
+          <v-tooltip bottom max-width="320">
             <template #activator="{ on, attrs }">
               <v-btn icon small v-bind="attrs" aria-label="Como calculamos" v-on="on">
                 <v-icon small color="secondary">mdi-information-outline</v-icon>
               </v-btn>
             </template>
             <span>
-              Usamos o <strong>último mês com lançamentos</strong> como referência: repetimos receita e despesa
-              desse mês em cada mês futuro e mostramos a <strong>soma acumulada</strong> (não é média nem parcelas).
+              Cada mês mostra só os <strong>lançamentos reais</strong> já guardados nesse mês (receitas, despesas à vista e
+              cartão). O <strong>saldo</strong> é em caixa (receitas − à vista), acumulado a partir do teu saldo real até
+              ao fim do <strong>mês atual</strong> — igual ao critério do dashboard. Meses sem movimento aparecem a zero.
             </span>
           </v-tooltip>
         </div>
 
         <v-alert
-          v-if="meta && !loading"
+          v-if="!loading && displayRows.length"
           dense
           text
           type="info"
@@ -29,11 +30,9 @@
           colored-border
           class="proj-ref-alert mb-0 text-body-2"
         >
-          <strong>Referência:</strong> {{ metaLabelReferencia }} —
-          <span class="finance-amount-income font-weight-medium">{{ formatBRL(meta.receita_mes_referencia) }}</span>
-          receitas /
-          <span class="finance-amount-expense font-weight-medium">{{ formatBRL(meta.despesa_mes_referencia) }}</span>
-          despesas no mês
+          <span class="text-caption secondary--text">
+            Saldo em caixa até fim do mês atual (base da projeção): {{ formatBRL(openingCash) }}
+          </span>
         </v-alert>
       </v-card-text>
     </v-card>
@@ -42,10 +41,10 @@
       <v-card-text class="py-4 px-3 px-sm-4">
         <div class="d-flex align-center mb-2">
           <v-icon color="secondary" class="mr-2" small>mdi-chart-areaspline</v-icon>
-          <span class="subtitle-1 font-weight-bold">Receita acumulada</span>
+          <span class="subtitle-1 font-weight-bold">Saldo em caixa ao fim de cada mês</span>
         </div>
         <p class="text-caption secondary--text mb-3">
-          Evolução da soma das receitas mês a mês (projeção linear a partir do mês de referência).
+          Evolução do saldo acumulado após os lançamentos já registados em cada mês futuro.
         </p>
         <div v-if="loading" class="text-center py-8">
           <v-progress-circular indeterminate color="primary" size="40" />
@@ -76,24 +75,24 @@
           <thead>
             <tr>
               <th>Mês</th>
-              <th class="text-right">Rec. mês</th>
-              <th class="text-right">Rec. acum.</th>
-              <th class="text-right d-none d-sm-table-cell">Desp. mês</th>
-              <th class="text-right">Saldo acum.</th>
+              <th class="text-right">Receitas</th>
+              <th class="text-right d-none d-sm-table-cell">À vista</th>
+              <th class="text-right d-none d-md-table-cell">Cartão</th>
+              <th class="text-right">Saldo caixa</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="r in displayRows" :key="r.mes">
-              <td class="font-weight-medium">{{ r.label || r.mes }}</td>
-              <td class="text-right tabular-nums finance-amount-income">{{ formatBRL(r.receita_mes) }}</td>
-              <td class="text-right tabular-nums font-weight-bold finance-amount-income">
-                {{ formatBRL(r.receita_acumulada) }}
-              </td>
+            <tr v-for="r in displayRows" :key="r.month">
+              <td class="font-weight-medium">{{ monthLabel(r.month) }}</td>
+              <td class="text-right tabular-nums finance-amount-income">{{ formatBRL(r.income) }}</td>
               <td class="text-right tabular-nums finance-amount-expense d-none d-sm-table-cell">
-                {{ formatBRL(r.despesa_mes) }}
+                {{ formatBRL(r.expense) }}
               </td>
-              <td class="text-right tabular-nums font-weight-medium" :class="saldoClass(r.saldo_acumulado)">
-                {{ formatSaldoCell(r.saldo_acumulado) }}
+              <td class="text-right tabular-nums finance-amount-expense d-none d-md-table-cell">
+                {{ formatBRL(r.expense_card) }}
+              </td>
+              <td class="text-right tabular-nums font-weight-medium" :class="saldoClass(r.balance)">
+                {{ formatSaldoCell(r.balance) }}
               </td>
             </tr>
           </tbody>
@@ -112,6 +111,17 @@ import axios from 'axios'
 import Chart from 'chart.js/auto'
 import { formatCurrencyBRLAxis } from '../currency'
 
+const PT_MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+
+function monthLabelFromYm(ym) {
+  if (!ym || !/^\d{4}-\d{2}$/.test(String(ym))) return '—'
+  const [, m] = String(ym).split('-')
+  const mi = parseInt(m, 10) - 1
+  const y = String(ym).slice(0, 4)
+  if (mi < 0 || mi > 11) return ym
+  return `${PT_MONTHS[mi]}/${y}`
+}
+
 export default {
   name: 'ProjectionCard',
   props: {
@@ -122,7 +132,6 @@ export default {
     return {
       loading: true,
       rows: [],
-      meta: null,
       chartInstance: null,
     }
   },
@@ -130,9 +139,15 @@ export default {
     displayRows() {
       return this.rows || []
     },
-    metaLabelReferencia() {
-      if (!this.meta) return '—'
-      return this.meta.label_referencia || this.meta.mes_referencia || '—'
+    /** Saldo em caixa ao fim do mês atual (inferido do 1.º mês projetado). */
+    openingCash() {
+      const rows = this.displayRows
+      if (!rows.length) return 0
+      const m = rows[0]
+      const bal = Number(m.balance) || 0
+      const inc = Number(m.income) || 0
+      const exp = Number(m.expense) || 0
+      return bal - (inc - exp)
     },
   },
   watch: {
@@ -152,6 +167,7 @@ export default {
     this.destroyChart()
   },
   methods: {
+    monthLabel: monthLabelFromYm,
     formatBRL(v) {
       return this.$formatCurrencyBRL(v)
     },
@@ -189,8 +205,8 @@ export default {
       this.destroyChart()
       const ctx = canvas.getContext('2d')
       const c = this.chartColors()
-      const labels = this.displayRows.map((r) => r.label || r.mes)
-      const acc = this.displayRows.map((r) => Number(r.receita_acumulada) || 0)
+      const labels = this.displayRows.map((r) => monthLabelFromYm(r.month))
+      const balances = this.displayRows.map((r) => Number(r.balance) || 0)
 
       this.chartInstance = new Chart(ctx, {
         type: 'line',
@@ -198,8 +214,8 @@ export default {
           labels,
           datasets: [
             {
-              label: 'Receita acumulada',
-              data: acc,
+              label: 'Saldo caixa',
+              data: balances,
               fill: true,
               backgroundColor: c.fill,
               borderColor: c.border,
@@ -228,7 +244,7 @@ export default {
               ticks: { maxRotation: 45, color: c.ticks, font: { size: 10 } },
             },
             y: {
-              beginAtZero: true,
+              beginAtZero: false,
               grid: { color: c.grid },
               ticks: {
                 color: c.ticks,
@@ -250,12 +266,10 @@ export default {
       this.destroyChart()
       try {
         const { data } = await axios.get(`${base}/projection`)
-        this.rows = data.meses || []
-        this.meta = data.meta || null
+        this.rows = Array.isArray(data.months) ? data.months : []
         this.$emit('loaded', data)
       } catch (e) {
         this.rows = []
-        this.meta = null
         this.$emit('error', 'Não foi possível carregar a projeção.')
       } finally {
         this.loading = false

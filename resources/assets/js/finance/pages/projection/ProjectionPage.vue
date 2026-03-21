@@ -1,8 +1,9 @@
 <template>
   <div class="projection-page px-1">
     <p class="text-caption secondary--text mb-4">
-      Projeção dos próximos 12 meses: <strong>acumulado de receitas</strong> (e despesas) repetindo o último mês com
-      movimento real — sem média nem simulação de parcelas.
+      Próximos <strong>12 meses</strong> a partir do mês seguinte: cada coluna reflete apenas os
+      <strong>lançamentos futuros</strong> que já criaste com data nesse mês. Não há simulação nem cópia de meses
+      anteriores — valores batem com Movimentações ao filtrar o mesmo mês.
     </p>
     <projection-card
       :api-base="apiBase"
