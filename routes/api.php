@@ -40,7 +40,7 @@ Route::group([
 | Módulos financeiros — sessão CMS (`web` + `auth`).
 | /api/finance/* /api/cards/* /api/projection/* /api/reports/*
 */
-Route::middleware(['web', 'auth'])->group(function () {
+Route::middleware(['web', 'auth', 'module:finance'])->group(function () {
     Route::prefix('finance')->group(function () {
         require base_path('routes/api/finance.php');
     });

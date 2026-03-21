@@ -103,33 +103,19 @@ class RestrictedController extends Controller
         );
     }
 
-    private function userHasFinanceModule(): bool
+    private function requiresFinanceEntitlement(Request $request): bool
     {
-        if ($this->user === null) {
-            return false;
-        }
-
-        $group = $this->user->group;
-        if ($group === null) {
-            return false;
-        }
-
-        return $group->modules()
-            ->where(function ($q) {
-                $q->where('path', 'finance')
-                    ->orWhere('father_path', 'finance');
-            })
-            ->exists();
+        return $request->is('cms/finance*') || $this->isFinanceApiRequest($request);
     }
 
     private function checkModule(Request $request): bool
     {
-        if ($this->isFinanceApiRequest($request)) {
-            return $this->userHasFinanceModule();
-        }
-
         if ($this->user === null) {
             return false;
+        }
+
+        if ($this->requiresFinanceEntitlement($request)) {
+            return $this->user->canAccessSaasModule('finance');
         }
 
         $group = $this->authenticatedUserGroup();

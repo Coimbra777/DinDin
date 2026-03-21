@@ -73,5 +73,7 @@ class Kernel extends HttpKernel
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'session_api' => \Illuminate\Session\Middleware\StartSession::class,
+        'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+        'module' => \App\Http\Middleware\EnsureUserHasSaasModule::class,
     ];
 }

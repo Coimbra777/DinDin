@@ -43,6 +43,17 @@
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <template v-if="isAdmin">
+          <v-divider class="my-2" />
+          <v-list-item href="/cms/admin" link rounded>
+            <v-list-item-icon class="mr-3">
+              <v-icon color="secondary">mdi-shield-account-outline</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="secondary--text font-weight-medium">Administração</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </template>
       </v-list>
     </v-navigation-drawer>
 
@@ -406,6 +417,7 @@ export default {
     userName: { type: String, default: '' },
     onboardingInitialCompleted: { type: Boolean, default: false },
     onboardingCompleteUrl: { type: String, required: true },
+    isAdmin: { type: Boolean, default: false },
   },
   data() {
     const v = VALID_VIEWS.includes(this.initialView) ? this.initialView : 'dashboard'

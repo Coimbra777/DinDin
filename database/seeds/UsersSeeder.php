@@ -23,6 +23,7 @@ class UsersSeeder extends Seeder
                 'updated_at' => $now,
                 'username' => 'admin',
                 'group_id' => 1,
+                'is_admin' => true,
                 'deleted_at' => null,
             ],
             [
@@ -34,6 +35,7 @@ class UsersSeeder extends Seeder
                 'updated_at' => $now,
                 'username' => 'test',
                 'group_id' => 1,
+                'is_admin' => true,
                 'deleted_at' => null,
             ],
         ]);

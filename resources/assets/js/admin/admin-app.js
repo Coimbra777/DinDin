@@ -1,25 +1,19 @@
 /**
- * Finanças — Vue 2 + Vuetify 2 (SPA montada em #finance-app).
- *
- * Temas light/dark: `theme.themes.light` · `theme.themes.dark` + `finance-standalone.scss`.
- * Preferência: localStorage (`finance-theme-preference`) ou, se vazio, `prefers-color-scheme`.
- *
- * Cores: primary #ff0000, secondary #85888f, success #4CAF50 (receita), error #ff0000 (despesa).
+ * Admin — Vue 2 + Vuetify 2 (utilizadores e módulos SaaS).
+ * Tema alinhado às finanças (primary #ff0000, light/dark + finance-standalone.scss).
  */
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import '@mdi/font/css/materialdesignicons.css'
 import axios from 'axios'
-import FinanceApp from './pages/finance/FinanceApp.vue'
-import { formatCurrencyBRL } from './currency'
-import { getInitialDark, applyBodyThemeClass } from './financeTheme'
+import AdminApp from './AdminApp.vue'
+import { getInitialDark, applyBodyThemeClass } from '../finance/financeTheme'
 import '../../sass/finance-standalone.scss'
 
 Vue.use(Vuetify)
-Vue.prototype.$formatCurrencyBRL = formatCurrencyBRL
 
-const el = document.getElementById('finance-app')
+const el = document.getElementById('admin-app')
 if (el) {
   const initialDark = getInitialDark()
   applyBodyThemeClass(initialDark)
@@ -30,6 +24,7 @@ if (el) {
     axios.defaults.headers.common['X-CSRF-TOKEN'] = csrf
     axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
   }
+  axios.defaults.headers.common.Accept = 'application/json'
 
   // eslint-disable-next-line no-new
   new Vue({
@@ -37,9 +32,7 @@ if (el) {
       icons: { iconfont: 'mdi' },
       theme: {
         dark: initialDark,
-        options: {
-          customProperties: true,
-        },
+        options: { customProperties: true },
         themes: {
           light: {
             primary: '#ff0000',
@@ -69,15 +62,11 @@ if (el) {
       },
     }),
     render: (h) =>
-      h(FinanceApp, {
+      h(AdminApp, {
         props: {
-          initialView: el.dataset.initialView || 'dashboard',
-          initialMonth: el.dataset.initialMonth || '',
           apiBase: (el.dataset.apiBase || '').replace(/\/$/, ''),
           userName: el.dataset.userName || '',
-          onboardingInitialCompleted: el.dataset.onboardingCompleted === '1',
-          onboardingCompleteUrl: el.dataset.onboardingCompleteUrl || '',
-          isAdmin: el.dataset.isAdmin === '1',
+          financePanelUrl: el.dataset.financePanelUrl || '/cms/finance/finance_dashboard',
         },
       }),
   }).$mount(el)

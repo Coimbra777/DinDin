@@ -22,6 +22,9 @@ use App\Http\Controllers\Finance\CategoryController;
 use App\Http\Controllers\Finance\FinanceDashboardController;
 use App\Http\Controllers\Finance\FinanceOnboardingWebController;
 use App\Http\Controllers\Finance\TransactionController;
+use App\Http\Controllers\Cms\Admin\AdminSpaController;
+use App\Http\Controllers\Cms\Admin\UserAdminApiController;
+use App\Http\Controllers\Cms\Admin\UserAdminController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -49,7 +52,21 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('finance_dashboard.index');
     })->name('dashboard.index');
 
-    Route::prefix('finance')->group(function () {
+    Route::middleware(['admin'])->prefix('admin')->name('cms.admin.')->group(function () {
+        Route::get('/', AdminSpaController::class)->name('home');
+
+        Route::prefix('api')->name('api.')->group(function () {
+            Route::get('users', [UserAdminApiController::class, 'index'])->name('users.index');
+            Route::get('users/{user}', [UserAdminApiController::class, 'show'])->name('users.show');
+            Route::post('users/{user}/modules', [UserAdminApiController::class, 'updateModules'])->name('users.modules');
+        });
+
+        Route::get('users', [UserAdminController::class, 'index'])->name('users.index');
+        Route::get('users/{user}/edit', [UserAdminController::class, 'edit'])->name('users.edit');
+        Route::put('users/{user}', [UserAdminController::class, 'update'])->name('users.update');
+    });
+
+    Route::middleware(['module:finance'])->prefix('finance')->group(function () {
         Route::prefix('api')->group(function () {
             Route::get('dashboard', [DashboardApiController::class, 'show'])->name('finance.api.dashboard');
             Route::get('user/onboarding', [FinanceOnboardingApiController::class, 'show'])->name('finance.api.user.onboarding');

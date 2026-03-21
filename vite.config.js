@@ -27,6 +27,7 @@ export default defineConfig({
         'resources/assets/sass/website/app.scss',
         'resources/assets/js/front/app.js',
         'resources/assets/js/finance/finance-app.js',
+        'resources/assets/js/admin/admin-app.js',
       ],
       refresh: true,
     }),

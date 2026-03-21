@@ -27,6 +27,7 @@ class UserFactory extends Factory
             'group_id' => 0,
             'image' => null,
             'onboarding_completed' => false,
+            'is_admin' => false,
             'remember_token' => Str::random(10),
         ];
     }
