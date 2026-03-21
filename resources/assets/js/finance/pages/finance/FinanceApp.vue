@@ -90,21 +90,107 @@
 
     <v-main class="finance-main">
       <v-container fluid class="pa-3 pa-md-6 pb-20">
-        <v-row v-if="showMonthSelector" align="center" class="mb-3">
-          <v-col cols="12" md="4">
-            <v-select
-              v-model="month"
-              :items="monthItems"
-              item-text="text"
-              item-value="value"
-              label="Mês"
+        <v-row v-if="showMonthSelector" class="mb-4 finance-month-row">
+          <v-col cols="12">
+            <v-sheet
               outlined
-              dense
-              :dark="$vuetify.theme.dark"
-              hide-details="auto"
-              prepend-inner-icon="mdi-calendar-month"
-              @change="onMonthChange"
-            />
+              rounded
+              class="finance-month-bar pa-3 pa-sm-4 d-flex flex-column flex-md-row align-md-center flex-wrap"
+            >
+              <div class="finance-month-bar__meta mr-md-6 mb-3 mb-md-0 flex-shrink-0">
+                <div class="d-flex align-center mb-1">
+                  <v-icon color="primary" class="mr-2" size="22">mdi-calendar-month</v-icon>
+                  <span class="text-overline secondary--text text-uppercase letter-wider font-weight-bold">
+                    Período
+                  </span>
+                </div>
+                <div class="finance-month-bar__hint text-caption finance-text-muted">
+                  Escolha o mês dos dados (dashboard, movimentações e relatórios).
+                </div>
+              </div>
+
+              <div class="finance-month-bar__controls d-flex align-center flex-grow-1" style="gap: 10px">
+                <v-tooltip bottom>
+                  <template #activator="{ on, attrs }">
+                    <v-btn
+                      icon
+                      outlined
+                      small
+                      type="button"
+                      class="flex-shrink-0"
+                      aria-label="Ver mês anterior"
+                      :disabled="!canShiftMonthOlder"
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="shiftMonthOlder"
+                    >
+                      <v-icon>mdi-chevron-left</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Mês anterior</span>
+                </v-tooltip>
+
+                <v-select
+                  v-model="month"
+                  class="finance-month-select flex-grow-1"
+                  :items="monthItems"
+                  item-text="text"
+                  item-value="value"
+                  label="Mês de referência"
+                  outlined
+                  dense
+                  hide-details
+                  :menu-props="{ offsetY: true, maxHeight: 320 }"
+                  aria-label="Selecionar mês de referência"
+                  @change="onMonthChange"
+                >
+                  <template #item="{ item, on, attrs }">
+                    <v-list-item v-bind="attrs" v-on="on">
+                      <v-list-item-content>
+                        <v-list-item-title class="text-body-2 font-weight-medium">
+                          {{ item.text }}
+                        </v-list-item-title>
+                        <v-list-item-subtitle class="text-caption">
+                          {{ item.short }}
+                        </v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </template>
+                  <template #selection="{ item }">
+                    <span
+                      v-if="item && item.text"
+                      class="d-flex flex-column align-start py-1 finance-month-select__selection"
+                    >
+                      <span class="text-body-2 font-weight-medium text-truncate" style="max-width: 100%">
+                        {{ item.text }}
+                      </span>
+                      <span class="text-caption finance-text-muted">{{ item.short }}</span>
+                    </span>
+                    <span v-else class="text-body-2">{{ monthLabelPt }}</span>
+                  </template>
+                </v-select>
+
+                <v-tooltip bottom>
+                  <template #activator="{ on, attrs }">
+                    <v-btn
+                      icon
+                      outlined
+                      small
+                      type="button"
+                      class="flex-shrink-0"
+                      aria-label="Ver mês seguinte"
+                      :disabled="!canShiftMonthNewer"
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="shiftMonthNewer"
+                    >
+                      <v-icon>mdi-chevron-right</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Mês seguinte (mais recente)</span>
+                </v-tooltip>
+              </div>
+            </v-sheet>
           </v-col>
         </v-row>
 
@@ -377,33 +463,127 @@
       @error="showError"
     />
 
-    <v-dialog v-model="duplicateDialog.open" max-width="420" persistent>
-      <v-card class="rounded-lg">
-        <v-card-title class="headline">Duplicar transação</v-card-title>
-        <v-card-text class="finance-text-muted">
-          <p class="mb-3">
-            Serão criadas cópias nos meses seguintes à data desta transação, com o mesmo valor, categoria e tipo.
+    <v-dialog
+      v-model="duplicateDialog.open"
+      max-width="520"
+      persistent
+      content-class="duplicate-transaction-dialog"
+    >
+      <v-card class="rounded-lg duplicate-transaction-card">
+        <v-card-title class="headline pb-2 px-4 pt-4">Duplicar transação</v-card-title>
+        <v-card-text class="pa-4 pt-2 d-flex flex-column">
+          <p class="body-2 finance-text-muted mb-0">
+            Cópias nos meses seguintes à data deste lançamento, com o mesmo valor, categoria e tipo. A transação original
+            não é alterada.
           </p>
-          <v-text-field
-            v-model.number="duplicateDialog.months"
-            type="number"
-            min="1"
-            max="60"
-            label="Quantidade de meses"
-            outlined
-            dense
-            hide-details="auto"
-            hint="De 1 a 60."
-            persistent-hint
-            :disabled="duplicateDialog.loading"
-          />
+
+          <v-row dense class="mt-4">
+            <v-col cols="12" class="d-flex flex-column">
+              <span class="text-subtitle-2 font-weight-medium mb-1">Quantos meses à frente?</span>
+              <span class="text-caption finance-text-muted mb-2">Arraste o controle ou digite de 1 a 60.</span>
+              <v-slider
+                v-model="duplicateSliderModel"
+                class="duplicate-transaction-slider mt-1"
+                min="1"
+                max="60"
+                step="1"
+                thumb-label="always"
+                color="primary"
+                track-color="secondary"
+                hide-details
+                :disabled="duplicateDialog.loading"
+              />
+            </v-col>
+
+            <v-col cols="12" class="d-flex align-start flex-nowrap">
+              <v-btn
+                icon
+                small
+                class="mt-1 flex-shrink-0"
+                type="button"
+                aria-label="Diminuir meses"
+                :disabled="duplicateDialog.loading || duplicateSliderModel <= 1"
+                @click="bumpDuplicateMonths(-1)"
+              >
+                <v-icon small>mdi-minus</v-icon>
+              </v-btn>
+              <v-text-field
+                class="mx-2 flex-grow-1"
+                outlined
+                dense
+                label="Número de meses"
+                type="number"
+                min="1"
+                max="60"
+                hide-details="auto"
+                :value="duplicateMonthsFieldDisplay"
+                :error-messages="duplicateMonthsError ? [duplicateMonthsError] : []"
+                :disabled="duplicateDialog.loading"
+                @input="onDuplicateMonthsInput"
+              />
+              <v-btn
+                icon
+                small
+                class="mt-1 flex-shrink-0"
+                type="button"
+                aria-label="Aumentar meses"
+                :disabled="duplicateDialog.loading || duplicateSliderModel >= 60"
+                @click="bumpDuplicateMonths(1)"
+              >
+                <v-icon small>mdi-plus</v-icon>
+              </v-btn>
+            </v-col>
+
+            <v-col cols="12" class="pt-1">
+              <div class="text-caption secondary--text mb-1">Atalhos</div>
+              <div class="d-flex flex-wrap" style="gap: 8px">
+                <v-chip
+                  v-for="preset in duplicateMonthPresets"
+                  :key="preset"
+                  small
+                  outlined
+                  :disabled="duplicateDialog.loading"
+                  @click="setDuplicateMonths(preset)"
+                >
+                  {{ preset }} {{ preset === 1 ? 'mês' : 'meses' }}
+                </v-chip>
+              </div>
+            </v-col>
+          </v-row>
+
+          <transition name="duplicate-preview-fade">
+            <v-sheet
+              v-if="duplicateTransactionPreviewCount"
+              :key="'preview-' + duplicateTransactionPreviewCount"
+              outlined
+              rounded
+              class="pa-3 mt-4 duplicate-preview-sheet"
+            >
+              <div class="body-2 font-weight-medium primary--text">
+                Isso criará {{ duplicateTransactionPreviewCount }}
+                {{ duplicateTransactionPreviewCount === 1 ? 'transação futura' : 'transações futuras' }}.
+              </div>
+              <div v-if="duplicatePreviewMonthsLine" class="text-caption finance-text-muted mt-2 mb-0">
+                Meses: {{ duplicatePreviewMonthsLine }}
+              </div>
+            </v-sheet>
+          </transition>
         </v-card-text>
-        <v-card-actions>
-          <v-btn text color="secondary" :disabled="duplicateDialog.loading" @click="duplicateDialog.open = false">
+        <v-divider />
+        <v-card-actions class="pa-4 d-flex flex-wrap justify-end" style="gap: 8px">
+          <v-btn text color="secondary" class="text-none" :disabled="duplicateDialog.loading" @click="closeDuplicateDialog">
             Cancelar
           </v-btn>
-          <v-spacer />
-          <v-btn color="primary" depressed :loading="duplicateDialog.loading" @click="confirmDuplicate">
+          <v-btn
+            color="primary"
+            depressed
+            large
+            class="px-6 text-none font-weight-medium"
+            :loading="duplicateDialog.loading"
+            :disabled="!canConfirmDuplicate"
+            @click="confirmDuplicate"
+          >
+            <v-icon left>mdi-content-copy</v-icon>
             Duplicar
           </v-btn>
         </v-card-actions>
@@ -462,7 +642,7 @@ import PlanningPage from '../planning/PlanningPage.vue'
 import FinanceThemeToggle from '../../components/FinanceThemeToggle.vue'
 import FinanceHelpModal from '../../components/FinanceHelpModal.vue'
 import OnboardingTour from '../../components/OnboardingTour.vue'
-import { monthChoices, normalizeMonth } from '../../format'
+import { monthChoices, normalizeMonth, toIsoDateOnly } from '../../format'
 import { applyBodyThemeClass, getStoredTheme } from '../../financeTheme'
 
 const VALID_VIEWS = [
@@ -552,7 +732,8 @@ export default {
       snackbar: { show: false, text: '', color: 'primary' },
       formOpen: false,
       editTransaction: null,
-      duplicateDialog: { open: false, loading: false, item: null, months: 3 },
+      duplicateDialog: { open: false, loading: false, item: null, months: 1 },
+      duplicateMonthPresets: [1, 2, 3, 6, 12],
       deleteDialog: { open: false, loading: false, item: null },
       categoryDialog: false,
       categoryDialogInitialType: null,
@@ -601,6 +782,93 @@ export default {
     },
     showTransactionFab() {
       return ['dashboard', 'transactions'].includes(this.view)
+    },
+    canShiftMonthOlder() {
+      const i = this.monthItems.findIndex((x) => x.value === this.month)
+      return i >= 0 && i < this.monthItems.length - 1
+    },
+    canShiftMonthNewer() {
+      const i = this.monthItems.findIndex((x) => x.value === this.month)
+      return i > 0
+    },
+    duplicateSliderModel: {
+      get() {
+        const m = parseInt(String(this.duplicateDialog.months), 10)
+        if (!Number.isFinite(m)) return 1
+        return Math.min(60, Math.max(1, m))
+      },
+      set(v) {
+        const n = typeof v === 'number' ? v : parseInt(String(v), 10)
+        if (Number.isFinite(n)) {
+          this.duplicateDialog.months = Math.min(60, Math.max(1, n))
+        }
+      },
+    },
+    duplicateMonthsFieldDisplay() {
+      const m = this.duplicateDialog.months
+      if (m === '' || m === null || m === undefined) return ''
+      return String(m)
+    },
+    duplicateMonthsError() {
+      if (!this.duplicateDialog.open) return ''
+      const raw = this.duplicateDialog.months
+      if (raw === '' || raw === null || raw === undefined) {
+        return 'Informe um valor entre 1 e 60.'
+      }
+      const m = parseInt(String(raw), 10)
+      if (!Number.isFinite(m)) {
+        return 'Use um número inteiro.'
+      }
+      if (m < 1) {
+        return 'O mínimo é 1 mês.'
+      }
+      if (m > 60) {
+        return 'No máximo 60 meses por vez.'
+      }
+      return ''
+    },
+    duplicateTransactionPreviewCount() {
+      if (this.duplicateMonthsError) {
+        return null
+      }
+      return parseInt(String(this.duplicateDialog.months), 10)
+    },
+    duplicatePreviewMonthLabels() {
+      const n = this.duplicateTransactionPreviewCount
+      const item = this.duplicateDialog.item
+      if (!n || !item) {
+        return []
+      }
+      const iso = toIsoDateOnly(item.transaction_date)
+      if (!iso) {
+        return []
+      }
+      const [ys, ms, ds] = iso.split('-').map((x) => parseInt(x, 10))
+      const out = []
+      for (let i = 1; i <= n; i += 1) {
+        const dt = new Date(ys, ms - 1, ds)
+        dt.setMonth(dt.getMonth() + i)
+        const label = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' }).format(dt)
+        out.push(label.replace(/\./g, '').replace(/\s{2,}/g, ' ').trim())
+      }
+      return out
+    },
+    duplicatePreviewMonthsLine() {
+      const labels = this.duplicatePreviewMonthLabels
+      if (!labels.length) {
+        return ''
+      }
+      const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
+      const maxInline = 6
+      if (labels.length <= maxInline) {
+        return labels.map(cap).join(' · ')
+      }
+      const head = labels.slice(0, 3).map(cap).join(' · ')
+      const rest = labels.length - 3
+      return `${head} · … (+${rest} ${rest === 1 ? 'mês' : 'meses'})`
+    },
+    canConfirmDuplicate() {
+      return !this.duplicateDialog.loading && this.duplicateMonthsError === '' && this.duplicateTransactionPreviewCount !== null
     },
   },
   watch: {
@@ -733,6 +1001,20 @@ export default {
     async onMonthChange() {
       await this.loadTransactions()
     },
+    shiftMonthOlder() {
+      const i = this.monthItems.findIndex((x) => x.value === this.month)
+      if (i >= 0 && i < this.monthItems.length - 1) {
+        this.month = this.monthItems[i + 1].value
+        this.onMonthChange()
+      }
+    },
+    shiftMonthNewer() {
+      const i = this.monthItems.findIndex((x) => x.value === this.month)
+      if (i > 0) {
+        this.month = this.monthItems[i - 1].value
+        this.onMonthChange()
+      }
+    },
     formatBRL(v) {
       return this.$formatCurrencyBRL(v)
     },
@@ -791,24 +1073,39 @@ export default {
       this.formOpen = true
     },
     openDuplicateDialog(transaction) {
-      // eslint-disable-next-line no-console
-      console.log('[finance] openDuplicateDialog', transaction && transaction.id, 'apiBase=', this.apiBase)
       this.duplicateDialog.item = transaction
-      this.duplicateDialog.months = 3
+      this.duplicateDialog.months = 1
       this.duplicateDialog.open = true
     },
+    closeDuplicateDialog() {
+      this.duplicateDialog.open = false
+    },
+    setDuplicateMonths(n) {
+      const v = parseInt(String(n), 10)
+      if (Number.isFinite(v)) {
+        this.duplicateDialog.months = Math.min(60, Math.max(1, v))
+      }
+    },
+    bumpDuplicateMonths(delta) {
+      let m = parseInt(String(this.duplicateDialog.months), 10)
+      if (!Number.isFinite(m)) {
+        m = 1
+      }
+      this.duplicateDialog.months = Math.min(60, Math.max(1, m + delta))
+    },
+    onDuplicateMonthsInput(val) {
+      if (val === '' || val === null || val === undefined) {
+        this.duplicateDialog.months = ''
+        return
+      }
+      const m = parseInt(String(val), 10)
+      if (!Number.isFinite(m)) {
+        this.duplicateDialog.months = val
+        return
+      }
+      this.duplicateDialog.months = Math.min(60, Math.max(1, m))
+    },
     async confirmDuplicate() {
-      // eslint-disable-next-line no-console
-      console.log(
-        '[finance] confirmDuplicate',
-        this.duplicateDialog.item && this.duplicateDialog.item.id,
-        'months=',
-        this.duplicateDialog.months,
-        'url=',
-        this.duplicateDialog.item
-          ? `${this.apiBase}/transactions/${this.duplicateDialog.item.id}/duplicate`
-          : null
-      )
       if (!this.duplicateDialog.item) return
       let m = parseInt(String(this.duplicateDialog.months), 10)
       if (!Number.isFinite(m) || m < 1) m = 1
@@ -928,5 +1225,56 @@ export default {
 .finance-fab--secondary-action:hover {
   transform: scale(1.04);
   box-shadow: 0 8px 26px rgba(133, 136, 143, 0.4) !important;
+}
+
+.duplicate-preview-fade-enter-active,
+.duplicate-preview-fade-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+.duplicate-preview-fade-enter,
+.duplicate-preview-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.duplicate-transaction-card .duplicate-transaction-slider ::v-deep .v-slider__thumb-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.theme--dark .duplicate-preview-sheet {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.finance-month-bar {
+  min-width: 0;
+}
+.theme--dark .finance-month-bar {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+.finance-month-bar__hint {
+  padding-left: 30px;
+}
+@media (min-width: 960px) {
+  .finance-month-bar__hint {
+    padding-left: 30px;
+    max-width: 280px;
+  }
+}
+.finance-month-bar__controls {
+  min-width: 0;
+}
+.finance-month-select {
+  min-width: 0;
+}
+@media (min-width: 600px) {
+  .finance-month-select {
+    max-width: 360px;
+  }
+}
+.finance-month-select__selection {
+  line-height: 1.3;
 }
 </style>

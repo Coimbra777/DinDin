@@ -155,8 +155,6 @@ export default {
   },
   methods: {
     onDuplicateClick(transaction) {
-      // eslint-disable-next-line no-console
-      console.log('[finance] duplicar clicado', transaction && transaction.id)
       this.$emit('duplicate', transaction)
     },
     formatTxDate(iso) {
