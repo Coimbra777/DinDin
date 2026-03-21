@@ -201,7 +201,7 @@
               Ir para {{ firstAllowedNavTitle() }}
             </v-btn>
           </div>
-          <!-- DASHBOARD (GET /api/dashboard + Chart.js) -->
+          <!-- DASHBOARD (GET /cms/finance/api/dashboard + Chart.js) -->
           <div v-else-if="view === 'dashboard'" key="dash">
             <dashboard
               :month="month"
@@ -268,7 +268,9 @@
                     >
                       {{ formatBRL(txSummary.saldo_previsto_acumulado_fim_mes) }}
                     </div>
-                    <div class="text-caption secondary--text">Acumulado previsto (caixa)</div>
+                    <div class="text-caption secondary--text">
+                      Acumulado com base no já registrado (caixa), sem projeção extra
+                    </div>
                   </v-card-text>
                 </v-card>
               </v-col>
@@ -281,6 +283,25 @@
               @delete="askDelete"
               @duplicate="openDuplicateDialog"
             />
+            <div
+              v-if="transactionsMeta && transactions.length && transactionsMeta.total > 0"
+              class="text-center text-caption secondary--text mt-2 mb-1"
+            >
+              A mostrar {{ transactionsMeta.from }}–{{ transactionsMeta.to }} de {{ transactionsMeta.total }}
+              movimentações
+            </div>
+            <div v-if="canLoadMoreTransactions" class="text-center mb-4">
+              <v-btn
+                outlined
+                color="primary"
+                class="text-none"
+                :loading="loadingMoreTransactions"
+                :disabled="loading.transactions"
+                @click="loadMoreTransactions"
+              >
+                Carregar mais
+              </v-btn>
+            </div>
           </div>
 
           <!-- CATEGORIAS -->
@@ -393,6 +414,17 @@
               :api-base="apiBase"
               :refresh-key="planningRefreshKey"
               @error="showError"
+            />
+          </div>
+
+          <!-- METAS -->
+          <div v-else-if="view === 'goals'" key="goals">
+            <goals-page
+              :api-base="apiBase"
+              :categories="categories"
+              :refresh-key="goalsRefreshKey"
+              @error="showError"
+              @saved="onGoalsSaved"
             />
           </div>
         </v-fade-transition>
@@ -639,6 +671,7 @@ import AlertsPage from '../alerts/AlertsPage.vue'
 import InsightsPage from '../insights/InsightsPage.vue'
 import CreditSimulatorPage from '../simulator/CreditSimulatorPage.vue'
 import PlanningPage from '../planning/PlanningPage.vue'
+import GoalsPage from '../goals/GoalsPage.vue'
 import FinanceThemeToggle from '../../components/FinanceThemeToggle.vue'
 import FinanceHelpModal from '../../components/FinanceHelpModal.vue'
 import OnboardingTour from '../../components/OnboardingTour.vue'
@@ -649,6 +682,7 @@ const VALID_VIEWS = [
   'dashboard',
   'transactions',
   'categories',
+  'goals',
   'cards',
   'projection',
   'reports',
@@ -672,6 +706,7 @@ export default {
     InsightsPage,
     CreditSimulatorPage,
     PlanningPage,
+    GoalsPage,
     FinanceThemeToggle,
     FinanceHelpModal,
     OnboardingTour,
@@ -704,6 +739,7 @@ export default {
       insightsRefreshKey: 0,
       simulatorRefreshKey: 0,
       planningRefreshKey: 0,
+      goalsRefreshKey: 0,
       /**
        * core: visível para qualquer utilizador com módulo `finance` (entrada na app).
        * !core: só com slug extra no pivot (checkbox no admin).
@@ -712,6 +748,7 @@ export default {
         { title: 'Dashboard', value: 'dashboard', icon: 'mdi-view-dashboard-outline', core: true },
         { title: 'Movimentações', value: 'transactions', icon: 'mdi-bank-transfer', core: true },
         { title: 'Categorias', value: 'categories', icon: 'mdi-shape-outline', core: true },
+        { title: 'Metas', value: 'goals', icon: 'mdi-flag-checkered', core: true },
         { title: 'Cartões', value: 'cards', icon: 'mdi-credit-card-outline', core: false, slug: 'cards' },
         { title: 'Projeção', value: 'projection', icon: 'mdi-chart-timeline-variant', core: false, slug: 'projections' },
         { title: 'Relatórios', value: 'reports', icon: 'mdi-file-chart-outline', core: false, slug: 'reports' },
@@ -721,6 +758,9 @@ export default {
         { title: 'Planejamento', value: 'planning', icon: 'mdi-calendar-check', core: false, slug: 'planning' },
       ],
       transactions: [],
+      transactionsPage: 1,
+      transactionsMeta: null,
+      loadingMoreTransactions: false,
       txSummary: null,
       categories: [],
       creditCards: [],
@@ -782,6 +822,11 @@ export default {
     },
     showTransactionFab() {
       return ['dashboard', 'transactions'].includes(this.view)
+    },
+    canLoadMoreTransactions() {
+      const m = this.transactionsMeta
+      if (!m || !m.last_page) return false
+      return m.current_page < m.last_page
     },
     canShiftMonthOlder() {
       const i = this.monthItems.findIndex((x) => x.value === this.month)
@@ -899,6 +944,9 @@ export default {
       if (v === 'planning') {
         this.planningRefreshKey += 1
       }
+      if (v === 'goals') {
+        this.goalsRefreshKey += 1
+      }
     },
   },
   created() {
@@ -981,8 +1029,9 @@ export default {
       this.insightsRefreshKey += 1
       this.simulatorRefreshKey += 1
       this.planningRefreshKey += 1
+      this.goalsRefreshKey += 1
       await Promise.all([
-        this.loadTransactions(),
+        this.loadTransactions({ reset: true }),
         this.loadCategories(),
         this.loadCreditCards(),
       ])
@@ -999,7 +1048,11 @@ export default {
     },
     /** Troca de mês: lista de transações + Dashboard observa `month` (sem segundo fetch por key). */
     async onMonthChange() {
-      await this.loadTransactions()
+      await this.loadTransactions({ reset: true })
+    },
+    onGoalsSaved() {
+      this.toast('Metas atualizadas.', 'success')
+      this.goalsRefreshKey += 1
     },
     shiftMonthOlder() {
       const i = this.monthItems.findIndex((x) => x.value === this.month)
@@ -1018,19 +1071,42 @@ export default {
     formatBRL(v) {
       return this.$formatCurrencyBRL(v)
     },
-    async loadTransactions() {
-      this.loading.transactions = true
+    /**
+     * Lista paginada (page, per_page) na API; reset=true volta à página 1 e substitui a lista.
+     */
+    async loadTransactions(options = {}) {
+      const reset = options.reset !== false
+      if (reset) {
+        this.transactionsPage = 1
+        this.transactionsMeta = null
+      }
+      this.loading.transactions = !reset ? false : true
+      this.loadingMoreTransactions = !reset
       try {
-        const params = { month: this.month }
+        const params = {
+          month: this.month,
+          page: this.transactionsPage,
+          per_page: 20,
+        }
         if (this.filterCategoryId) params.category_id = this.filterCategoryId
         const [txOut, sumOut] = await Promise.allSettled([
           axios.get(`${this.apiBase}/transactions`, { params }),
           axios.get(`${this.apiBase}/summary`, { params: { month: this.month } }),
         ])
         if (txOut.status === 'fulfilled') {
-          this.transactions = txOut.value.data.data || []
+          const body = txOut.value.data
+          const chunk = body.data || []
+          this.transactionsMeta = body.meta || null
+          if (reset) {
+            this.transactions = chunk
+          } else {
+            this.transactions = [...this.transactions, ...chunk]
+          }
         } else {
-          this.transactions = []
+          if (reset) {
+            this.transactions = []
+            this.transactionsMeta = null
+          }
         }
         if (sumOut.status === 'fulfilled') {
           this.txSummary = sumOut.value.data || null
@@ -1039,7 +1115,13 @@ export default {
         }
       } finally {
         this.loading.transactions = false
+        this.loadingMoreTransactions = false
       }
+    },
+    async loadMoreTransactions() {
+      if (!this.canLoadMoreTransactions) return
+      this.transactionsPage += 1
+      await this.loadTransactions({ reset: false })
     },
     async loadCategories() {
       this.loading.categories = true

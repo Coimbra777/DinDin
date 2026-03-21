@@ -76,5 +76,7 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         'module' => \App\Http\Middleware\EnsureUserHasSaasModule::class,
         'finance.module' => \App\Http\Middleware\EnsureFinanceModuleAccess::class,
+        /** Espelhos /api/* em routes/api.php — preferir /cms/finance/api (SPA canónica). */
+        'deprecated.finance.api.mirror' => \App\Http\Middleware\LogDeprecatedFinanceApiMirror::class,
     ];
 }

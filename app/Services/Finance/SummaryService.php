@@ -28,6 +28,7 @@ final class SummaryService
         $previstoAcumuladoFim = round($ateInicioMes->saldo_caixa + $forecast['saldo_previsto_mes'], 2);
 
         return [
+            'forecast_type' => DashboardService::FORECAST_TYPE_REALIZED_ONLY,
             'month' => $month,
             'balance_all_time' => Transaction::balanceForUser($userId),
             'income_month' => $period['income'],

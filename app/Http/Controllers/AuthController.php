@@ -6,6 +6,13 @@ use App\Http\Requests\RegisterRequest;
 use App\Services\AuthenticationService;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Autenticação JWT (guard {@code api}) sob o prefixo {@code /api/auth/*}.
+ *
+ * A SPA de finanças no CMS usa sessão web ({@code web} + {@code auth}) e chama apenas {@code /cms/finance/api/*}.
+ * Este controlador permanece para integrações externas, mobile ou clientes legados que usem token — não remover sem
+ * migrar esses consumidores.
+ */
 class AuthController extends Controller
 {
     public function __construct(

@@ -14,6 +14,9 @@ final class TransactionResource
      */
     public static function toArray(Transaction $t): array
     {
+        $legacyRecurring = $t->recurring_transaction_id !== null
+            && (int) $t->recurring_transaction_id > 0;
+
         return [
             'id' => $t->id,
             'title' => $t->title,
@@ -27,7 +30,9 @@ final class TransactionResource
             'is_credit_card' => (bool) $t->is_credit_card,
             'category_id' => $t->category_id,
             'parent_transaction_id' => $t->parent_transaction_id,
+            /** Vínculo com regra antiga em finance_recurring_transactions (recorrência automática removida da app). */
             'recurring_transaction_id' => $t->recurring_transaction_id,
+            'is_legacy_recurring' => $legacyRecurring,
             'category' => $t->category ? [
                 'id' => $t->category->id,
                 'name' => $t->category->name,

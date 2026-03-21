@@ -123,6 +123,11 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('finance_dashboard', [FinanceDashboardController::class, 'index'])
             ->name('finance_dashboard.index');
+
+        /*
+        | Blade CRUD legado (views em resources/views/cms/finance/*) — a UI canónica é a SPA Vue.
+        | Mantido para bookmarks/POST antigos; novas funcionalidades devem ir para a API em finance/api/*.
+        */
         Route::resource('finance_transactions', TransactionController::class)->except(['show']);
         Route::resource('finance_categories', CategoryController::class)->except(['show']);
     });

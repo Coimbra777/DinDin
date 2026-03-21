@@ -5,9 +5,10 @@
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Duplicação intencional (fonte canónica para a app Vue: /cms/finance/api/*):
-| os prefixos abaixo espelham finanças sob /api/* para compatibilidade.
-| @deprecated Preferir rotas em routes/cms.php (prefixo cms/finance/api) quando possível.
+| CANÓNICO para a SPA de finanças: /cms/finance/api/* (routes/cms.php + middleware web+auth).
+|
+| O grupo abaixo (middleware deprecated.finance.api.mirror) duplica esses endpoints sob /api/*
+| para integrações antigas. Cada pedido gera Log::warning — remover este grupo quando não houver clientes.
 |--------------------------------------------------------------------------
 */
 
@@ -42,9 +43,9 @@ Route::group([
 });
 
 /*
-| Módulos financeiros — sessão CMS (`web` + `auth` + permissão por slug SaaS).
+| Módulos financeiros — espelho deprecado (ver cabeçalho deste ficheiro).
 */
-Route::middleware(['web', 'auth'])->group(function () {
+Route::middleware(['web', 'auth', 'deprecated.finance.api.mirror'])->group(function () {
     Route::middleware('finance.module')->group(function () {
         Route::prefix('finance')->group(function () {
             require base_path('routes/api/finance.php');

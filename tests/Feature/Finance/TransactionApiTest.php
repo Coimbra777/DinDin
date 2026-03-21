@@ -23,8 +23,22 @@ class TransactionApiTest extends FinanceApiTestCase
         $this->actingAs($user)
             ->getJson($this->financeApi('transactions'))
             ->assertOk()
-            ->assertJsonStructure(['data'])
+            ->assertJsonStructure(['data', 'meta'])
+            ->assertJsonPath('meta.total', 2)
             ->assertJsonCount(2, 'data');
+    }
+
+    public function test_transactions_index_respects_per_page_and_page(): void
+    {
+        $user = $this->financeUser();
+        Transaction::factory()->count(25)->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->getJson($this->financeApi('transactions').'?per_page=10&page=2')
+            ->assertOk()
+            ->assertJsonPath('meta.per_page', 10)
+            ->assertJsonPath('meta.current_page', 2)
+            ->assertJsonCount(10, 'data');
     }
 
     public function test_store_transaction_requires_category_id(): void

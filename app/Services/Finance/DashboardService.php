@@ -37,6 +37,9 @@ final class DashboardService
             2
         );
 
+        /** @see self::FORECAST_TYPE_REALIZED_ONLY — sem projeção além do já lançado no mês */
+        $forecastType = self::FORECAST_TYPE_REALIZED_ONLY;
+
         $ultimas = Transaction::forUser($userId)
             ->with(['category:id,name,color,type', 'creditCard:id,name'])
             ->whereBetween('transaction_date', [$start, $end])
@@ -63,11 +66,12 @@ final class DashboardService
             'entradas_previstas_mes' => $forecast['entradas_previstas_mes'],
             'despesas_fixas_previstas_mes' => $forecast['despesas_fixas_previstas_mes'],
             'saldo_previsto_mes' => $forecast['saldo_previsto_mes'],
+            'forecast_type' => $forecastType,
         ];
     }
 
     /**
-     * Sem compromissos automáticos: previsto = realizado no mês (caixa).
+     * “Previsão” = espelho do realizado no mês (caixa): não há modelo preditivo nem recorrência automática.
      *
      * @return array{entradas_previstas_mes: float, despesas_fixas_previstas_mes: float, saldo_previsto_mes: float}
      */

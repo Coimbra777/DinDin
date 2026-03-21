@@ -30,9 +30,17 @@ class TransactionApiController extends RestrictedController
             $filters['category_id'] = (int) $request->query('category_id');
         }
 
-        $data = $this->transactions->listForUser((int) $request->user()->id, $filters);
+        $perPage = min(100, max(1, (int) $request->query('per_page', 20)));
+        $page = max(1, (int) $request->query('page', 1));
 
-        return response()->json(['data' => $data]);
+        $payload = $this->transactions->listForUserPaginated(
+            (int) $request->user()->id,
+            $filters,
+            $perPage,
+            $page,
+        );
+
+        return response()->json($payload);
     }
 
     public function recent(Request $request): JsonResponse

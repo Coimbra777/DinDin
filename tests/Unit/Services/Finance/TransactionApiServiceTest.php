@@ -32,7 +32,7 @@ class TransactionApiServiceTest extends TestCase
             'installment_of' => null,
             'credit_card_id' => null,
             'is_credit_card' => false,
-        ], []);
+        ]);
 
         $this->assertSame('Compra unit', $row['title']);
         $this->assertEquals(42.5, (float) $row['amount']);

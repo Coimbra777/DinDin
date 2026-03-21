@@ -12,19 +12,37 @@ use Illuminate\Validation\ValidationException;
 final class TransactionApiService
 {
     /**
-     * @return list<array<string, mixed>>
+     * Lista paginada (substitui o limite fixo de 200). Ordenação: data desc, id desc.
+     *
+     * @return array{data: list<array<string, mixed>>, meta: array<string, int|null>}
      */
-    public function listForUser(int $userId, array $filters): array
+    public function listForUserPaginated(int $userId, array $filters, int $perPage, int $page): array
     {
-        $items = Transaction::forUser($userId)
+        $perPage = min(100, max(1, $perPage));
+        $page = max(1, $page);
+
+        $query = Transaction::forUser($userId)
             ->with(['category', 'creditCard'])
             ->filter($filters)
             ->orderByDesc('transaction_date')
-            ->orderByDesc('id')
-            ->limit(200)
-            ->get();
+            ->orderByDesc('id');
 
-        return $items->map(fn (Transaction $t) => TransactionResource::toArray($t))->all();
+        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+        $paginator->setCollection(
+            $paginator->getCollection()->map(fn (Transaction $t) => TransactionResource::toArray($t))->values()
+        );
+
+        return [
+            'data' => $paginator->items(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'from' => $paginator->firstItem(),
+                'to' => $paginator->lastItem(),
+            ],
+        ];
     }
 
     /**

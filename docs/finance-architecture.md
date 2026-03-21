@@ -1,10 +1,22 @@
 # Finanças pessoais — organização do código
 
+## API canónica (SPA Vue)
+
+A aplicação montada em `#finance-app` usa **exclusivamente** o prefixo:
+
+**`/cms/finance/api/*`** (definido em `routes/cms.php`, middleware `web` + `auth` + `finance.module`).
+
+## Espelho deprecado em `/api/*`
+
+`routes/api.php` regista as mesmas capacidades financeiras sob `/api/...` (ex.: `/api/finance/...`, `/api/goals`, `/api/cards`, …) com middleware `deprecated.finance.api.mirror`, que escreve **`Log::warning`** em cada pedido. Serve para integrações antigas; o objetivo é remover este grupo quando não houver clientes.
+
+---
+
 O domínio financeiro vive sob namespaces Laravel padrão:
 
 | Camada | Local |
 |--------|--------|
-| Models | `app/Models/Finance/` (`Category`, `Transaction`, `CreditCard`, `FinanceGoal`, `FinanceMonthlyPlan`) |
+| Models | `app/Models/Finance/` (`Category`, `Transaction`, `CreditCard`, `FinanceGoal`, `FinanceMonthlyPlan`, …) |
 | Services | `app/Services/Finance/` |
 | Controllers web | `app/Http/Controllers/Finance/` |
 | Controllers API | `app/Http/Controllers/Finance/Api/` |
@@ -12,15 +24,23 @@ O domínio financeiro vive sob namespaces Laravel padrão:
 
 Form requests: `app/Http/Requests/Goals/`, `app/Http/Requests/Finance/`.
 
-### Novos endpoints (resumo)
+### Endpoints resumo (espelhados em `/cms/finance/api/...` e `/api/...`)
 
-| Prefixo `/api/...` | Função |
-|--------------------|--------|
-| `alerts` | GET — alertas (gasto alto, saldo negativo, fatura alta) |
-| `insights` | GET — análises e frases (%, comparação mês anterior) |
+| Prefixo | Função |
+|---------|--------|
+| `alerts` | GET — alertas |
+| `insights` | GET — análises |
 | `credit-simulator` | POST `simulate` — simula parcelas |
 | `planning` | CRUD — planeamento mensal (`finance_monthly_plans`) |
+| `goals` | CRUD — metas (`finance_goals`) |
 
-O mesmo exist em `/cms/finance/api/...`. Ver **`docs/finance-multi-user.md`** para isolamento por `user_id`.
+Ver **`docs/finance-multi-user.md`** para isolamento por `user_id`.
 
-A montagem das rotas HTTP está em `routes/api.php` (prefixos `finance`, `cards`, etc.) e em `routes/cms.php` (`cms/finance/api/...`).
+### Autenticação
+
+- **SPA finanças:** sessão (cookies), não JWT.
+- **JWT:** `AuthController` + `/api/auth/*` para outros clientes.
+
+### UI legado Blade
+
+Rotas `finance_transactions` e `finance_categories` (resource) em `routes/cms.php` apontam para views Blade; a UI principal é a SPA.

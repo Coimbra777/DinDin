@@ -109,7 +109,7 @@
             <v-card-text class="py-4 px-4">
               <div class="d-flex align-center flex-wrap mb-2">
                 <v-icon color="primary" class="mr-2">mdi-chart-timeline-variant</v-icon>
-                <span class="subtitle-1 font-weight-bold">Projeção acumulada ao fim do mês</span>
+                <span class="subtitle-1 font-weight-bold">Saldo acumulado ao fim do mês (só com o já registrado)</span>
                 <v-spacer />
                 <span class="text-caption secondary--text">{{ monthLabel }}</span>
               </div>
@@ -141,7 +141,8 @@
               <v-progress-circular indeterminate color="primary" size="28" />
             </v-card-text>
             <v-card-text v-else-if="upcoming.length === 0" class="py-6 text-center finance-text-muted text-body-2">
-              Nenhum compromisso agendado à frente.
+              Não há compromissos automáticos listados. O sistema não agenda recorrências; use duplicação manual nas
+              movimentações se precisar de cópias futuras.
             </v-card-text>
             <v-list v-else dense class="py-0 transparent pb-3">
               <template v-for="(c, i) in upcoming">
