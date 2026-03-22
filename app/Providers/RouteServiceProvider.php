@@ -72,15 +72,13 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function map()
     {
-        $this->mapApiRoutes();
-
         $this->mapWebRoutes();
 
         $this->mapCmsRoutes();
     }
 
     /**
-     * Define the "web" routes for the application.
+     * Define the "web" routes for your application.
      *
      * These routes all receive session state, CSRF protection, etc.
      *
@@ -93,21 +91,7 @@ class RouteServiceProvider extends ServiceProvider
     }
 
     /**
-     * Define the "api" routes for the application.
-     *
-     * These routes are typically stateless.
-     *
-     * @return void
-     */
-    protected function mapApiRoutes()
-    {
-        Route::prefix('api')
-            ->middleware('api')
-            ->group(base_path('routes/api.php'));
-    }
-
-    /**
-     * Define the "cms" routes for the application.
+     * Define the "cms" routes for your application.
      *
      * These routes all receive session state, CSRF protection, etc.
      *

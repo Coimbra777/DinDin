@@ -41,7 +41,7 @@ class SaasAccessTest extends TestCase
         $user = User::factory()->create(['group_id' => 0, 'is_admin' => false]);
 
         $this->actingAs($user)
-            ->getJson('/api/finance/dashboard')
+            ->getJson('/cms/finance/api/dashboard')
             ->assertOk();
     }
 
@@ -50,7 +50,7 @@ class SaasAccessTest extends TestCase
         $admin = User::factory()->create(['group_id' => 0, 'is_admin' => true]);
 
         $this->actingAs($admin)
-            ->getJson('/api/finance/dashboard')
+            ->getJson('/cms/finance/api/dashboard')
             ->assertOk();
     }
 }

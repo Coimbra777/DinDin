@@ -5,11 +5,11 @@
 | CMS / app autenticada — autenticação + finanças (sem CMS institucional antigo)
 |--------------------------------------------------------------------------
 |
-| Finanças (prefixo finance): middleware finance.module — espelho em routes/api.php
-| sob /api/* mantido por compatibilidade (@deprecated progressivo).
+| API de finanças (canónica): /cms/finance/api/* — fragmentos em routes/finance-api/*.php
 |--------------------------------------------------------------------------
 */
 
+use App\Http\Controllers\Api\TinyMceController;
 use App\Http\Controllers\Cms\Admin\AdminSpaController;
 use App\Http\Controllers\Cms\Admin\UserAdminApiController;
 use App\Http\Controllers\Cms\Admin\UserAdminController;
@@ -51,6 +51,9 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('cms.reset-password');
 
 Route::middleware(['auth'])->group(function () {
+    Route::post('api/upload', [TinyMceController::class, 'uploadImage'])->name('cms.api.tinymce.upload');
+    Route::post('api/remove_media', [TinyMceController::class, 'removeImage'])->name('cms.api.tinymce.remove');
+
     Route::get('dashboard', function () {
         return redirect()->route('finance_dashboard.index');
     })->name('dashboard.index');
@@ -94,19 +97,19 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('reports/trend', [ReportApiController::class, 'trend'])->name('finance.api.reports.trend');
             });
             Route::prefix('goals')->group(function () {
-                require base_path('routes/api/goals.php');
+                require base_path('routes/finance-api/goals.php');
             });
             Route::prefix('alerts')->group(function () {
-                require base_path('routes/api/alerts.php');
+                require base_path('routes/finance-api/alerts.php');
             });
             Route::prefix('insights')->group(function () {
-                require base_path('routes/api/insights.php');
+                require base_path('routes/finance-api/insights.php');
             });
             Route::prefix('credit-simulator')->group(function () {
-                require base_path('routes/api/credit-simulator.php');
+                require base_path('routes/finance-api/credit-simulator.php');
             });
             Route::prefix('planning')->middleware('module:planning')->group(function () {
-                require base_path('routes/api/planning.php');
+                require base_path('routes/finance-api/planning.php');
             });
         });
 

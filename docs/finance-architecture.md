@@ -6,9 +6,13 @@ A aplicação montada em `#finance-app` usa **exclusivamente** o prefixo:
 
 **`/cms/finance/api/*`** (definido em `routes/cms.php`, middleware `web` + `auth` + `finance.module`).
 
-## Espelho deprecado em `/api/*`
+Fragmentos de rotas reutilizáveis: **`routes/finance-api/*.php`** (incluídos sob `/cms/finance/api/...`).
 
-`routes/api.php` regista as mesmas capacidades financeiras sob `/api/...` (ex.: `/api/finance/...`, `/api/goals`, …) com middleware `deprecated.finance.api.mirror`, que escreve **`Log::warning`** em cada pedido. Serve para integrações antigas; o objetivo é remover este grupo quando não houver clientes.
+### Breaking change (remoção do espelho `/api/*`)
+
+Foram removidos o ficheiro `routes/api.php`, o prefixo público **`/api/*`** para finanças (ex.: `/api/finance/...`, `/api/goals`, `/api/reports/...`, `/api/projection`, …) e o middleware `deprecated.finance.api.mirror`. Qualquer cliente externo, bookmark ou script que ainda chame esses URLs deve passar a usar **`/cms/finance/api/...`** (mesma sessão e cookies do CMS).
+
+Upload/remoção de imagens **TinyMCE** no backoffice passou de `/api/upload` e `/api/remove_media` para **`/cms/api/upload`** e **`/cms/api/remove_media`** (autenticado).
 
 ---
 
@@ -20,11 +24,11 @@ O domínio financeiro vive sob namespaces Laravel padrão:
 | Services | `app/Services/Finance/` |
 | Controllers web | `app/Http/Controllers/Finance/` |
 | Controllers API | `app/Http/Controllers/Finance/Api/` |
-| Rotas API (fragmentos) | `routes/api/finance.php`, `projection.php`, `reports.php`, `goals.php`, `alerts.php`, `insights.php`, `credit-simulator.php`, `planning.php` |
+| Rotas API (fragmentos) | `routes/finance-api/` (`goals.php`, `alerts.php`, `insights.php`, `credit-simulator.php`, `planning.php`); restantes (dashboard, transações, categorias, `projection`, `reports/*`, onboarding) em `routes/cms.php` |
 
 Form requests: `app/Http/Requests/Goals/`, `app/Http/Requests/Finance/`.
 
-### Endpoints resumo (espelhados em `/cms/finance/api/...` e `/api/...`)
+### Endpoints resumo (sob `/cms/finance/api/...`)
 
 | Prefixo | Função |
 |---------|--------|
@@ -40,7 +44,6 @@ Ver **`docs/finance-multi-user.md`** para isolamento por `user_id`.
 ### Autenticação
 
 - **CMS e SPA finanças:** guard `web` (sessão Laravel). Identidade única: modelo `User` / tabela `users`.
-- **API espelhada em `/api/*`:** também `web` + `auth` (mesma sessão que o CMS), não há token JWT.
 - **Integrações externas headless:** usar [Laravel Sanctum](https://laravel.com/docs/sanctum) (tokens pessoais ou SPA cookie) ou `session` com login web — não está instalado por defeito neste repositório.
 
 ### UI legado Blade

@@ -24,7 +24,7 @@ final class EnsureFinanceModuleAccess
     {
         $user = $request->user();
         if ($user === null || ! $this->moduleAccess->can($user, 'finance')) {
-            if ($request->expectsJson() || $request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('cms/finance/*')) {
                 return response()->json(['message' => 'Módulo não autorizado'], 403);
             }
             abort(403, 'Módulo não autorizado');

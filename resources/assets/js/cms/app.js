@@ -39,7 +39,7 @@ tinymce.init({
 	paste_data_images: true,
 	image_title: true,
 	automatic_uploads: true,
-	images_upload_url: "/api/upload",
+	images_upload_url: "/cms/api/upload",
 	language_url: '/js/langs/pt_BR.js',
 	file_picker_types: "image",
 	height: "420",
@@ -79,7 +79,7 @@ tinymce.init({
 				var selectedNode = tinymce.activeEditor.selection.getNode();
 				if (selectedNode && selectedNode.nodeName == 'IMG') {
 					var imageSrc = selectedNode.src;
-					Axios.post("/api/remove_media", { image: imageSrc })
+					Axios.post("/cms/api/remove_media", { image: imageSrc })
 						.then(res => {
 							console.log(res)
 						})

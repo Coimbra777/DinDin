@@ -6,7 +6,7 @@ use App\Http\Controllers\Finance\Api\FinanceGoalApiController;
 use Illuminate\Support\Facades\Route;
 
 /*
-| Metas financeiras — prefixo definido no RouteServiceProvider (ex.: /api/goals/* ou /cms/finance/api/goals/*)
+| Metas financeiras — incluído em routes/cms.php → /cms/finance/api/goals/*
 */
 Route::get('/', [FinanceGoalApiController::class, 'index']);
 Route::post('/', [FinanceGoalApiController::class, 'store']);
