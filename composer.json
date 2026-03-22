@@ -14,8 +14,7 @@
     "laravel/helpers": "^1.1",
     "laravel/tinker": "^2.6.1",
     "laravel/ui": "^4.2",
-    "tightenco/ziggy": "^1.8",
-    "tymon/jwt-auth": "*"
+    "tightenco/ziggy": "^1.8"
   },
   "require-dev": {
     "beyondcode/laravel-dump-server": "^1.0",

@@ -39,8 +39,9 @@ Ver **`docs/finance-multi-user.md`** para isolamento por `user_id`.
 
 ### Autenticação
 
-- **SPA finanças:** sessão (cookies), não JWT.
-- **JWT:** `AuthController` + `/api/auth/*` para outros clientes.
+- **CMS e SPA finanças:** guard `web` (sessão Laravel). Identidade única: modelo `User` / tabela `users`.
+- **API espelhada em `/api/*`:** também `web` + `auth` (mesma sessão que o CMS), não há token JWT.
+- **Integrações externas headless:** usar [Laravel Sanctum](https://laravel.com/docs/sanctum) (tokens pessoais ou SPA cookie) ou `session` com login web — não está instalado por defeito neste repositório.
 
 ### UI legado Blade
 

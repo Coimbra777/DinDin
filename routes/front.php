@@ -13,11 +13,4 @@
 
 use App\Http\Controllers\Front\HomeController;
 
-Route::group([
-    'middleware' => ['frontAuth', 'api'],
-    'prefix' => '/',
-], function () {
-    // COLOQUE AQUI AS ROTAS PARA QUE POSSA TER OS DADOS DO USUÁRIO LOGADO
-});
-
 Route::get('/', [HomeController::class, 'index'])->name('home');

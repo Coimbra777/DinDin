@@ -13,7 +13,6 @@
 */
 
 use App\Http\Controllers\Api\TinyMceController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Finance\Api\DashboardApiController;
 use App\Http\Controllers\Finance\Api\ProjectionApiController;
 use Illuminate\Support\Facades\Route;
@@ -27,18 +26,6 @@ Route::middleware('cors')->group(function () {
 Route::middleware(['cors', 'web', 'auth'])->group(function () {
     Route::post('/upload', [TinyMceController::class, 'uploadImage'])->name('api.tinymce.upload');
     Route::post('/remove_media', [TinyMceController::class, 'removeImage'])->name('api.tinymce.remove');
-});
-
-Route::group([
-    'middleware' => 'api',
-    'prefix' => 'auth',
-], function () {
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::post('me', [AuthController::class, 'me']);
-    if (config('auth.allow_jwt_registration')) {
-        Route::post('register', [AuthController::class, 'register']);
-    }
 });
 
 /*
