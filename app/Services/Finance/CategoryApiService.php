@@ -16,6 +16,7 @@ final class CategoryApiService
     public function listForUser(int $userId): array
     {
         return Category::forUser($userId)
+            ->withCount('transactions')
             ->orderBy('name')
             ->get()
             ->map(fn (Category $c) => $this->toArray($c))
@@ -49,7 +50,16 @@ final class CategoryApiService
      */
     public function update(Category $category, array $data): Category
     {
-        $typeAfter = $data['type'] ?? $category->type ?? Category::TYPE_EXPENSE;
+        $originalType = $category->type ?? Category::TYPE_EXPENSE;
+        if (array_key_exists('type', $data) && $data['type'] !== null && $data['type'] !== $originalType) {
+            if ($category->transactions()->exists()) {
+                throw ValidationException::withMessages([
+                    'type' => 'Não é possível alterar o tipo de uma categoria com transações existentes.',
+                ]);
+            }
+        }
+
+        $typeAfter = $data['type'] ?? $originalType;
         $groupAfter = array_key_exists('group', $data) ? $data['group'] : $category->group;
 
         if ($typeAfter === Category::TYPE_INCOME) {
@@ -60,8 +70,10 @@ final class CategoryApiService
         $this->validateTypeAndGroup($typeAfter, $groupAfter);
 
         $category->update($data);
+        $category->refresh();
+        $category->loadCount('transactions');
 
-        return $category->fresh();
+        return $category;
     }
 
     public function delete(Category $category): void
@@ -74,6 +86,10 @@ final class CategoryApiService
      */
     public function toArray(Category $c): array
     {
+        $hasTransactions = array_key_exists('transactions_count', $c->getAttributes())
+            ? (int) $c->getAttributes()['transactions_count'] > 0
+            : $c->transactions()->exists();
+
         return [
             'id' => $c->id,
             'name' => $c->name,
@@ -81,6 +97,7 @@ final class CategoryApiService
             'group' => $c->group,
             'color' => $c->color,
             'slug' => $c->slug,
+            'has_transactions' => $hasTransactions,
         ];
     }
 

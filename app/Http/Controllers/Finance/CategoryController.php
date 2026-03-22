@@ -7,13 +7,21 @@ namespace App\Http\Controllers\Finance;
 use App\Http\Controllers\Cms\RestrictedController;
 use App\Models\Finance\Category;
 use App\Models\Finance\Transaction;
+use App\Services\Finance\CategoryApiService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class CategoryController extends RestrictedController
 {
+    public function __construct(
+        private readonly CategoryApiService $categoryApi,
+    ) {
+        parent::__construct();
+    }
+
     public function index(Request $request): View
     {
         if (config('finance.standalone_ui', true)) {
@@ -101,7 +109,14 @@ class CategoryController extends RestrictedController
             unset($data['type']);
         }
 
-        $finance_category->update($data);
+        try {
+            $this->categoryApi->update($finance_category, $data);
+        } catch (ValidationException $e) {
+            return redirect()
+                ->back()
+                ->withErrors($e->errors())
+                ->withInput();
+        }
 
         return redirect()
             ->route('finance_categories.index')

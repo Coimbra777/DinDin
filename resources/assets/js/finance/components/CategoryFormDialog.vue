@@ -18,6 +18,9 @@
           item-text="text"
           item-value="value"
           :rules="[rules.required]"
+          :disabled="typeLocked"
+          :hint="typeLockedHint"
+          :persistent-hint="typeLocked"
         />
         <v-select
           v-if="type === TX_EXPENSE"
@@ -85,6 +88,14 @@ export default {
   computed: {
     isEdit() {
       return !!(this.category && this.category.id)
+    },
+    typeLocked() {
+      return this.isEdit && !!this.category && !!this.category.has_transactions
+    },
+    typeLockedHint() {
+      return this.typeLocked
+        ? 'O tipo não pode ser alterado enquanto existirem transações nesta categoria.'
+        : ''
     },
   },
   watch: {

@@ -29,6 +29,7 @@ class CategoryApiController extends RestrictedController
     {
         $data = $request->validate($this->categories->validationRulesForStore());
         $c = $this->categories->create((int) $request->user()->id, $data);
+        $c->loadCount('transactions');
 
         return response()->json($this->categories->toArray($c), 201);
     }
