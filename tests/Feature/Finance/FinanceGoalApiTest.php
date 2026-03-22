@@ -25,7 +25,7 @@ class FinanceGoalApiTest extends FinanceApiTestCase
     {
         $user = $this->financeUser();
 
-        $this->actingAs($user)
+        $response = $this->actingAs($user)
             ->postJson($this->financeApi('goals'), [
                 'title' => 'Reserva',
                 'description' => 'Meta de teste',
@@ -34,8 +34,9 @@ class FinanceGoalApiTest extends FinanceApiTestCase
                 'deadline' => now()->addYear()->format('Y-m-d'),
             ])
             ->assertStatus(201)
-            ->assertJsonPath('title', 'Reserva')
-            ->assertJsonPath('target_amount', 5000.0);
+            ->assertJsonPath('title', 'Reserva');
+
+        self::assertEqualsWithDelta(5000.0, (float) $response->json('target_amount'), 0.00001);
 
         $this->assertDatabaseHas('finance_goals', [
             'user_id' => $user->id,

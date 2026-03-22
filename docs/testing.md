@@ -44,6 +44,12 @@ Garanta que o serviço está a correr (ex.: `docker compose up -d`) e que `DB_*`
 
 **Modelo:** copie `.env.testing.example` para `.env.testing` e crie a base (ex. `nova_base_test`). O ficheiro `.env.testing` está no `.gitignore`.
 
+### API finanças nos testes (`/cms/finance/api/*`)
+
+- Pedidos **JSON** sem sessão (`getJson` / `postJson` sem `actingAs`) recebem **401** (middleware `auth`), não 302.
+- O índice de transações filtra por **mês civil** (por defeito o mês atual). Factories com datas aleatórias podem cair fora desse mês — em testes que contem linhas, fixe `transaction_date` ou use o query param `month=YYYY-MM` alinhado aos dados.
+- `FinanceApiTestCase` faz `Carbon::setTestNow()` no `tearDown` para testes que fixam a data não afetarem os seguintes.
+
 ### Dados QA via `db:seed` completo
 
 No `.env` ou `.env.testing`, defina `SEED_FINANCIAL_TEST_DATA=true` e corra:

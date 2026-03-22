@@ -12,13 +12,17 @@ class TransactionApiTest extends FinanceApiTestCase
     public function test_guest_cannot_access_transactions(): void
     {
         $this->getJson($this->financeApi('transactions'))
-            ->assertStatus(302);
+            ->assertUnauthorized();
     }
 
     public function test_authenticated_user_lists_transactions(): void
     {
         $user = $this->financeUser();
-        Transaction::factory()->count(2)->create(['user_id' => $user->id]);
+        $today = now()->format('Y-m-d');
+        Transaction::factory()->count(2)->create([
+            'user_id' => $user->id,
+            'transaction_date' => $today,
+        ]);
 
         $this->actingAs($user)
             ->getJson($this->financeApi('transactions'))
@@ -31,10 +35,17 @@ class TransactionApiTest extends FinanceApiTestCase
     public function test_transactions_index_respects_per_page_and_page(): void
     {
         $user = $this->financeUser();
-        Transaction::factory()->count(25)->create(['user_id' => $user->id]);
+        $month = now()->format('Y-m');
+        $start = now()->copy()->startOfMonth();
+        for ($i = 0; $i < 25; $i++) {
+            Transaction::factory()->create([
+                'user_id' => $user->id,
+                'transaction_date' => $start->copy()->addDays($i % 28)->format('Y-m-d'),
+            ]);
+        }
 
         $this->actingAs($user)
-            ->getJson($this->financeApi('transactions').'?per_page=10&page=2')
+            ->getJson($this->financeApi('transactions').'?month='.$month.'&per_page=10&page=2')
             ->assertOk()
             ->assertJsonPath('meta.per_page', 10)
             ->assertJsonPath('meta.current_page', 2)

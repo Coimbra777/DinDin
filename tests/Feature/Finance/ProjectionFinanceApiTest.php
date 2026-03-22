@@ -10,12 +10,6 @@ use Carbon\Carbon;
 
 class ProjectionFinanceApiTest extends FinanceApiTestCase
 {
-    protected function tearDown(): void
-    {
-        Carbon::setTestNow();
-        parent::tearDown();
-    }
-
     public function test_projection_uses_only_real_transactions_per_month(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-03-15 12:00:00', config('app.timezone')));
