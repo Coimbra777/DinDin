@@ -64,7 +64,7 @@ final class FinanceMonthlyPlanService
         $m = $plan->year_month;
         $row = Transaction::aggregateMonthStats($userId, $m, null);
         $income = (float) ($row->income_total ?? 0);
-        $exp = (float) ($row->expense_cash ?? 0) + (float) ($row->expense_card ?? 0);
+        $exp = (float) ($row->expense_total ?? 0);
         $savingActual = $income - $exp;
 
         return [

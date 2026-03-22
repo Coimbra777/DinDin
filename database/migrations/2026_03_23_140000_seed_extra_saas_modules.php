@@ -11,7 +11,6 @@ return new class extends Migration
 
         $now = now();
         foreach ([
-            ['name' => 'Cartão', 'slug' => 'cards'],
             ['name' => 'Relatórios', 'slug' => 'reports'],
             ['name' => 'Projeções', 'slug' => 'projections'],
         ] as $row) {
@@ -28,6 +27,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::table('saas_modules')->whereIn('slug', ['cards', 'reports', 'projections'])->delete();
+        DB::table('saas_modules')->whereIn('slug', ['reports', 'projections'])->delete();
     }
 };

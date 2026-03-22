@@ -35,9 +35,9 @@
             Movimentações
           </h3>
           <p class="text-body-2 finance-help-text mb-0">
-            Cada <strong>movimentação</strong> é uma entrada ou saída: receita ou despesa, valor, data, categoria e
-            (opcionalmente) cartão. Na mesma lista aparecem lançamentos únicos, parcelas e os gerados por compromissos
-            recorrentes (com indicação no item). O mês selecionado filtra o que você vê.
+            Cada <strong>movimentação</strong> é uma entrada ou saída: receita ou despesa, valor, data e categoria.
+            Na mesma lista aparecem lançamentos únicos, parcelas e os gerados por compromissos recorrentes (com
+            indicação no item). O mês selecionado filtra o que você vê.
           </p>
         </section>
 
@@ -50,8 +50,7 @@
             <li class="mb-2"><strong>Dashboard</strong> — visão do mês e indicadores principais.</li>
             <li class="mb-2"><strong>Movimentações</strong> — lista, filtros e inclusão/edição de lançamentos.</li>
             <li class="mb-2"><strong>Categorias</strong> — criar e editar grupos para classificar receitas e despesas.</li>
-            <li class="mb-2"><strong>Cartões</strong> — cadastrar cartões; em despesas, você pode vincular à fatura.</li>
-            <li class="mb-0">Demais telas (projeção, relatórios, alertas, etc.) aprofundam análise e planejamento.</li>
+            <li class="mb-0">Demais telas (projeção, relatórios, alertas, simulador, etc.) aprofundam análise e planejamento.</li>
           </ul>
         </section>
       </v-card-text>

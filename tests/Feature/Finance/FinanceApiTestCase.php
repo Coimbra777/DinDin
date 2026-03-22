@@ -27,7 +27,7 @@ abstract class FinanceApiTestCase extends TestCase
         $user = User::factory()->create(array_merge(['group_id' => 0], $overrides));
 
         $ids = SaasModule::query()
-            ->whereIn('slug', ['finance', 'cards', 'reports', 'projections', 'planning'])
+            ->whereIn('slug', ['finance', 'reports', 'projections', 'planning'])
             ->pluck('id')
             ->all();
 

@@ -180,25 +180,6 @@
             </v-btn>
           </div>
 
-          <v-select
-            v-if="form.type === TX_EXPENSE && creditCardItems.length"
-            v-model="form.credit_card_id"
-            :items="creditCardItems"
-            label="Cartão de crédito (opcional)"
-            outlined
-            dense
-            clearable
-            prepend-inner-icon="mdi-credit-card-outline"
-            item-text="name"
-            item-value="id"
-            hide-details="auto"
-            class="mb-2"
-          >
-            <template slot="append-outer">
-              <help-tooltip text="Use para compras parceladas ou fatura" aria-label="Ajuda: cartão de crédito" />
-            </template>
-          </v-select>
-
           <v-menu
             ref="menu"
             v-model="dateMenu"
@@ -281,7 +262,6 @@ const emptyForm = () => ({
   amount: null,
   type: TRANSACTION_TYPE_EXPENSE,
   category_id: null,
-  credit_card_id: null,
   transaction_date: todayIsoLocal(),
   description: '',
 })
@@ -293,7 +273,6 @@ export default {
     value: { type: Boolean, default: false },
     apiBase: { type: String, required: true },
     categories: { type: Array, default: () => [] },
-    creditCards: { type: Array, default: () => [] },
     transaction: { type: Object, default: null },
   },
   data() {
@@ -349,9 +328,6 @@ export default {
       const dateOk = !!toIsoDateOnly(this.form.transaction_date)
       return titleOk && catOk && amountOk && dateOk
     },
-    creditCardItems() {
-      return this.creditCards || []
-    },
     typeChoiceLabel() {
       return this.form.type === this.TX_INCOME ? 'Receita (entrada)' : 'Despesa (saída)'
     },
@@ -394,9 +370,6 @@ export default {
       const prev = this.form.category_id
       this.$set(this.form, 'type', t)
       this.clearFieldError('category_id')
-      if (t !== this.TX_EXPENSE) {
-        this.form.credit_card_id = null
-      }
       if (prev == null) return
       const cat = this.categories.find((c) => c.id === prev)
       if (cat && cat.type && cat.type !== t) {
@@ -435,7 +408,6 @@ export default {
           amount: this.transaction.amount,
           type: normalizeTransactionType(this.transaction.type),
           category_id: this.transaction.category_id,
-          credit_card_id: this.transaction.credit_card_id || null,
           transaction_date: toIsoDateOnly(this.transaction.transaction_date) || todayIsoLocal(),
           description: this.transaction.description || '',
         }
@@ -479,7 +451,6 @@ export default {
         transaction_date: toIsoDateOnly(this.form.transaction_date) || this.form.transaction_date,
         description: this.form.description || null,
         category_id: parseInt(String(this.form.category_id), 10),
-        credit_card_id: this.form.type === this.TX_EXPENSE && this.form.credit_card_id ? this.form.credit_card_id : null,
       }
 
       try {

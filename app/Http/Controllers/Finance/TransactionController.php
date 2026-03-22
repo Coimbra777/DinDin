@@ -100,11 +100,6 @@ class TransactionController extends RestrictedController
             'description' => 'nullable|string|max:5000',
             'installment_number' => ['nullable', 'integer', 'min:1', 'max:360'],
             'installment_of' => ['nullable', 'integer', 'min:2', 'max:360'],
-            'credit_card_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('finance_credit_cards', 'id')->where(fn ($q) => $q->where('user_id', $userId)),
-            ],
         ]);
 
         $hasN = array_key_exists('installment_number', $data) && $data['installment_number'] !== null;
@@ -118,19 +113,6 @@ class TransactionController extends RestrictedController
             throw ValidationException::withMessages([
                 'installment_number' => 'A parcela atual deve ser menor que o total de parcelas.',
             ]);
-        }
-
-        $hasCard = ! empty($data['credit_card_id']);
-        if ($hasCard && $data['type'] !== Transaction::TYPE_EXPENSE) {
-            throw ValidationException::withMessages([
-                'credit_card_id' => 'Cartão de crédito só pode ser usado em despesas.',
-            ]);
-        }
-        if ($hasCard) {
-            $data['is_credit_card'] = true;
-        } else {
-            $data['credit_card_id'] = null;
-            $data['is_credit_card'] = false;
         }
 
         TransactionCategoryTypeGuard::assertCompatible($userId, isset($data['category_id']) ? (int) $data['category_id'] : null, $data['type']);

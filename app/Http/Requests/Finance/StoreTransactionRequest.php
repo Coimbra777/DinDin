@@ -49,11 +49,6 @@ class StoreTransactionRequest extends FormRequest
             ],
             'transaction_date' => 'required|date',
             'description' => 'nullable|string|max:5000',
-            'credit_card_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('finance_credit_cards', 'id')->where(fn ($q) => $q->where('user_id', $userId)),
-            ],
         ];
     }
 
@@ -66,16 +61,6 @@ class StoreTransactionRequest extends FormRequest
 
             $data = $validator->getData();
             $userId = (int) $this->user()->id;
-
-            $hasCard = ! empty($data['credit_card_id']);
-            if ($hasCard && ($data['type'] ?? '') !== Transaction::TYPE_EXPENSE) {
-                $validator->errors()->add(
-                    'credit_card_id',
-                    'Cartão de crédito só pode ser usado em despesas.'
-                );
-
-                return;
-            }
 
             try {
                 TransactionCategoryTypeGuard::assertCompatible(
@@ -98,16 +83,6 @@ class StoreTransactionRequest extends FormRequest
      */
     public function toTransactionAttributes(): array
     {
-        $data = $this->validated();
-
-        $hasCard = ! empty($data['credit_card_id']);
-        if ($hasCard) {
-            $data['is_credit_card'] = true;
-        } else {
-            $data['credit_card_id'] = null;
-            $data['is_credit_card'] = false;
-        }
-
-        return $data;
+        return $this->validated();
     }
 }

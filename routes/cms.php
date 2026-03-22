@@ -18,7 +18,6 @@ use App\Http\Controllers\Cms\Auth\LoginController;
 use App\Http\Controllers\Cms\Auth\RegisterController;
 use App\Http\Controllers\Cms\Auth\ResetPasswordController;
 use App\Http\Controllers\Finance\Api\CategoryApiController;
-use App\Http\Controllers\Finance\Api\CreditCardApiController;
 use App\Http\Controllers\Finance\Api\DashboardApiController;
 use App\Http\Controllers\Finance\Api\FinanceOnboardingApiController;
 use App\Http\Controllers\Finance\Api\ProjectionApiController;
@@ -90,13 +89,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('transactions/{transaction}/duplicate', [TransactionApiController::class, 'duplicate'])->name('finance.api.transactions.duplicate');
             Route::put('transactions/{transaction}', [TransactionApiController::class, 'update'])->name('finance.api.transactions.update');
             Route::delete('transactions/{transaction}', [TransactionApiController::class, 'destroy'])->name('finance.api.transactions.destroy');
-            Route::middleware('module:cards')->group(function () {
-                Route::get('credit-cards', [CreditCardApiController::class, 'index'])->name('finance.api.credit-cards.index');
-                Route::post('credit-cards', [CreditCardApiController::class, 'store'])->name('finance.api.credit-cards.store');
-                Route::put('credit-cards/{finance_credit_card}', [CreditCardApiController::class, 'update'])->name('finance.api.credit-cards.update');
-                Route::delete('credit-cards/{finance_credit_card}', [CreditCardApiController::class, 'destroy'])->name('finance.api.credit-cards.destroy');
-                Route::get('credit-cards/{finance_credit_card}/bill', [CreditCardApiController::class, 'bill'])->name('finance.api.credit-cards.bill');
-            });
             Route::middleware('module:reports')->group(function () {
                 Route::get('reports/categories', [ReportApiController::class, 'categories'])->name('finance.api.reports.categories');
                 Route::get('reports/trend', [ReportApiController::class, 'trend'])->name('finance.api.reports.trend');

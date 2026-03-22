@@ -35,9 +35,9 @@ final class ReportService
     }
 
     /**
-     * Série mensal: receitas, despesas caixa, despesas cartão e saldos (últimos N meses).
+     * Série mensal: receitas, despesas e saldo acumulado (últimos N meses).
      *
-     * @return list<array{month: string, receitas: float, despesas_caixa: float, despesas_cartao: float, saldo_real: float, saldo_com_cartao: float, saldo_acumulado: float, saldo_acumulado_com_cartao: float}>
+     * @return list<array{month: string, receitas: float, despesas: float, saldo_mes: float, saldo_acumulado: float}>
      */
     public function monthlyTrend(int $userId, int $months = 6): array
     {
@@ -48,15 +48,12 @@ final class ReportService
             $key = $cursor->format('Y-m');
             $row = Transaction::aggregateMonthStats($userId, $key, null);
             $rec = (float) ($row->income_total ?? 0);
-            $cash = (float) ($row->expense_cash ?? 0);
-            $card = (float) ($row->expense_card ?? 0);
+            $desp = (float) ($row->expense_total ?? 0);
             $out[] = [
                 'month' => $key,
                 'receitas' => round($rec, 2),
-                'despesas_caixa' => round($cash, 2),
-                'despesas_cartao' => round($card, 2),
-                'saldo_real' => round($rec - $cash, 2),
-                'saldo_com_cartao' => round($rec - $cash - $card, 2),
+                'despesas' => round($desp, 2),
+                'saldo_mes' => round($rec - $desp, 2),
             ];
             $cursor = $cursor->copy()->subMonth();
         }
@@ -64,8 +61,7 @@ final class ReportService
         $out = array_reverse($out);
         foreach ($out as &$row) {
             $cum = Transaction::cumulativeStatsThroughMonthEnd($userId, (string) $row['month']);
-            $row['saldo_acumulado'] = round($cum->saldo_caixa, 2);
-            $row['saldo_acumulado_com_cartao'] = round($cum->saldo_com_cartao, 2);
+            $row['saldo_acumulado'] = round($cum->balance, 2);
         }
         unset($row);
 

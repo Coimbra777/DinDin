@@ -7,6 +7,6 @@ use Illuminate\Support\Facades\Route;
 
 /*
 | Projeção — prefixo pai "projection" → /api/projection/*
-| Resposta: { months: [{ month, income, expense, expense_card, balance }] } (só dados reais por mês).
+| Resposta: { months: [{ month, income, expense, balance }] } (só dados reais por mês).
 */
 Route::get('/', [ProjectionApiController::class, 'show']);

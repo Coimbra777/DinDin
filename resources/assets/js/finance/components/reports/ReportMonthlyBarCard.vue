@@ -27,7 +27,7 @@
         <canvas ref="barCanvas" />
       </div>
       <p class="text-caption secondary--text text-center px-4 pb-4 mb-0">
-        Barras: receitas e despesas por mês · Linha: saldo acumulado (caixa), mês a mês
+        Barras: receitas e despesas por mês · Linha: saldo acumulado, mês a mês
       </p>
     </template>
     <v-card-text v-else class="finance-text-muted text-body-2 pb-8 text-center">
@@ -123,7 +123,7 @@ export default {
       this.destroyChart()
       const labels = this.series.map((r) => this.labelMes(r.month))
       const receitas = this.series.map((r) => Number(r.receitas) || 0)
-      const despesas = this.series.map((r) => (Number(r.despesas_caixa) || 0) + (Number(r.despesas_cartao) || 0))
+      const despesas = this.series.map((r) => Number(r.despesas) || 0)
       const saldoAcum = this.series.map((r) => Number(r.saldo_acumulado) || 0)
       const isNarrow = typeof window !== 'undefined' && window.innerWidth < 600
       const tc = this.chartThemeColors()
@@ -153,7 +153,7 @@ export default {
             },
             {
               type: 'line',
-              label: 'Saldo acumulado (caixa)',
+              label: 'Saldo acumulado',
               data: saldoAcum,
               yAxisID: 'y1',
               borderColor: 'rgba(33, 150, 243, 0.95)',

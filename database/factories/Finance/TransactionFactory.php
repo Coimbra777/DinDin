@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Database\Factories\Finance;
 
 use App\Models\Finance\Category;
-use App\Models\Finance\CreditCard;
 use App\Models\Finance\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
@@ -29,7 +28,6 @@ class TransactionFactory extends Factory
             'user_id' => User::factory(),
             'parent_transaction_id' => null,
             'recurring_transaction_id' => null,
-            'credit_card_id' => null,
             'title' => fake()->randomElement(['Mercado', 'Uber', 'Aluguel', 'Farmácia', 'Restaurante', 'Salário', 'Bônus']),
             'amount' => $amount,
             'type' => $type,
@@ -58,7 +56,6 @@ class TransactionFactory extends Factory
             'description' => fake()->boolean(40) ? implode(' ', fake()->words(fake()->numberBetween(3, 8))) : null,
             'installment_number' => null,
             'installment_of' => null,
-            'is_credit_card' => false,
         ];
     }
 
@@ -67,7 +64,6 @@ class TransactionFactory extends Factory
         return $this->state(fn () => [
             'type' => Transaction::TYPE_INCOME,
             'amount' => fake()->randomFloat(2, 10, 5000),
-            'is_credit_card' => false,
         ]);
     }
 
@@ -76,7 +72,6 @@ class TransactionFactory extends Factory
         return $this->state(fn () => [
             'type' => Transaction::TYPE_EXPENSE,
             'amount' => fake()->randomFloat(2, 10, 5000),
-            'is_credit_card' => false,
         ]);
     }
 
@@ -87,17 +82,6 @@ class TransactionFactory extends Factory
 
         return $this->state(fn () => [
             'transaction_date' => $start->copy()->day($day)->format('Y-m-d'),
-        ]);
-    }
-
-    public function creditCard(CreditCard $card): static
-    {
-        return $this->state(fn () => [
-            'user_id' => $card->user_id,
-            'credit_card_id' => $card->id,
-            'type' => Transaction::TYPE_EXPENSE,
-            'is_credit_card' => true,
-            'amount' => fake()->randomFloat(2, 15, 2500),
         ]);
     }
 

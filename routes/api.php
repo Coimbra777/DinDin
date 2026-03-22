@@ -14,7 +14,6 @@
 
 use App\Http\Controllers\Api\TinyMceController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Finance\Api\CreditCardApiController;
 use App\Http\Controllers\Finance\Api\DashboardApiController;
 use App\Http\Controllers\Finance\Api\ProjectionApiController;
 use Illuminate\Support\Facades\Route;
@@ -65,18 +64,6 @@ Route::middleware(['web', 'auth', 'deprecated.finance.api.mirror'])->group(funct
 
         /** @deprecated use GET /api/finance/dashboard */
         Route::get('/dashboard', [DashboardApiController::class, 'show']);
-    });
-
-    Route::middleware('module:cards')->group(function () {
-        Route::prefix('cards')->group(function () {
-            require base_path('routes/api/cards.php');
-        });
-        /** @deprecated use rotas em /api/cards */
-        Route::get('/credit-cards', [CreditCardApiController::class, 'index']);
-        Route::post('/credit-cards', [CreditCardApiController::class, 'store']);
-        Route::put('/credit-cards/{finance_credit_card}', [CreditCardApiController::class, 'update']);
-        Route::delete('/credit-cards/{finance_credit_card}', [CreditCardApiController::class, 'destroy']);
-        Route::get('/credit-cards/{finance_credit_card}/bill', [CreditCardApiController::class, 'bill']);
     });
 
     Route::middleware('module:projections')->group(function () {

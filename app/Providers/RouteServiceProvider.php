@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Models\Finance\Category;
-use App\Models\Finance\CreditCard;
 use App\Models\Finance\FinanceGoal;
 use App\Models\Finance\FinanceMonthlyPlan;
 use App\Models\Finance\Transaction;
@@ -36,17 +35,6 @@ class RouteServiceProvider extends ServiceProvider
             }
 
             return Category::query()
-                ->where('id', $value)
-                ->where('user_id', auth()->id())
-                ->firstOrFail();
-        });
-
-        Route::bind('finance_credit_card', function ($value) {
-            if (! auth()->check()) {
-                abort(403);
-            }
-
-            return CreditCard::query()
                 ->where('id', $value)
                 ->where('user_id', auth()->id())
                 ->firstOrFail();

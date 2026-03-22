@@ -50,7 +50,6 @@ class FinanceSeeder extends Seeder
             Transaction::query()->create([
                 'user_id' => $user->id,
                 'category_id' => $categoryId,
-                'credit_card_id' => null,
                 'title' => fake()->randomElement($type === Transaction::TYPE_INCOME ? $titlesIncome : $titlesExpense),
                 'amount' => number_format(fake()->randomFloat(2, 10, 5000), 2, '.', ''),
                 'type' => $type,
@@ -58,10 +57,9 @@ class FinanceSeeder extends Seeder
                 'description' => fake()->boolean(35) ? implode(' ', fake()->words(fake()->numberBetween(4, 10))) : null,
                 'installment_number' => null,
                 'installment_of' => null,
-                'is_credit_card' => false,
             ]);
         }
 
-        $this->command?->info('FinanceSeeder: 52 transações (caixa) criadas para test@test.com.');
+        $this->command?->info('FinanceSeeder: 52 transações criadas para test@test.com.');
     }
 }

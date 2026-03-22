@@ -30,8 +30,6 @@ class TransactionApiServiceTest extends TestCase
             'description' => null,
             'installment_number' => null,
             'installment_of' => null,
-            'credit_card_id' => null,
-            'is_credit_card' => false,
         ]);
 
         $this->assertSame('Compra unit', $row['title']);

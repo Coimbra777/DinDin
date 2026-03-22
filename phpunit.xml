@@ -20,7 +20,7 @@
         <env name="CACHE_DRIVER" value="array"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
-        <!-- Feature tests (RefreshDatabase): defina DB no .env.testing ou descomente SQLite abaixo (requer ext-pdo_sqlite). -->
+        <!-- Feature tests (RefreshDatabase): defina DB no .env.testing (ex.: DB_HOST=127.0.0.1 se o .env usa hostname só-Docker). Ver docs/testing.md. -->
         <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
         <!-- <env name="DB_DATABASE" value=":memory:"/> -->
     </php>

@@ -22,7 +22,7 @@ final class TransactionApiService
         $page = max(1, $page);
 
         $query = Transaction::forUser($userId)
-            ->with(['category', 'creditCard'])
+            ->with(['category'])
             ->filter($filters)
             ->orderByDesc('transaction_date')
             ->orderByDesc('id');
@@ -52,7 +52,7 @@ final class TransactionApiService
     {
         $filters = ['month' => $month];
         $items = Transaction::forUser($userId)
-            ->with(['category', 'creditCard'])
+            ->with(['category'])
             ->filter($filters)
             ->orderByDesc('transaction_date')
             ->orderByDesc('id')
@@ -73,7 +73,7 @@ final class TransactionApiService
             $transactionData['recurring_transaction_id'] = null;
             $transactionData['parent_transaction_id'] = null;
             $t = Transaction::create($transactionData);
-            $t->load(['category', 'creditCard']);
+            $t->load(['category']);
 
             return TransactionResource::toArray($t);
         });
@@ -93,7 +93,7 @@ final class TransactionApiService
             );
             $transaction->update($transactionData);
             $t = $transaction->fresh();
-            $t->load(['category', 'creditCard']);
+            $t->load(['category']);
 
             return TransactionResource::toArray($t);
         });
@@ -140,7 +140,6 @@ final class TransactionApiService
                     'parent_transaction_id' => $parentId,
                     'category_id' => $source->category_id,
                     'recurring_transaction_id' => null,
-                    'credit_card_id' => $source->credit_card_id,
                     'title' => $source->title,
                     'amount' => $source->amount,
                     'type' => $source->type,
@@ -148,14 +147,13 @@ final class TransactionApiService
                     'description' => $source->description,
                     'installment_number' => null,
                     'installment_of' => null,
-                    'is_credit_card' => (bool) $source->is_credit_card,
                 ]);
                 $ids[] = $row->id;
             }
 
             $fresh = Transaction::query()
                 ->whereIn('id', $ids)
-                ->with(['category', 'creditCard'])
+                ->with(['category'])
                 ->orderBy('transaction_date')
                 ->orderBy('id')
                 ->get();

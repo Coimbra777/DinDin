@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Models\Finance\CreditCard;
 use App\Models\Finance\FinanceGoal;
 use App\Models\Finance\FinanceMonthlyPlan;
 use App\Models\Finance\Transaction;
@@ -52,8 +51,6 @@ class FinancialTestDataSeeder extends Seeder
             'username' => 'finance_qa_'.uniqid(),
             'group_id' => $group->id,
         ]);
-
-        CreditCard::factory()->count(2)->create(['user_id' => $user->id]);
 
         FinanceGoal::factory()->count(3)->create(['user_id' => $user->id]);
 

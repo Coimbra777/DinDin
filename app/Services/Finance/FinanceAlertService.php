@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Finance;
 
-use App\Models\Finance\CreditCard;
 use App\Models\Finance\FinanceGoal;
 
 /**
- * Alertas derivados de transações, cartões e metas (sem persistência).
+ * Alertas derivados de transações e metas (sem persistência).
  *
  * @phpstan-type AlertItem array{
  *   type: string,
@@ -21,8 +20,6 @@ use App\Models\Finance\FinanceGoal;
  */
 final class FinanceAlertService
 {
-    private const HIGH_BILL_LIMIT_RATIO = 0.50;
-
     public function __construct(
         private readonly FinanceMonthMetrics $monthMetrics,
         private readonly FinanceGoalService $goals,
@@ -37,19 +34,19 @@ final class FinanceAlertService
         $alerts = [];
 
         if ($snap['negative_balance']) {
-            $gap = abs($snap['saldo_com_cartao']);
+            $gap = abs($snap['saldo']);
             $alerts[] = [
                 'type' => 'negative_balance',
                 'severity' => 'warning',
                 'title' => 'Saldo no vermelho neste mês',
                 'message' => sprintf(
-                    'Suas despesas (incluindo o que já está no cartão) ultrapassam a receita em %s neste mês. Sem ajuste, o caixa tende a ficar mais apertado nos próximos meses.',
+                    'Suas despesas ultrapassam a receita em %s neste mês. Sem ajuste, o saldo tende a ficar mais apertado nos próximos meses.',
                     $this->brl($gap)
                 ),
-                'action_hint' => 'Revise despesas fixas, parcelas no cartão e o que ainda dá para cortar neste mês.',
+                'action_hint' => 'Revise despesas fixas e o que ainda dá para cortar neste mês.',
                 'meta' => [
                     'month' => $snap['month'],
-                    'saldo_com_cartao' => $snap['saldo_com_cartao'],
+                    'saldo' => $snap['saldo'],
                 ],
             ];
         }
@@ -61,7 +58,7 @@ final class FinanceAlertService
                 'severity' => 'info',
                 'title' => 'Gastos acima do seu “normal” recente',
                 'message' => sprintf(
-                    'Você está gastando cerca de %s%% a mais que a média dos últimos três meses. Manter esse ritmo pode comprometer o saldo nas próximas faturas e no mês que vem.',
+                    'Você está gastando cerca de %s%% a mais que a média dos últimos três meses. Manter esse ritmo pode comprometer o saldo no mês que vem.',
                     $this->fmtPct($pct)
                 ),
                 'action_hint' => 'Revise suas despesas recentes e as categorias que mais cresceram.',
@@ -72,33 +69,6 @@ final class FinanceAlertService
                     'percentual_acima_media' => $pct,
                 ],
             ];
-        }
-
-        $cards = CreditCard::query()->forUser($userId)->get();
-        foreach ($cards as $card) {
-            $bill = CreditCardBillingService::billPayload($card);
-            $fatura = (float) ($bill['fatura_total'] ?? 0);
-            $limite = (float) ($bill['credit_card']['limit'] ?? 0);
-            if ($limite > 0 && $fatura > $limite * self::HIGH_BILL_LIMIT_RATIO) {
-                $ratioPct = (int) (self::HIGH_BILL_LIMIT_RATIO * 100);
-                $alerts[] = [
-                    'type' => 'high_credit_card_bill',
-                    'severity' => 'warning',
-                    'title' => sprintf('Fatura do cartão “%s” está alta', $card->name),
-                    'message' => sprintf(
-                        'A fatura atual (%s) passa de %d%% do limite (%s). Isso aumenta o risco de estourar o limite ou pagar juros se não planejar o pagamento.',
-                        $this->brl($fatura),
-                        $ratioPct,
-                        $this->brl($limite)
-                    ),
-                    'action_hint' => 'Confira compras parceladas e antecipe parte da fatura, se possível.',
-                    'meta' => [
-                        'credit_card_id' => $card->id,
-                        'fatura_total' => $fatura,
-                        'limite' => $limite,
-                    ],
-                ];
-            }
         }
 
         $today = now()->toDateString();

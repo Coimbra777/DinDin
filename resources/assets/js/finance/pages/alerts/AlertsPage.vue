@@ -21,7 +21,7 @@
       </v-card-text>
 
       <v-card-text v-else-if="!alerts.length" class="finance-text-muted text-body-2 py-6">
-        Nenhum alerta para este mês. Continue acompanhando seus gastos e cartões.
+        Nenhum alerta para este mês. Continue acompanhando seus gastos.
       </v-card-text>
 
       <v-list v-else class="py-0 transparent" dense>
@@ -92,14 +92,11 @@ export default {
     },
     formatMeta(meta) {
       const parts = []
-      if (meta.saldo_com_cartao != null) {
-        parts.push(`Saldo c/ cartão: ${this.$formatCurrencyBRL(meta.saldo_com_cartao)}`)
+      if (meta.saldo != null) {
+        parts.push(`Saldo do mês: ${this.$formatCurrencyBRL(meta.saldo)}`)
       }
       if (meta.percentual_acima_media != null) {
         parts.push(`Acima da média: ${meta.percentual_acima_media}%`)
-      }
-      if (meta.fatura_total != null && meta.limite != null) {
-        parts.push(`Fatura ${this.$formatCurrencyBRL(meta.fatura_total)} / limite ${this.$formatCurrencyBRL(meta.limite)}`)
       }
       if (meta.shortfall != null && meta.projected_total != null) {
         parts.push(

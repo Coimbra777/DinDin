@@ -8,7 +8,7 @@ use App\Models\Finance\Transaction;
 use Carbon\Carbon;
 
 /**
- * Indicadores do mês (receita, despesas, saldo c/ cartão, comparação com média recente).
+ * Indicadores do mês (receita, despesas, saldo, comparação com média recente).
  * Usado por alertas e por metas (contexto de pressão no caixa).
  */
 final class FinanceMonthMetrics
@@ -19,10 +19,9 @@ final class FinanceMonthMetrics
      * @return array{
      *     month: string,
      *     income: float,
-     *     expense_cash: float,
-     *     expense_card: float,
+     *     expense_total: float,
      *     total_expense: float,
-     *     saldo_com_cartao: float,
+     *     saldo: float,
      *     negative_balance: bool,
      *     spending_spike: bool,
      *     spending_spike_percent: float|null,
@@ -34,26 +33,23 @@ final class FinanceMonthMetrics
         $month = Transaction::normalizeMonth($monthQuery);
         $row = Transaction::aggregateMonthStats($userId, $month, null);
         $income = (float) ($row->income_total ?? 0);
-        $expCash = (float) ($row->expense_cash ?? 0);
-        $expCard = (float) ($row->expense_card ?? 0);
-        $totalExpense = $expCash + $expCard;
-        $saldoComCartao = $income - $expCash - $expCard;
+        $expense = (float) ($row->expense_total ?? 0);
+        $saldo = $income - $expense;
 
         $avgPrior = $this->averageTotalExpensePriorMonths($userId, $month, 3);
-        $spike = $avgPrior > 0 && $totalExpense > $avgPrior * self::SPENDING_SPIKE_RATIO;
+        $spike = $avgPrior > 0 && $expense > $avgPrior * self::SPENDING_SPIKE_RATIO;
         $spikePct = null;
         if ($spike && $avgPrior > 0) {
-            $spikePct = round((($totalExpense / $avgPrior) - 1) * 100, 1);
+            $spikePct = round((($expense / $avgPrior) - 1) * 100, 1);
         }
 
         return [
             'month' => $month,
             'income' => $income,
-            'expense_cash' => $expCash,
-            'expense_card' => $expCard,
-            'total_expense' => round($totalExpense, 2),
-            'saldo_com_cartao' => round($saldoComCartao, 2),
-            'negative_balance' => $saldoComCartao < 0,
+            'expense_total' => round($expense, 2),
+            'total_expense' => round($expense, 2),
+            'saldo' => round($saldo, 2),
+            'negative_balance' => $saldo < 0,
             'spending_spike' => $spike,
             'spending_spike_percent' => $spikePct,
             'avg_prior_expense' => round($avgPrior, 2),
@@ -68,8 +64,7 @@ final class FinanceMonthMetrics
         for ($i = 0; $i < $count; $i++) {
             $key = $cursor->format('Y-m');
             $row = Transaction::aggregateMonthStats($userId, $key, null);
-            $total = (float) ($row->expense_cash ?? 0) + (float) ($row->expense_card ?? 0);
-            $sum += $total;
+            $sum += (float) ($row->expense_total ?? 0);
             $n++;
             $cursor = $cursor->copy()->subMonth();
         }

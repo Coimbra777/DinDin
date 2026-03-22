@@ -5,6 +5,29 @@
 - **Feature** (`tests/Feature/Finance/*`): usam `RefreshDatabase` e precisam de uma base de dados acessível (MySQL/MariaDB como no `.env`, ou SQLite em memória).
 - **Unit** (`tests/Unit/*`): a maioria não toca na BD; podem correr sem servidor de BD.
 
+### Erro: `could not find driver` (Connection: mysql)
+
+O PHPUnit usa o mesmo PHP da linha de comandos. Se aparecer **`PDOException: could not find driver`** ao correr testes com `RefreshDatabase`, o PHP **não tem o driver PDO MySQL** (`pdo_mysql`).
+
+**Correção (Ubuntu/Debian)** — ajuste a versão do PHP à do `php -v`:
+
+```bash
+sudo apt install php8.3-mysql
+php -m | grep -i pdo
+```
+
+Deve listar `pdo_mysql`. Alternativas: correr `./vendor/bin/phpunit` **dentro do container Docker** do projeto (onde a extensão costuma existir), ou usar **SQLite** para testes (secção seguinte).
+
+### Erro: `getaddrinfo for … failed` / hostname Docker (`mysql_*`)
+
+Se o `.env` usa `DB_HOST=mysql_nova_base` (ou outro nome de **serviço Compose**), esse nome **só resolve dentro da rede Docker**. Na máquina host, o PHPUnit falha ao ligar à BD antes de qualquer asserção (muitos erros, zero assertions).
+
+**Correção (escolha uma):**
+
+1. **Recomendado:** copie `.env.testing.example` para `.env.testing` e defina `DB_HOST=127.0.0.1` (ou o host onde o MySQL está exposto), mais `DB_DATABASE` de teste dedicada. O Laravel carrega `.env.testing` com `APP_ENV=testing`.
+2. Correr `./vendor/bin/phpunit` **no container** da aplicação (mesma rede que o MySQL).
+3. Mapear o hostname no host, por exemplo em `/etc/hosts`: `127.0.0.1 mysql_nova_base` (só se a porta MySQL estiver publicada no host).
+
 ### SQLite em memória (opcional)
 
 1. Instale a extensão PHP: `pdo_sqlite`.
@@ -48,7 +71,7 @@ Isto executa os seeders habituais e, no fim, o `FinancialTestDataSeeder` (utiliz
 
 | Email | Senha | Notas |
 |-------|-------|--------|
-| `test@test.com` | `123456` | Dados de finanças (transações, metas, cartões, planejamento) |
+| `test@test.com` | `123456` | Dados de finanças (transações, metas, planejamento) |
 | `admin@example.com` | `123456` | Administrador CMS |
 
 ## Dados de seed para QA (opcional)
@@ -57,7 +80,7 @@ Isto executa os seeders habituais e, no fim, o `FinancialTestDataSeeder` (utiliz
 php artisan db:seed --class=FinancialTestDataSeeder
 ```
 
-Cria utilizador `finance-qa@example.test` (password padrão da factory: `password`), cartões, metas, planejamentos e 55+ transações. O seeder garante grupo, módulo `finance` e ligação `group_module` se faltarem.
+Cria utilizador `finance-qa@example.test` (password padrão da factory: `password`), metas, planejamentos e 55+ transações. O seeder garante grupo, módulo `finance` e ligação `group_module` se faltarem.
 
 ## Mocks (HTTP)
 

@@ -345,7 +345,7 @@
                     <div
                       class="text-overline secondary--text text-uppercase letter-wider"
                     >
-                      Saldo em caixa (como fecha)
+                      Saldo (como fecha)
                     </div>
                     <div class="text-caption secondary--text mb-2">
                       Acumulado dos meses anteriores + resultado deste mês
@@ -367,7 +367,7 @@
                       class="d-flex justify-space-between align-baseline text-body-2"
                     >
                       <span class="secondary--text pr-2"
-                        >+ Este mês (à vista)</span
+                        >+ Este mês</span
                       >
                       <span
                         class="tabular-nums font-weight-medium text-right"
@@ -515,16 +515,6 @@
             </v-card>
           </div>
 
-          <!-- CARTÕES -->
-          <div v-else-if="view === 'cards'" key="cards">
-            <credit-cards-page
-              :api-base="apiBase"
-              :refresh-key="creditCardsRefreshKey"
-              @saved="onCreditCardPanelSaved"
-              @error="showError"
-            />
-          </div>
-
           <!-- PROJEÇÃO -->
           <div v-else-if="view === 'projection'" key="proj">
             <projection-page
@@ -564,7 +554,7 @@
             />
           </div>
 
-          <!-- SIMULADOR CARTÃO -->
+          <!-- SIMULADOR -->
           <div v-else-if="view === 'simulator'" key="sim">
             <credit-simulator-page
               :api-base="apiBase"
@@ -644,7 +634,6 @@
       v-model="formOpen"
       :api-base="apiBase"
       :categories="categories"
-      :credit-cards="creditCards"
       :transaction="editTransaction"
       @saved="onSaved"
       @error="showError"
@@ -875,7 +864,6 @@ import Dashboard from "../../components/Dashboard.vue";
 import TransactionList from "../../components/TransactionList.vue";
 import TransactionForm from "../../components/TransactionForm.vue";
 import CategoryFormDialog from "../../components/CategoryFormDialog.vue";
-import CreditCardsPage from "../cards/CreditCardsPage.vue";
 import ReportsPage from "../reports/ReportsPage.vue";
 import ProjectionPage from "../projection/ProjectionPage.vue";
 import AlertsPage from "../alerts/AlertsPage.vue";
@@ -899,7 +887,6 @@ const VALID_VIEWS = [
   "transactions",
   "categories",
   "goals",
-  "cards",
   "projection",
   "reports",
   "alerts",
@@ -915,7 +902,6 @@ export default {
     TransactionList,
     TransactionForm,
     CategoryFormDialog,
-    CreditCardsPage,
     ReportsPage,
     ProjectionPage,
     AlertsPage,
@@ -950,7 +936,6 @@ export default {
       month: normalizeMonth(this.initialMonth),
       monthItems: monthChoices(24),
       dashboardRefreshKey: 0,
-      creditCardsRefreshKey: 0,
       reportsRefreshKey: 0,
       projectionRefreshKey: 0,
       alertsRefreshKey: 0,
@@ -986,13 +971,6 @@ export default {
           value: "goals",
           icon: "mdi-flag-checkered",
           core: true,
-        },
-        {
-          title: "Cartões",
-          value: "cards",
-          icon: "mdi-credit-card-outline",
-          core: false,
-          slug: "cards",
         },
         {
           title: "Projeção",
@@ -1040,7 +1018,6 @@ export default {
       loadingMoreTransactions: false,
       txSummary: null,
       categories: [],
-      creditCards: [],
       filterCategoryId: null,
       loading: {
         transactions: false,
@@ -1222,10 +1199,6 @@ export default {
     },
     view(v) {
       if (v === "categories") this.loadCategories();
-      if (v === "cards") {
-        this.creditCardsRefreshKey += 1;
-        this.loadCreditCards();
-      }
       if (v === "reports") {
         this.reportsRefreshKey += 1;
       }
@@ -1326,7 +1299,6 @@ export default {
     },
     async refreshAll() {
       this.dashboardRefreshKey += 1;
-      this.creditCardsRefreshKey += 1;
       this.reportsRefreshKey += 1;
       this.projectionRefreshKey += 1;
       this.alertsRefreshKey += 1;
@@ -1337,7 +1309,6 @@ export default {
       await Promise.all([
         this.loadTransactions({ reset: true }),
         this.loadCategories(),
-        this.loadCreditCards(),
       ]);
     },
     goView(value) {
@@ -1439,18 +1410,6 @@ export default {
       } finally {
         this.loading.categories = false;
       }
-    },
-    async loadCreditCards() {
-      try {
-        const { data } = await axios.get(`${this.apiBase}/credit-cards`);
-        this.creditCards = data.data || [];
-      } catch (e) {
-        this.creditCards = [];
-      }
-    },
-    onCreditCardPanelSaved() {
-      this.loadCreditCards();
-      this.dashboardRefreshKey += 1;
     },
     openCreate() {
       this.editTransaction = null;

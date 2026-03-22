@@ -26,8 +26,6 @@ final class TransactionResource
             'description' => $t->description,
             'installment_number' => $t->installment_number,
             'installment_of' => $t->installment_of,
-            'credit_card_id' => $t->credit_card_id,
-            'is_credit_card' => (bool) $t->is_credit_card,
             'category_id' => $t->category_id,
             'parent_transaction_id' => $t->parent_transaction_id,
             /** Vínculo com regra antiga em finance_recurring_transactions (recorrência automática removida da app). */
@@ -38,10 +36,6 @@ final class TransactionResource
                 'name' => $t->category->name,
                 'color' => $t->category->color,
                 'type' => $t->category->type ?? null,
-            ] : null,
-            'credit_card' => $t->creditCard ? [
-                'id' => $t->creditCard->id,
-                'name' => $t->creditCard->name,
             ] : null,
         ];
     }

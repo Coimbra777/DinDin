@@ -116,11 +116,6 @@
                   {{ item.category.name }}
                 </span>
               </template>
-              <span v-if="item.is_credit_card || item.credit_card" class="ml-1">
-                <v-icon x-small color="indigo lighten-1"
-                  >mdi-credit-card-outline</v-icon
-                >
-              </span>
             </v-list-item-subtitle>
             <div
               v-if="item.description"
@@ -205,13 +200,10 @@ export default {
     },
     itemIcon(item) {
       if (item.type === "income") return "mdi-cash-plus";
-      if (item.is_credit_card || item.credit_card)
-        return "mdi-credit-card-outline";
       return "mdi-cash-minus";
     },
     avatarColor(item) {
       if (item.type === "income") return "success";
-      if (item.is_credit_card || item.credit_card) return "indigo darken-1";
       return "error";
     },
     /** Valor sempre em R$ com sinal visível */

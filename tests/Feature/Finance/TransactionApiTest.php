@@ -101,21 +101,18 @@ class TransactionApiTest extends FinanceApiTestCase
             'type' => Transaction::TYPE_INCOME,
             'amount' => 5000,
             'transaction_date' => '2026-01-10',
-            'is_credit_card' => false,
         ]);
         Transaction::factory()->forUserId($user->id)->create([
             'category_id' => $cat->id,
             'type' => Transaction::TYPE_EXPENSE,
             'amount' => 2000,
             'transaction_date' => '2026-02-05',
-            'is_credit_card' => false,
         ]);
         Transaction::factory()->forUserId($user->id)->create([
             'category_id' => $cat->id,
             'type' => Transaction::TYPE_EXPENSE,
             'amount' => 500,
             'transaction_date' => '2026-03-12',
-            'is_credit_card' => false,
         ]);
 
         $summary = $this->actingAs($user)

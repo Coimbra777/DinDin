@@ -75,8 +75,8 @@ final class FinanceInsightService
         $prev = Carbon::createFromFormat('Y-m', $month)->startOfMonth()->subMonth()->format('Y-m');
         $curRow = Transaction::aggregateMonthStats($userId, $month, null);
         $prevRow = Transaction::aggregateMonthStats($userId, $prev, null);
-        $curExp = (float) ($curRow->expense_cash ?? 0) + (float) ($curRow->expense_card ?? 0);
-        $prevExp = (float) ($prevRow->expense_cash ?? 0) + (float) ($prevRow->expense_card ?? 0);
+        $curExp = (float) ($curRow->expense_total ?? 0);
+        $prevExp = (float) ($prevRow->expense_total ?? 0);
 
         $variacaoPct = 0.0;
         if ($prevExp > 0) {

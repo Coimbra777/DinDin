@@ -34,7 +34,6 @@ class Transaction extends Model
         'parent_transaction_id',
         'category_id',
         'recurring_transaction_id',
-        'credit_card_id',
         'title',
         'amount',
         'type',
@@ -42,13 +41,11 @@ class Transaction extends Model
         'description',
         'installment_number',
         'installment_of',
-        'is_credit_card',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'transaction_date' => 'date',
-        'is_credit_card' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -74,11 +71,6 @@ class Transaction extends Model
     public function childDuplicates(): HasMany
     {
         return $this->hasMany(self::class, 'parent_transaction_id');
-    }
-
-    public function creditCard(): BelongsTo
-    {
-        return $this->belongsTo(CreditCard::class, 'credit_card_id');
     }
 
     public function scopeForUser(Builder $query, int $userId): Builder
@@ -183,9 +175,9 @@ class Transaction extends Model
     }
 
     /**
-     * Agregados de um mês civil (YYYY-MM) em uma única query — despesas separadas: caixa vs cartão.
+     * Agregados de um mês civil (YYYY-MM) em uma única query.
      *
-     * @return object{income_total: mixed, expense_cash: mixed, expense_card: mixed, tx_count: int}
+     * @return object{income_total: mixed, expense_total: mixed, tx_count: int}
      */
     public static function aggregateMonthStats(int $userId, string $yearMonth, ?int $categoryId = null): object
     {
@@ -203,24 +195,23 @@ class Transaction extends Model
 
         $row = $q->selectRaw(
             'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as income_total, '.
-            'SUM(CASE WHEN type = ? AND (is_credit_card = 0 OR is_credit_card IS NULL) THEN amount ELSE 0 END) as expense_cash, '.
-            'SUM(CASE WHEN type = ? AND is_credit_card = 1 THEN amount ELSE 0 END) as expense_card, '.
+            'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as expense_total, '.
             'COUNT(*) as tx_count',
-            [$incomeType, $expenseType, $expenseType]
+            [$incomeType, $expenseType]
         )->first();
 
         return $row ?? (object) [
             'income_total' => 0,
-            'expense_cash' => 0,
-            'expense_card' => 0,
+            'expense_total' => 0,
             'tx_count' => 0,
         ];
     }
 
     /**
      * Totais acumulados desde o primeiro lançamento até ao último dia do mês (inclusive).
+     * Saldo = receitas − despesas (todas as despesas).
      *
-     * @return object{income_total: float, expense_cash: float, expense_card: float, saldo_caixa: float, saldo_com_cartao: float}
+     * @return object{income_total: float, expense_total: float, balance: float}
      */
     public static function cumulativeStatsThroughMonthEnd(int $userId, string $yearMonth): object
     {
@@ -233,35 +224,24 @@ class Transaction extends Model
             ->whereDate('transaction_date', '<=', $end)
             ->selectRaw(
                 'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as income_total, '.
-                'SUM(CASE WHEN type = ? AND (is_credit_card = 0 OR is_credit_card IS NULL) THEN amount ELSE 0 END) as expense_cash, '.
-                'SUM(CASE WHEN type = ? AND is_credit_card = 1 THEN amount ELSE 0 END) as expense_card',
-                [$incomeType, $expenseType, $expenseType]
+                'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as expense_total',
+                [$incomeType, $expenseType]
             )->first();
 
         $inc = (float) ($row->income_total ?? 0);
-        $cash = (float) ($row->expense_cash ?? 0);
-        $card = (float) ($row->expense_card ?? 0);
+        $exp = (float) ($row->expense_total ?? 0);
 
         return (object) [
             'income_total' => $inc,
-            'expense_cash' => $cash,
-            'expense_card' => $card,
-            'saldo_caixa' => $inc - $cash,
-            'saldo_com_cartao' => $inc - $cash - $card,
+            'expense_total' => $exp,
+            'balance' => $inc - $exp,
         ];
     }
 
     /**
      * Receitas, despesas e saldo líquido para os filtros aplicados (ex.: mês + categoria).
      *
-     * @return array{
-     *     income: float,
-     *     expense: float,
-     *     expense_cash: float,
-     *     expense_credit_card: float,
-     *     available: float,
-     *     available_with_card: float
-     * }
+     * @return array{income: float, expense: float, available: float}
      */
     public static function periodSummary(int $userId, array $filters): array
     {
@@ -270,32 +250,22 @@ class Transaction extends Model
             $categoryId = isset($filters['category_id']) ? (int) $filters['category_id'] : null;
             $row = self::aggregateMonthStats($userId, $month, $categoryId);
             $income = (float) ($row->income_total ?? 0);
-            $expCash = (float) ($row->expense_cash ?? 0);
-            $expCard = (float) ($row->expense_card ?? 0);
+            $expense = (float) ($row->expense_total ?? 0);
 
             return [
                 'income' => $income,
-                'expense' => $expCash,
-                'expense_cash' => $expCash,
-                'expense_credit_card' => $expCard,
-                'available' => $income - $expCash,
-                'available_with_card' => $income - $expCash - $expCard,
+                'expense' => $expense,
+                'available' => $income - $expense,
             ];
         }
 
         $income = (float) static::query()->forUser($userId)->income()->filter($filters)->sum('amount');
-        $expCash = (float) static::query()->forUser($userId)->expense()->filter($filters)->where(function ($q) {
-            $q->where('is_credit_card', false)->orWhereNull('is_credit_card');
-        })->sum('amount');
-        $expCard = (float) static::query()->forUser($userId)->expense()->filter($filters)->where('is_credit_card', true)->sum('amount');
+        $expense = (float) static::query()->forUser($userId)->expense()->filter($filters)->sum('amount');
 
         return [
             'income' => $income,
-            'expense' => $expCash,
-            'expense_cash' => $expCash,
-            'expense_credit_card' => $expCard,
-            'available' => $income - $expCash,
-            'available_with_card' => $income - $expCash - $expCard,
+            'expense' => $expense,
+            'available' => $income - $expense,
         ];
     }
 
@@ -305,9 +275,7 @@ class Transaction extends Model
     public static function balanceForUser(int $userId, ?array $filters = null): float
     {
         $incomeQ = static::query()->forUser($userId)->income();
-        $expenseQ = static::query()->forUser($userId)->expense()->where(function ($q) {
-            $q->where('is_credit_card', false)->orWhereNull('is_credit_card');
-        });
+        $expenseQ = static::query()->forUser($userId)->expense();
         if ($filters) {
             $incomeQ->filter($filters);
             $expenseQ->filter($filters);

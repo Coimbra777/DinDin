@@ -46,7 +46,7 @@ const STEPS = [
   },
   {
     title: 'Entradas e saídas',
-    text: 'Em Movimentações, o saldo em caixa é a soma do que já acumulou até o mês anterior com o resultado à vista do mês escolhido. O cartão entra só nas despesas marcadas como cartão.',
+    text: 'No painel, o saldo acumulado considera todas as receitas e despesas até o fim do mês. O resultado do mês é receitas menos despesas no período selecionado.',
     selector: '[data-tour="dashboard-income-expense"]',
   },
   {

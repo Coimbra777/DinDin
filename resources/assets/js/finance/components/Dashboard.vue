@@ -40,18 +40,7 @@
                 resultado do mês: {{ formatBRL(saldoMes) }}
                 <span class="mx-1">·</span>
                 {{ totalTransacoes }} lançamento(s)
-                <span class="d-none d-sm-inline"> · caixa (sem fatura)</span>
               </div>
-              <v-chip
-                v-if="mostrarMiniCartao"
-                small
-                outlined
-                class="mt-3"
-                color="secondary"
-              >
-                <v-icon left x-small>mdi-credit-card-outline</v-icon>
-                Acumulado c/ cartão: {{ formatBRL(saldoAcumuladoComCartao) }}
-              </v-chip>
             </v-card-text>
           </v-card>
         </v-col>
@@ -89,11 +78,6 @@
                 </div>
                 <div class="stat-tile__value finance-amount-expense font-weight-bold tabular-nums">
                   {{ formatBRL(despesasTotalMes) }}
-                </div>
-                <div v-if="despesasCartaoMes > 0" class="text-caption secondary--text mt-1">
-                  À vista {{ formatBRL(despesasCaixaMes) }}
-                  <span class="mx-1">·</span>
-                  Cartão {{ formatBRL(despesasCartaoMes) }}
                 </div>
               </div>
             </v-card-text>
@@ -191,14 +175,11 @@ export default {
       reloading: false,
       hasPayload: false,
       saldoAcumulado: 0,
-      saldoAcumuladoComCartao: 0,
       saldoMes: 0,
-      saldoComCartao: 0,
       acumuladoAteInicioMes: 0,
       saldoPrevistoAcumuladoFimMes: 0,
       receitasMes: 0,
-      despesasCaixaMes: 0,
-      despesasCartaoMes: 0,
+      despesasMes: 0,
       totalTransacoes: 0,
       ultimasTransacoes: [],
       apiMonth: '',
@@ -215,13 +196,7 @@ export default {
       return `${m}/${y}`
     },
     despesasTotalMes() {
-      return this.despesasCaixaMes + this.despesasCartaoMes
-    },
-    mostrarMiniCartao() {
-      return (
-        Math.abs(this.saldoAcumuladoComCartao - this.saldoAcumulado) > 0.005 ||
-        this.despesasCartaoMes > 0
-      )
+      return this.despesasMes
     },
     /** Saldo em tipografia neutra; só intensidade muda levemente */
     heroBalanceTextClass() {
@@ -290,19 +265,14 @@ export default {
         const ac = Number(data.saldo_acumulado)
         const at = Number(data.saldo_atual)
         this.saldoAcumulado = Number.isFinite(ac) ? ac : (Number.isFinite(at) ? at : 0)
-        const sac = Number(data.saldo_acumulado_com_cartao)
-        this.saldoAcumuladoComCartao = Number.isFinite(sac) ? sac : this.saldoAcumulado
         this.saldoMes = Number(data.saldo_real) || 0
-        this.saldoComCartao = Number(data.saldo_com_cartao) || 0
         this.acumuladoAteInicioMes = Number(data.acumulado_ate_inicio_mes) || 0
         const spa = Number(data.saldo_previsto_acumulado_fim_mes)
         this.saldoPrevistoAcumuladoFimMes = Number.isFinite(spa)
           ? spa
           : this.acumuladoAteInicioMes + (Number(data.saldo_previsto_mes) || 0)
         this.receitasMes = Number(data.receitas_mes) || 0
-        const dCaixa = data.despesas_caixa_mes
-        this.despesasCaixaMes = Number(dCaixa !== undefined ? dCaixa : data.despesas_mes) || 0
-        this.despesasCartaoMes = Number(data.despesas_cartao_mes) || 0
+        this.despesasMes = Number(data.despesas_mes) || 0
         this.totalTransacoes = Number(data.total_transacoes) || 0
         this.ultimasTransacoes = data.ultimas_transacoes || []
         this.apiMonth = data.month || this.month
@@ -329,25 +299,23 @@ export default {
       this.destroyChart()
       const ctx = canvas.getContext('2d')
       const rec = this.receitasMes
-      const desCaixa = this.despesasCaixaMes
-      const desCartao = this.despesasCartaoMes
+      const des = this.despesasMes
       const isNarrow = typeof window !== 'undefined' && window.innerWidth < 600
       const sc = this.chartScaleColors()
 
       this.chartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['Receitas', 'À vista', 'Cartão'],
+          labels: ['Receitas', 'Despesas'],
           datasets: [
             {
               label: 'R$',
-              data: [rec, desCaixa, desCartao],
+              data: [rec, des],
               backgroundColor: [
                 'rgba(76, 175, 80, 0.92)',
                 'rgba(255, 0, 0, 0.85)',
-                'rgba(103, 58, 183, 0.82)',
               ],
-              borderColor: ['#4CAF50', '#ff0000', '#7E57C2'],
+              borderColor: ['#4CAF50', '#ff0000'],
               borderWidth: 0,
               borderRadius: isNarrow ? 6 : 10,
               maxBarThickness: isNarrow ? 44 : 56,

@@ -19,7 +19,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             FinanceSeeder::class,
             GoalsSeeder::class,
-            CreditCardSeeder::class,
             PlanningSeeder::class,
         ]);
 

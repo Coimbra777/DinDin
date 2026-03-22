@@ -14,9 +14,9 @@
               </v-btn>
             </template>
             <span>
-              Cada mês mostra só os <strong>lançamentos reais</strong> já guardados nesse mês (receitas, despesas à vista e
-              cartão). O <strong>saldo</strong> é em caixa (receitas − à vista), acumulado a partir do teu saldo real até
-              ao fim do <strong>mês atual</strong> — igual ao critério do dashboard. Meses sem movimento aparecem a zero.
+              Cada mês mostra só os <strong>lançamentos reais</strong> já guardados nesse mês (receitas e despesas).
+              O <strong>saldo</strong> é receitas − despesas, acumulado a partir do teu saldo até ao fim do
+              <strong>mês atual</strong> — alinhado ao dashboard. Meses sem movimento aparecem a zero.
             </span>
           </v-tooltip>
         </div>
@@ -31,7 +31,7 @@
           class="proj-ref-alert mb-0 text-body-2"
         >
           <span class="text-caption secondary--text">
-            Saldo em caixa até fim do mês atual (base da projeção): {{ formatBRL(openingCash) }}
+            Saldo até fim do mês atual (base da projeção): {{ formatBRL(openingCash) }}
           </span>
         </v-alert>
       </v-card-text>
@@ -41,7 +41,7 @@
       <v-card-text class="py-4 px-3 px-sm-4">
         <div class="d-flex align-center mb-2">
           <v-icon color="secondary" class="mr-2" small>mdi-chart-areaspline</v-icon>
-          <span class="subtitle-1 font-weight-bold">Saldo em caixa ao fim de cada mês</span>
+          <span class="subtitle-1 font-weight-bold">Saldo ao fim de cada mês</span>
         </div>
         <p class="text-caption secondary--text mb-3">
           Evolução do saldo acumulado após os lançamentos já registados em cada mês futuro.
@@ -76,9 +76,8 @@
             <tr>
               <th>Mês</th>
               <th class="text-right">Receitas</th>
-              <th class="text-right d-none d-sm-table-cell">À vista</th>
-              <th class="text-right d-none d-md-table-cell">Cartão</th>
-              <th class="text-right">Saldo caixa</th>
+              <th class="text-right d-none d-sm-table-cell">Despesas</th>
+              <th class="text-right">Saldo</th>
             </tr>
           </thead>
           <tbody>
@@ -87,9 +86,6 @@
               <td class="text-right tabular-nums finance-amount-income">{{ formatBRL(r.income) }}</td>
               <td class="text-right tabular-nums finance-amount-expense d-none d-sm-table-cell">
                 {{ formatBRL(r.expense) }}
-              </td>
-              <td class="text-right tabular-nums finance-amount-expense d-none d-md-table-cell">
-                {{ formatBRL(r.expense_card) }}
               </td>
               <td class="text-right tabular-nums font-weight-medium" :class="saldoClass(r.balance)">
                 {{ formatSaldoCell(r.balance) }}
@@ -139,7 +135,7 @@ export default {
     displayRows() {
       return this.rows || []
     },
-    /** Saldo em caixa ao fim do mês atual (inferido do 1.º mês projetado). */
+    /** Saldo ao fim do mês atual (inferido do 1.º mês projetado). */
     openingCash() {
       const rows = this.displayRows
       if (!rows.length) return 0
@@ -214,7 +210,7 @@ export default {
           labels,
           datasets: [
             {
-              label: 'Saldo caixa',
+              label: 'Saldo',
               data: balances,
               fill: true,
               backgroundColor: c.fill,

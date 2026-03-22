@@ -30,7 +30,6 @@ class ProjectionFinanceApiTest extends FinanceApiTestCase
             'amount' => 500,
             'transaction_date' => '2026-05-10',
             'title' => 'Extra maio',
-            'is_credit_card' => false,
         ]);
         Transaction::factory()->forUserId($user->id)->expense()->create([
             'user_id' => $user->id,
@@ -38,7 +37,6 @@ class ProjectionFinanceApiTest extends FinanceApiTestCase
             'amount' => 100,
             'transaction_date' => '2026-05-20',
             'title' => 'Conta maio',
-            'is_credit_card' => false,
         ]);
 
         $res = $this->actingAs($user)->getJson($this->financeApi('projection'));
@@ -52,7 +50,6 @@ class ProjectionFinanceApiTest extends FinanceApiTestCase
         $this->assertNotNull($may);
         $this->assertSame(500.0, (float) $may['income']);
         $this->assertSame(100.0, (float) $may['expense']);
-        $this->assertSame(0.0, (float) $may['expense_card']);
 
         $april = collect($months)->firstWhere('month', '2026-04');
         $this->assertNotNull($april);
@@ -73,14 +70,12 @@ class ProjectionFinanceApiTest extends FinanceApiTestCase
             'category_id' => $catIn->id,
             'amount' => 200,
             'transaction_date' => '2026-04-05',
-            'is_credit_card' => false,
         ]);
         Transaction::factory()->forUserId($user->id)->expense()->create([
             'user_id' => $user->id,
             'category_id' => $catOut->id,
             'amount' => 50,
             'transaction_date' => '2026-04-15',
-            'is_credit_card' => false,
         ]);
 
         $proj = $this->actingAs($user)->getJson($this->financeApi('projection'))->json('months');
@@ -91,19 +86,16 @@ class ProjectionFinanceApiTest extends FinanceApiTestCase
             ->assertOk();
 
         $sumIncome = 0.0;
-        $sumCash = 0.0;
+        $sumExpense = 0.0;
         foreach ($tx->json('data') as $row) {
             if (($row['type'] ?? '') === Transaction::TYPE_INCOME) {
                 $sumIncome += (float) ($row['amount'] ?? 0);
             } elseif (($row['type'] ?? '') === Transaction::TYPE_EXPENSE) {
-                if (! empty($row['is_credit_card'])) {
-                    continue;
-                }
-                $sumCash += (float) ($row['amount'] ?? 0);
+                $sumExpense += (float) ($row['amount'] ?? 0);
             }
         }
 
         $this->assertSame($sumIncome, (float) $aprilProj['income']);
-        $this->assertSame($sumCash, (float) $aprilProj['expense']);
+        $this->assertSame($sumExpense, (float) $aprilProj['expense']);
     }
 }
