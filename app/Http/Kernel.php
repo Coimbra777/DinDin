@@ -45,12 +45,6 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
-
-        'api' => [
-            'throttle:400,1',
-            'bindings',
-            // 'session_api'
-        ],
     ];
 
     /**
@@ -61,17 +55,12 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'cors' => \App\Http\Middleware\Cors::class,
         'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
-        'autenticate' => \App\Http\Middleware\ValidateToken::class,
-        'authenticate' => \App\Http\Middleware\ValidateToken::class,
-        'logs' => \App\Http\Middleware\Logs::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'session_api' => \Illuminate\Session\Middleware\StartSession::class,
         'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         'module' => \App\Http\Middleware\EnsureUserHasSaasModule::class,
         'finance.module' => \App\Http\Middleware\EnsureFinanceModuleAccess::class,
