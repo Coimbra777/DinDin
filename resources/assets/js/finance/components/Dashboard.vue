@@ -102,7 +102,7 @@
       </v-row>
       </div>
 
-      <!-- Previsão e compromissos -->
+      <!-- Previsão (caixa) -->
       <v-row dense class="mb-4 mb-sm-5">
         <v-col cols="12" class="px-2 px-sm-4">
           <v-card class="rounded-xl forecast-card" flat outlined>
@@ -129,49 +129,6 @@
                 <span class="d-none d-sm-inline">fixas prev. {{ formatBRL(despesasFixasPrevistasMes) }}</span>
               </div>
             </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="12" class="px-2 px-sm-4">
-          <v-card class="rounded-xl" flat outlined>
-            <v-card-text class="pb-2 pt-4 px-4 d-flex align-center">
-              <v-icon color="secondary" class="mr-2">mdi-calendar-clock</v-icon>
-              <span class="subtitle-1 font-weight-bold">Próximos compromissos</span>
-            </v-card-text>
-            <v-card-text v-if="upcomingLoading" class="py-6 text-center">
-              <v-progress-circular indeterminate color="primary" size="28" />
-            </v-card-text>
-            <v-card-text v-else-if="upcoming.length === 0" class="py-6 text-center finance-text-muted text-body-2">
-              Não há compromissos automáticos listados. O sistema não agenda recorrências; use duplicação manual nas
-              movimentações se precisar de cópias futuras.
-            </v-card-text>
-            <v-list v-else dense class="py-0 transparent pb-3">
-              <template v-for="(c, i) in upcoming">
-                <v-list-item :key="c.id" class="px-4">
-                  <v-list-item-content>
-                    <v-list-item-title class="font-weight-medium d-flex align-center flex-wrap">
-                      {{ c.description }}
-                      <v-chip x-small label outlined color="deep-purple" class="ml-2 flex-shrink-0">
-                        {{ commitmentTypeLabel(c) }}
-                      </v-chip>
-                    </v-list-item-title>
-                    <v-list-item-subtitle class="text-caption">
-                      {{ formatUpcomingDate(c.next_run_date) }}
-                      <span v-if="c.category"> · {{ c.category.name }}</span>
-                      <span v-if="c.installments_label" class="ml-1"> · {{ c.installments_label }}</span>
-                    </v-list-item-subtitle>
-                  </v-list-item-content>
-                  <v-list-item-action>
-                    <span
-                      class="font-weight-bold tabular-nums"
-                      :class="c.type === 'income' ? 'finance-amount-income' : 'finance-amount-expense'"
-                    >
-                      {{ c.type === 'income' ? '+' : '−' }}{{ formatBRL(Math.abs(c.amount)) }}
-                    </span>
-                  </v-list-item-action>
-                </v-list-item>
-                <v-divider v-if="i < upcoming.length - 1" :key="'d' + c.id" class="mx-4 opacity-35" />
-              </template>
-            </v-list>
           </v-card>
         </v-col>
       </v-row>
@@ -218,7 +175,6 @@
 import axios from 'axios'
 import Chart from 'chart.js/auto'
 import { formatCurrencyBRLAxis } from '../currency'
-import { formatDatePtBR } from '../format'
 import TransactionList from './TransactionList.vue'
 
 export default {
@@ -250,8 +206,6 @@ export default {
       entradasPrevistasMes: 0,
       despesasFixasPrevistasMes: 0,
       saldoPrevistoMes: 0,
-      upcoming: [],
-      upcomingLoading: true,
     }
   },
   computed: {
@@ -307,12 +261,6 @@ export default {
     formatAxis(v) {
       return formatCurrencyBRLAxis(v)
     },
-    formatUpcomingDate(iso) {
-      return formatDatePtBR(iso)
-    },
-    commitmentTypeLabel() {
-      return 'Compromisso'
-    },
     destroyChart() {
       if (this.chartInstance) {
         this.chartInstance.destroy()
@@ -336,13 +284,8 @@ export default {
       if (isRefresh) this.reloading = true
       else this.loading = true
 
-      if (!isRefresh) this.upcomingLoading = true
-
       try {
-        const [dashRes, upRes] = await Promise.all([
-          axios.get(`${base}/dashboard`, { params: { month: this.month } }),
-          axios.get(`${base}/dashboard/upcoming`).catch(() => ({ data: { data: [] } })),
-        ])
+        const dashRes = await axios.get(`${base}/dashboard`, { params: { month: this.month } })
         const data = dashRes.data
         const ac = Number(data.saldo_acumulado)
         const at = Number(data.saldo_atual)
@@ -366,7 +309,6 @@ export default {
         this.entradasPrevistasMes = Number(data.entradas_previstas_mes) || 0
         this.despesasFixasPrevistasMes = Number(data.despesas_fixas_previstas_mes) || 0
         this.saldoPrevistoMes = Number(data.saldo_previsto_mes) || 0
-        this.upcoming = (upRes.data && upRes.data.data) || []
         this.hasPayload = true
 
         await this.$nextTick()
@@ -378,7 +320,6 @@ export default {
       } finally {
         this.loading = false
         this.reloading = false
-        this.upcomingLoading = false
       }
     },
     renderChart() {
