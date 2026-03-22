@@ -65,13 +65,22 @@ Isto executa os seeders habituais e, no fim, o `FinancialTestDataSeeder` (utiliz
 ```bash
 # Toda a suíte
 ./vendor/bin/phpunit
+# ou: php ./vendor/bin/phpunit
 
 # Só unitários
 ./vendor/bin/phpunit tests/Unit
 
-# Só API finanças
+# Só finanças (Feature)
 ./vendor/bin/phpunit tests/Feature/Finance
+
+# Um ficheiro
+./vendor/bin/phpunit tests/Feature/Finance/TransactionApiTest.php
+
+# Por nome de teste (substring)
+./vendor/bin/phpunit --filter test_store_transaction
 ```
+
+Se o `php` do PATH não tiver `pdo_mysql`, use a versão certa (ex.: `php8.2 ./vendor/bin/phpunit`). Comandos resumidos na secção **Testes automatizados (PHPUnit)** do [readme.md](../readme.md).
 
 ## Utilizador padrão após `migrate:fresh --seed`
 

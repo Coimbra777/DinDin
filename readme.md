@@ -60,13 +60,39 @@ vendor/bin/pint --dirty
 
 ### Testes automatizados (PHPUnit)
 
+Na raiz do projeto (host ou container), com dependências instaladas (`composer install`):
+
 ```bash
+# Toda a suíte
 ./vendor/bin/phpunit
-./vendor/bin/phpunit tests/Unit
-./vendor/bin/phpunit tests/Feature/Finance
+
+# Equivalente (chama o mesmo binário)
+php ./vendor/bin/phpunit
 ```
 
-Requisitos e `.env.testing`: ver [docs/testing.md](docs/testing.md).
+**Por pasta ou ficheiro:**
+
+```bash
+# Só testes unitários
+./vendor/bin/phpunit tests/Unit
+
+# Só finanças (Feature)
+./vendor/bin/phpunit tests/Feature/Finance
+
+# Um ficheiro específico
+./vendor/bin/phpunit tests/Feature/Finance/TransactionApiTest.php
+
+# Filtrar por nome do método (substring)
+./vendor/bin/phpunit --filter test_store_transaction
+```
+
+**PHP com extensão PDO MySQL:** os testes Feature usam base de dados (`RefreshDatabase`). Se o `php` padrão do sistema não tiver `pdo_mysql` (erro `could not find driver`), use a versão correta, por exemplo:
+
+```bash
+php8.2 ./vendor/bin/phpunit
+```
+
+**Configuração de BD para testes** (host Docker, `DB_HOST`, etc.): [docs/testing.md](docs/testing.md).
 
 ### 5. Front-end (no host, na raiz do projeto)
 
