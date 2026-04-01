@@ -16,6 +16,30 @@ export function formatDatePtBR(value) {
   return `${d}/${m}/${y}`
 }
 
+/** DD/MM (sem ano), para vencimento compacto na lista. */
+export function formatDayMonthPtBR(value) {
+  const iso = toIsoDateOnly(value)
+  if (!iso) return ''
+  const [, mo, da] = iso.split('-')
+  return `${da}/${mo}`
+}
+
+/**
+ * Dias corridos inteiros entre a data de vencimento (exclusive do “hoje” como fim do atraso).
+ * Retorna 0 se `due` for inválido ou se `due >= referência`.
+ *
+ * @param {string} dueIso
+ * @param {string} [referenceIso] YYYY-MM-DD (default: hoje local)
+ */
+export function wholeDaysPastDue(dueIso, referenceIso = null) {
+  const due = toIsoDateOnly(dueIso)
+  const ref = referenceIso || todayIsoLocal()
+  if (!due || !ref || due >= ref) return 0
+  const t0 = new Date(`${due}T12:00:00`).getTime()
+  const t1 = new Date(`${ref}T12:00:00`).getTime()
+  return Math.max(0, Math.round((t1 - t0) / 86400000))
+}
+
 /** Data de hoje no fuso local, como YYYY-MM-DD (picker / API). */
 export function todayIsoLocal() {
   const n = new Date()

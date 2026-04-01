@@ -2,6 +2,11 @@
 export const TRANSACTION_TYPE_INCOME = 'income'
 export const TRANSACTION_TYPE_EXPENSE = 'expense'
 
+/** Status efetivo retornado pela API (overdue é derivado no backend). */
+export const PAYMENT_STATUS_PENDING = 'pending'
+export const PAYMENT_STATUS_PAID = 'paid'
+export const PAYMENT_STATUS_OVERDUE = 'overdue'
+
 /** Garante income | expense para o payload (defesa contra índices ou strings legadas). */
 export function normalizeTransactionType(value) {
   const v = value

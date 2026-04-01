@@ -140,7 +140,12 @@ final class TransactionApiService
             }
 
             $ids = [];
-            foreach ($datesToCreate as $ymd) {
+            foreach ($datesToCreate as $idx => $ymd) {
+                $monthsAdded = $idx + 1;
+                $dueRaw = $source->due_date;
+                $newDue = $dueRaw !== null
+                    ? Carbon::parse($dueRaw)->copy()->addMonths($monthsAdded)->toDateString()
+                    : null;
                 $row = Transaction::create([
                     'user_id' => $userId,
                     'parent_transaction_id' => $parentId,
@@ -150,6 +155,8 @@ final class TransactionApiService
                     'amount' => $source->amount,
                     'type' => $source->type,
                     'transaction_date' => $ymd,
+                    'payment_status' => $source->payment_status ?? Transaction::STATUS_PENDING,
+                    'due_date' => $newDue,
                     'description' => $source->description,
                     'installment_number' => null,
                     'installment_of' => null,
@@ -186,5 +193,22 @@ final class TransactionApiService
         $userId = (int) $transaction->user_id;
         $transaction->delete();
         $this->readCache->bump($userId);
+    }
+
+    /**
+     * Marca como pago (atalho de API; mesmo efeito que PUT com payment_status pago).
+     *
+     * @return array<string, mixed>
+     */
+    public function markAsPaid(Transaction $transaction): array
+    {
+        return DB::transaction(function () use ($transaction): array {
+            $transaction->update(['payment_status' => Transaction::STATUS_PAID]);
+            $t = $transaction->fresh();
+            $t->load(['category']);
+            $this->readCache->bump((int) $t->user_id);
+
+            return TransactionResource::toArray($t);
+        });
     }
 }

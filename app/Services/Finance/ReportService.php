@@ -21,12 +21,13 @@ final class ReportService
     /**
      * Totais por categoria no mês (análise / gráficos).
      *
+     * @param  array<string, mixed>  $extraFilters  ex.: payment_status = pending|paid|overdue
      * @return array<int, array{category_key: int, category_name: string, category_type: string|null, income: float, expense: float, net: float}>
      */
-    public function categoryBreakdown(int $userId, ?string $monthQuery): array
+    public function categoryBreakdown(int $userId, ?string $monthQuery, array $extraFilters = []): array
     {
         $month = $this->summaries->normalizeMonth($monthQuery);
-        $filters = ['month' => $month];
+        $filters = array_merge(['month' => $month], $extraFilters);
         $totals = $this->summaries->totalsByCategoryForUser($userId, $filters);
 
         $out = [];

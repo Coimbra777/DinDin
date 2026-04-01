@@ -6,6 +6,7 @@ namespace Tests\Feature\Finance;
 
 use App\Models\Finance\Category;
 use App\Models\Finance\Transaction;
+use Carbon\Carbon;
 
 class TransactionApiTest extends FinanceApiTestCase
 {
@@ -223,4 +224,80 @@ class TransactionApiTest extends FinanceApiTestCase
             ])
             ->assertStatus(422);
     }
+
+    public function test_store_transaction_persists_due_date_and_pending_status(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-04-01 10:00:00'));
+        $user = $this->financeUser();
+        $cat = Category::factory()->expense()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->postJson($this->financeApi('transactions'), [
+                'title' => 'Conta luz',
+                'amount' => 50,
+                'type' => Transaction::TYPE_EXPENSE,
+                'category_id' => $cat->id,
+                'transaction_date' => '2026-04-01',
+                'due_date' => '2026-04-10',
+                'payment_status' => Transaction::STATUS_PENDING,
+            ])
+            ->assertCreated()
+            ->assertJsonPath('due_date', '2026-04-10')
+            ->assertJsonPath('payment_status', 'pending')
+            ->assertJsonPath('is_overdue', false);
+
+        $this->assertDatabaseHas('finance_transactions', [
+            'user_id' => $user->id,
+            'title' => 'Conta luz',
+            'due_date' => '2026-04-10',
+            'payment_status' => Transaction::STATUS_PENDING,
+        ]);
+    }
+
+    public function test_api_exposes_overdue_when_due_date_passed_and_still_pending(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-04-20 10:00:00'));
+        $user = $this->financeUser();
+        $cat = Category::factory()->expense()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->postJson($this->financeApi('transactions'), [
+                'title' => 'Boleto atraso',
+                'amount' => 120,
+                'type' => Transaction::TYPE_EXPENSE,
+                'category_id' => $cat->id,
+                'transaction_date' => '2026-04-01',
+                'due_date' => '2026-04-05',
+                'payment_status' => Transaction::STATUS_PENDING,
+            ])
+            ->assertCreated()
+            ->assertJsonPath('payment_status', Transaction::STATUS_OVERDUE)
+            ->assertJsonPath('is_overdue', true);
+    }
+
+    public function test_mark_as_paid_sets_status_paid(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-04-15 10:00:00'));
+        $user = $this->financeUser();
+        $cat = Category::factory()->expense()->create(['user_id' => $user->id]);
+        $tx = Transaction::factory()->forUserId((int) $user->id)->create([
+            'category_id' => $cat->id,
+            'type' => Transaction::TYPE_EXPENSE,
+            'transaction_date' => '2026-04-01',
+            'payment_status' => Transaction::STATUS_PENDING,
+            'due_date' => '2026-04-01',
+        ]);
+
+        $this->actingAs($user)
+            ->postJson($this->financeApi('transactions/'.$tx->id.'/mark-as-paid'))
+            ->assertOk()
+            ->assertJsonPath('payment_status', Transaction::STATUS_PAID)
+            ->assertJsonPath('is_overdue', false);
+
+        $this->assertDatabaseHas('finance_transactions', [
+            'id' => $tx->id,
+            'payment_status' => Transaction::STATUS_PAID,
+        ]);
+    }
 }
+

@@ -266,7 +266,7 @@
           <!-- MOVIMENTAÇÕES -->
           <div v-else-if="view === 'transactions'" key="tx">
             <v-row dense class="mb-4">
-              <v-col cols="12" md="5">
+              <v-col cols="12" sm="6" md="5">
                 <v-select
                   v-model="filterCategoryId"
                   :items="categoryFilterItems"
@@ -277,6 +277,23 @@
                   clearable
                   hide-details="auto"
                   prepend-inner-icon="mdi-filter-variant"
+                  @change="loadTransactions"
+                />
+              </v-col>
+              <v-col cols="12" sm="6" md="4">
+                <v-select
+                  v-model="filterPaymentStatus"
+                  :items="paymentStatusFilterItems"
+                  item-text="text"
+                  item-value="value"
+                  label="Pagamento (despesas)"
+                  outlined
+                  dense
+                  :dark="$vuetify.theme.dark"
+                  hide-details="false"
+                  hint="Receitas ignoram este filtro. Com status definido, a lista mostra só despesas."
+                  persistent-hint
+                  prepend-inner-icon="mdi-cash-check"
                   @change="loadTransactions"
                 />
               </v-col>
@@ -398,9 +415,11 @@
               title="Movimentações"
               :items="transactions"
               :loading="loading.transactions"
+              :marking-paid-by-id="markingPaidById"
               @edit="openEdit"
               @delete="askDelete"
               @duplicate="openDuplicateDialog"
+              @mark-paid="markTransactionPaid"
             />
             <div
               v-if="
@@ -1019,6 +1038,9 @@ export default {
       txSummary: null,
       categories: [],
       filterCategoryId: null,
+      /** null = todos; valores alinhados à API (query payment_status). */
+      filterPaymentStatus: null,
+      markingPaidById: {},
       loading: {
         transactions: false,
         categories: false,
@@ -1048,6 +1070,14 @@ export default {
     },
     categoryFilterItems() {
       return this.categories.map((c) => ({ text: c.name, value: c.id }));
+    },
+    paymentStatusFilterItems() {
+      return [
+        { text: "Todos os status", value: null },
+        { text: "Pendente", value: "pending" },
+        { text: "Pago", value: "paid" },
+        { text: "Atrasado", value: "overdue" },
+      ];
     },
     monthLabelPt() {
       if (!this.month || !/^\d{4}-\d{2}$/.test(this.month)) return "—";
@@ -1364,6 +1394,10 @@ export default {
           per_page: 20,
         };
         if (this.filterCategoryId) params.category_id = this.filterCategoryId;
+        if (this.filterPaymentStatus) {
+          params.payment_status = this.filterPaymentStatus;
+          params.type = "expense";
+        }
         const [txOut, sumOut] = await Promise.allSettled([
           axios.get(`${this.apiBase}/transactions`, { params }),
           axios.get(`${this.apiBase}/summary`, {
@@ -1399,6 +1433,67 @@ export default {
       if (!this.canLoadMoreTransactions) return;
       this.transactionsPage += 1;
       await this.loadTransactions({ reset: false });
+    },
+    async markTransactionPaid(item) {
+      const id = item && item.id;
+      if (id == null || this.markingPaidById[id]) return;
+      if (!item || item.type !== "expense") return;
+
+      const idx = this.transactions.findIndex((t) => t.id === id);
+      if (idx === -1) return;
+
+      const row = this.transactions[idx];
+      const prev = {
+        payment_status: row.payment_status,
+        is_overdue: row.is_overdue,
+        due_date: row.due_date,
+      };
+
+      Object.assign(row, { payment_status: "paid", is_overdue: false });
+      this.$set(this.markingPaidById, id, true);
+
+      try {
+        const { data } = await axios.post(
+          `${this.apiBase}/transactions/${id}/mark-as-paid`,
+        );
+        const leavesFilteredList =
+          data &&
+          data.payment_status === "paid" &&
+          (this.filterPaymentStatus === "overdue" ||
+            this.filterPaymentStatus === "pending");
+
+        if (leavesFilteredList) {
+          this.transactions = this.transactions.filter((t) => t.id !== id);
+          if (
+            this.transactionsMeta &&
+            typeof this.transactionsMeta.total === "number"
+          ) {
+            this.transactionsMeta = {
+              ...this.transactionsMeta,
+              total: Math.max(0, this.transactionsMeta.total - 1),
+            };
+          }
+        } else {
+          this.$set(this.transactions, idx, { ...row, ...data });
+        }
+
+        this.toast("Marcado como pago.", "success");
+      } catch (e) {
+        const cur = this.transactions[idx];
+        if (cur && cur.id === id) {
+          Object.assign(cur, prev);
+        }
+        const msg =
+          (e.response &&
+            e.response.data &&
+            (e.response.data.message || e.response.data.error)) ||
+          "Não foi possível marcar como pago.";
+        this.showError(
+          typeof msg === "string" ? msg : "Não foi possível marcar como pago.",
+        );
+      } finally {
+        this.$delete(this.markingPaidById, id);
+      }
     },
     async loadCategories() {
       this.loading.categories = true;

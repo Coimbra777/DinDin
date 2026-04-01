@@ -30,6 +30,19 @@ class TransactionApiController extends FinanceApiController
         if ($request->filled('category_id')) {
             $filters['category_id'] = (int) $request->query('category_id');
         }
+        if ($request->filled('type')) {
+            $t = (string) $request->query('type');
+            if (in_array($t, [Transaction::TYPE_INCOME, Transaction::TYPE_EXPENSE], true)) {
+                $filters['type'] = $t;
+            }
+        }
+        if ($request->filled('payment_status')) {
+            $ps = (string) $request->query('payment_status');
+            $allowed = [Transaction::STATUS_PENDING, Transaction::STATUS_PAID, Transaction::STATUS_OVERDUE];
+            if (in_array($ps, $allowed, true)) {
+                $filters['payment_status'] = $ps;
+            }
+        }
 
         $perPage = min(100, max(1, (int) $request->query('per_page', 20)));
         $page = max(1, (int) $request->query('page', 1));
@@ -69,6 +82,14 @@ class TransactionApiController extends FinanceApiController
             $transaction,
             $request->toTransactionAttributes(),
         );
+
+        return response()->json($payload);
+    }
+
+    public function markAsPaid(Transaction $transaction): JsonResponse
+    {
+        $this->authorize('update', $transaction);
+        $payload = $this->transactions->markAsPaid($transaction);
 
         return response()->json($payload);
     }

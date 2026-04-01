@@ -110,7 +110,8 @@ class TransactionController extends RestrictedController
                 Rule::exists('finance_categories', 'id')->where(fn ($q) => $q->where('user_id', $userId)),
             ],
             'transaction_date' => 'required|date',
-            'description' => 'nullable|string|max:5000',
+            'payment_status' => ['nullable', Rule::in([Transaction::STATUS_PENDING, Transaction::STATUS_PAID])],
+            'due_date' => ['nullable', 'date'],
             'installment_number' => ['nullable', 'integer', 'min:1', 'max:360'],
             'installment_of' => ['nullable', 'integer', 'min:2', 'max:360'],
         ]);
@@ -125,6 +126,14 @@ class TransactionController extends RestrictedController
         if ($hasN && $hasO && (int) $data['installment_number'] >= (int) $data['installment_of']) {
             throw ValidationException::withMessages([
                 'installment_number' => 'A parcela atual deve ser menor que o total de parcelas.',
+            ]);
+        }
+
+        $due = $data['due_date'] ?? null;
+        $txDate = $data['transaction_date'] ?? null;
+        if ($due !== null && $txDate !== null && strtotime((string) $due) < strtotime((string) $txDate)) {
+            throw ValidationException::withMessages([
+                'due_date' => 'A data de vencimento não pode ser anterior à data da transação.',
             ]);
         }
 

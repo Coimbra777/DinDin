@@ -89,6 +89,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('categories/{category}', [CategoryApiController::class, 'update'])->middleware('throttle:finance-api-mutations')->name('finance.api.categories.update');
             Route::delete('categories/{category}', [CategoryApiController::class, 'destroy'])->middleware('throttle:finance-api-mutations')->name('finance.api.categories.destroy');
             Route::post('transactions', [TransactionApiController::class, 'store'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.store');
+            Route::post('transactions/{transaction}/mark-as-paid', [TransactionApiController::class, 'markAsPaid'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.mark_as_paid');
             Route::post('transactions/{transaction}/duplicate', [TransactionApiController::class, 'duplicate'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.duplicate');
             Route::put('transactions/{transaction}', [TransactionApiController::class, 'update'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.update');
             Route::delete('transactions/{transaction}', [TransactionApiController::class, 'destroy'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.destroy');

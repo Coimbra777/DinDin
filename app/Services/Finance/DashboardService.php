@@ -66,6 +66,23 @@ final class DashboardService
             ->limit(5)
             ->get();
 
+        // Contagens operacionais (só despesas): não alteram totais de caixa.
+        $expenseBase = Transaction::forUser($userId)
+            ->expense()
+            ->whereBetween('transaction_date', [$start, $end]);
+        $pagamentosPendentesMes = (clone $expenseBase)
+            ->where('payment_status', Transaction::STATUS_PENDING)
+            ->where(function ($q): void {
+                $today = now()->format('Y-m-d');
+                $q->whereNull('due_date')->orWhereDate('due_date', '>=', $today);
+            })
+            ->count();
+        $pagamentosAtrasadosMes = (clone $expenseBase)
+            ->where('payment_status', Transaction::STATUS_PENDING)
+            ->whereNotNull('due_date')
+            ->whereDate('due_date', '<', now()->format('Y-m-d'))
+            ->count();
+
         return [
             'month' => $month,
             'saldo_real' => round($saldoMes, 2),
@@ -76,6 +93,8 @@ final class DashboardService
             'receitas_mes' => round($receitasMes, 2),
             'despesas_mes' => round($despesasMes, 2),
             'total_transacoes' => $totalTransacoes,
+            'pagamentos_pendentes_mes' => $pagamentosPendentesMes,
+            'pagamentos_atrasados_mes' => $pagamentosAtrasadosMes,
             'ultimas_transacoes' => $ultimas->map(fn (Transaction $t) => TransactionResource::toArray($t))->all(),
             'entradas_previstas_mes' => $forecast['entradas_previstas_mes'],
             'despesas_fixas_previstas_mes' => $forecast['despesas_fixas_previstas_mes'],

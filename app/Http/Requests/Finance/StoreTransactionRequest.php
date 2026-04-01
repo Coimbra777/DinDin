@@ -48,6 +48,8 @@ class StoreTransactionRequest extends FormRequest
                 Rule::exists('finance_categories', 'id')->where(fn ($q) => $q->where('user_id', $userId)),
             ],
             'transaction_date' => 'required|date',
+            'payment_status' => ['sometimes', 'nullable', Rule::in([Transaction::STATUS_PENDING, Transaction::STATUS_PAID])],
+            'due_date' => ['sometimes', 'nullable', 'date'],
             'description' => 'nullable|string|max:5000',
         ];
     }
@@ -61,6 +63,14 @@ class StoreTransactionRequest extends FormRequest
 
             $data = $validator->getData();
             $userId = (int) $this->user()->id;
+
+            $due = $data['due_date'] ?? null;
+            $txDate = $data['transaction_date'] ?? null;
+            if ($due !== null && $due !== '' && $txDate !== null && $txDate !== '') {
+                if (strtotime((string) $due) < strtotime((string) $txDate)) {
+                    $validator->errors()->add('due_date', 'A data de vencimento não pode ser anterior à data da transação.');
+                }
+            }
 
             try {
                 TransactionCategoryTypeGuard::assertCompatible(

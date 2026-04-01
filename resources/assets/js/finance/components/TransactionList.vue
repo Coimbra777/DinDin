@@ -97,6 +97,16 @@
               >
                 {{ item.installment_number }}/{{ item.installment_of }} parcelas
               </v-chip>
+              <v-chip
+                v-if="isExpense(item) && resolvePaymentStatus(item)"
+                x-small
+                dark
+                :color="paymentStatusChipColor(item)"
+                class="ml-2 flex-shrink-0"
+                label
+              >
+                {{ paymentStatusLabel(item) }}
+              </v-chip>
             </v-list-item-title>
             <v-list-item-subtitle
               class="tx-list__meta text-caption secondary--text mt-1"
@@ -117,6 +127,45 @@
                 </span>
               </template>
             </v-list-item-subtitle>
+            <div
+              v-if="isExpense(item) && item.due_date"
+              class="text-caption mt-1 d-flex align-center flex-wrap"
+            >
+              <v-icon x-small class="mr-1" :color="dueMetaColor(item)"
+                >mdi-calendar-clock</v-icon
+              >
+              <span :class="dueMetaColor(item) + '--text'"
+                >Venc. {{ formatDueDayMonth(item.due_date) }}</span
+              >
+              <span
+                v-if="overdueDaysHint(item)"
+                class="ml-2 error--text font-weight-medium"
+              >
+                {{ overdueDaysHint(item) }}
+              </span>
+            </div>
+            <div
+              v-if="
+                showActions &&
+                isExpense(item) &&
+                !isPaidStatus(item)
+              "
+              class="mt-2 d-flex flex-wrap align-center"
+            >
+              <v-btn
+                type="button"
+                small
+                depressed
+                color="success"
+                class="text-none"
+                :loading="isMarkingPaid(item)"
+                :disabled="isMarkingPaid(item)"
+                @click.stop="onMarkPaidClick(item)"
+              >
+                <v-icon left small>mdi-check</v-icon>
+                Marcar como pago
+              </v-btn>
+            </div>
             <div
               v-if="item.description"
               class="text-caption finance-text-muted text-truncate mt-1 d-none d-sm-block"
@@ -173,7 +222,17 @@
 
 <script>
 import { formatCurrencyBRL } from "../currency";
-import { formatDatePtBR } from "../format";
+import {
+  formatDatePtBR,
+  formatDayMonthPtBR,
+  wholeDaysPastDue,
+} from "../format";
+import {
+  PAYMENT_STATUS_OVERDUE,
+  PAYMENT_STATUS_PAID,
+  PAYMENT_STATUS_PENDING,
+  TRANSACTION_TYPE_EXPENSE,
+} from "../transactionTypes";
 
 export default {
   name: "TransactionList",
@@ -184,6 +243,8 @@ export default {
     items: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false },
     showActions: { type: Boolean, default: true },
+    /** ids com POST mark-as-paid em curso */
+    markingPaidById: { type: Object, default: () => ({}) },
     /** comfortable = mais ar no mobile; compact = denso */
     layout: {
       type: String,
@@ -192,6 +253,57 @@ export default {
     },
   },
   methods: {
+    isExpense(item) {
+      return item && item.type === TRANSACTION_TYPE_EXPENSE;
+    },
+    resolvePaymentStatus(item) {
+      if (!this.isExpense(item)) return "";
+      if (item.payment_status) return item.payment_status;
+      if (item.is_overdue) return PAYMENT_STATUS_OVERDUE;
+      return PAYMENT_STATUS_PENDING;
+    },
+    isPaidStatus(item) {
+      if (!this.isExpense(item)) return false;
+      return this.resolvePaymentStatus(item) === PAYMENT_STATUS_PAID;
+    },
+    paymentStatusLabel(item) {
+      if (!this.isExpense(item)) return "";
+      const s = this.resolvePaymentStatus(item);
+      if (s === PAYMENT_STATUS_PAID) return "Pago";
+      if (s === PAYMENT_STATUS_OVERDUE) return "Atrasado";
+      return "Pendente";
+    },
+    paymentStatusChipColor(item) {
+      if (!this.isExpense(item)) return "secondary";
+      const s = this.resolvePaymentStatus(item);
+      if (s === PAYMENT_STATUS_PAID) return "success";
+      if (s === PAYMENT_STATUS_OVERDUE) return "error";
+      return "warning";
+    },
+    dueMetaColor(item) {
+      if (!this.isExpense(item)) return "secondary";
+      return this.resolvePaymentStatus(item) === PAYMENT_STATUS_OVERDUE
+        ? "error"
+        : "secondary";
+    },
+    formatDueDayMonth(iso) {
+      return formatDayMonthPtBR(iso);
+    },
+    overdueDaysHint(item) {
+      if (!this.isExpense(item) || !item.due_date || this.isPaidStatus(item)) {
+        return "";
+      }
+      const n = wholeDaysPastDue(item.due_date);
+      if (n <= 0) return "";
+      return n === 1 ? "Atrasado há 1 dia" : `Atrasado há ${n} dias`;
+    },
+    isMarkingPaid(item) {
+      return !!(this.markingPaidById && this.markingPaidById[item.id]);
+    },
+    onMarkPaidClick(item) {
+      if (!this.isExpense(item)) return;
+      this.$emit("mark-paid", item);
+    },
     onDuplicateClick(transaction) {
       this.$emit("duplicate", transaction);
     },

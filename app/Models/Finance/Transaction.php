@@ -6,6 +6,7 @@ namespace App\Models\Finance;
 
 use App\Models\User;
 use App\Services\Finance\FinancialSummaryService;
+use Carbon\CarbonInterface;
 use Database\Factories\Finance\TransactionFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +27,13 @@ class Transaction extends Model
 
     public const TYPE_EXPENSE = 'expense';
 
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_PAID = 'paid';
+
+    /** Somente resposta/UX; não é persistido nem aceito em input. */
+    public const STATUS_OVERDUE = 'overdue';
+
     protected $table = 'finance_transactions';
 
     protected $fillable = [
@@ -37,6 +45,8 @@ class Transaction extends Model
         'amount',
         'type',
         'transaction_date',
+        'payment_status',
+        'due_date',
         'description',
         'installment_number',
         'installment_of',
@@ -45,6 +55,7 @@ class Transaction extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'transaction_date' => 'date',
+        'due_date' => 'date',
     ];
 
     public function user(): BelongsTo
@@ -87,6 +98,35 @@ class Transaction extends Model
         return $query->where('type', self::TYPE_EXPENSE);
     }
 
+    public function isOverdue(?CarbonInterface $asOf = null): bool
+    {
+        if ($this->payment_status === self::STATUS_PAID) {
+            return false;
+        }
+        if ($this->due_date === null) {
+            return false;
+        }
+
+        $today = ($asOf ?? now())->format('Y-m-d');
+
+        return $this->due_date->format('Y-m-d') < $today;
+    }
+
+    /**
+     * Estado efetivo para API/UX: pendente, pago ou atrasado (atrasado é sempre derivado).
+     */
+    public function effectivePaymentStatus(): string
+    {
+        if ($this->payment_status === self::STATUS_PAID) {
+            return self::STATUS_PAID;
+        }
+        if ($this->isOverdue()) {
+            return self::STATUS_OVERDUE;
+        }
+
+        return self::STATUS_PENDING;
+    }
+
     public function scopeFilter(Builder $query, array $filters): Builder
     {
         if (! empty($filters['type']) && in_array($filters['type'], [self::TYPE_INCOME, self::TYPE_EXPENSE], true)) {
@@ -109,6 +149,23 @@ class Transaction extends Model
 
         if (! empty($filters['date_to'])) {
             $query->whereDate('transaction_date', '<=', $filters['date_to']);
+        }
+
+        if (! empty($filters['payment_status']) && is_string($filters['payment_status'])) {
+            $ps = $filters['payment_status'];
+            if ($ps === self::STATUS_OVERDUE) {
+                $query->where('payment_status', self::STATUS_PENDING)
+                    ->whereNotNull('due_date')
+                    ->whereDate('due_date', '<', now()->format('Y-m-d'));
+            } elseif ($ps === self::STATUS_PENDING) {
+                $query->where('payment_status', self::STATUS_PENDING)
+                    ->where(function (Builder $q): void {
+                        $q->whereNull('due_date')
+                            ->orWhereDate('due_date', '>=', now()->format('Y-m-d'));
+                    });
+            } elseif ($ps === self::STATUS_PAID) {
+                $query->where('payment_status', self::STATUS_PAID);
+            }
         }
 
         return $query;
