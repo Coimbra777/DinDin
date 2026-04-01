@@ -1,36 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-
-// use Laravel\Passport\Passport;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
     /**
      * The policy mappings for the application.
      *
-     * @var array
+     * @var array<class-string, class-string>
      */
     protected $policies = [
-        'App\Model' => 'App\Policies\ModelPolicy',
+        //
     ];
 
     /**
      * Register any authentication / authorization services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerPolicies();
-        // Passport::routes();
 
-        // // Configuration of Passport
-        // Passport::hashClientSecrets();
-        // Passport::tokensExpireIn(now()->addDays(15)); //Defines how long it will take for the token to expire
-        // Passport::refreshTokensExpireIn(now()->addDays(30)); //If the user logs, it will take more 30 for the token to expire
-        // Passport::personalAccessTokensExpireIn(now()->addMonths(6));
+        /*
+         * ACL canónica (ver config/acl.php). Persistência atual: is_admin + saas_module_user.
+         * Uso: Gate::allows('admin.access'), Gate::allows('saas-module', 'reports'), etc.
+         */
+        Gate::define('admin.access', fn (User $user): bool => $user->isAdmin());
+
+        Gate::define('saas-module', fn (User $user, string $slug): bool => $user->canAccessSaasModule($slug));
+
+        Gate::define('finance.use', fn (User $user): bool => $user->canAccessSaasModule('finance'));
     }
 }

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -172,6 +173,60 @@ class Transaction extends Model
         }
 
         return $out;
+    }
+
+    /**
+     * Totais de receita/despesa agrupados por mês civil (YYYY-MM) até à data indicada (inclusive).
+     * Suporta MySQL e SQLite (testes).
+     *
+     * @return Collection<int, object{ym: string, income_total: string|float|int, expense_total: string|float|int}>
+     */
+    public static function monthlyIncomeExpenseGroupedThroughDate(int $userId, string $throughDateInclusive): Collection
+    {
+        $driver = DB::connection()->getDriverName();
+        $ymExpr = match ($driver) {
+            'sqlite' => "strftime('%Y-%m', transaction_date)",
+            'pgsql' => "to_char(transaction_date, 'YYYY-MM')",
+            default => "date_format(transaction_date, '%Y-%m')",
+        };
+
+        return static::query()
+            ->forUser($userId)
+            ->whereDate('transaction_date', '<=', $throughDateInclusive)
+            ->selectRaw(
+                "{$ymExpr} as ym, ".
+                'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as income_total, '.
+                'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as expense_total',
+                [self::TYPE_INCOME, self::TYPE_EXPENSE]
+            )
+            ->groupBy(DB::raw($ymExpr))
+            ->orderBy('ym')
+            ->get();
+    }
+
+    /**
+     * Soma receitas/despesas com data estritamente anterior a {@code $beforeDateYmd} (YYYY-MM-DD).
+     *
+     * @return object{income_total: float, expense_total: float}
+     */
+    public static function incomeExpenseTotalsStrictlyBeforeDate(int $userId, string $beforeDateYmd): object
+    {
+        $incomeType = self::TYPE_INCOME;
+        $expenseType = self::TYPE_EXPENSE;
+
+        $row = static::query()
+            ->forUser($userId)
+            ->whereDate('transaction_date', '<', $beforeDateYmd)
+            ->selectRaw(
+                'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as income_total, '.
+                'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as expense_total',
+                [$incomeType, $expenseType]
+            )->first();
+
+        $inc = (float) ($row->income_total ?? 0);
+        $exp = (float) ($row->expense_total ?? 0);
+
+        return (object) ['income_total' => $inc, 'expense_total' => $exp];
     }
 
     /**

@@ -40,15 +40,15 @@ Route::get('/', function () {
 });
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('login', [LoginController::class, 'login']);
+Route::post('login', [LoginController::class, 'login'])->middleware('throttle:login');
 
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('register', [RegisterController::class, 'register']);
+Route::post('register', [RegisterController::class, 'register'])->middleware('throttle:register');
 
 Route::get('password/forgot', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('cms.password.forgot');
-Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('cms.forgot-password');
+Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->middleware('throttle:forgot-password')->name('cms.forgot-password');
 Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('cms.reset-password');
+Route::post('reset-password', [ResetPasswordController::class, 'reset'])->middleware('throttle:reset-password')->name('cms.reset-password');
 
 Route::middleware(['auth'])->group(function () {
     Route::post('api/upload', [TinyMceController::class, 'uploadImage'])->name('cms.api.tinymce.upload');

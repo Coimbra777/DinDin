@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Finance\Api;
 
-use App\Http\Controllers\Cms\RestrictedController;
 use App\Http\Requests\Finance\DuplicateTransactionRequest;
 use App\Http\Requests\Finance\StoreTransactionRequest;
 use App\Http\Requests\Finance\UpdateTransactionRequest;
@@ -13,7 +12,7 @@ use App\Services\Finance\TransactionApiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class TransactionApiController extends RestrictedController
+class TransactionApiController extends FinanceApiController
 {
     public function __construct(
         private readonly TransactionApiService $transactions,
@@ -61,9 +60,9 @@ class TransactionApiController extends RestrictedController
         return response()->json($payload, 201);
     }
 
-    public function update(UpdateTransactionRequest $request, int $transaction): JsonResponse
+    public function update(UpdateTransactionRequest $request, Transaction $transaction): JsonResponse
     {
-        $t = Transaction::forUser($request->user()->id)->where('id', $transaction)->firstOrFail();
+        $t = $transaction;
         $payload = $this->transactions->update(
             $t,
             $request->toTransactionAttributes(),
@@ -72,9 +71,9 @@ class TransactionApiController extends RestrictedController
         return response()->json($payload);
     }
 
-    public function duplicate(DuplicateTransactionRequest $request, int $transaction): JsonResponse
+    public function duplicate(DuplicateTransactionRequest $request, Transaction $transaction): JsonResponse
     {
-        $t = Transaction::forUser($request->user()->id)->where('id', $transaction)->firstOrFail();
+        $t = $transaction;
         $created = $this->transactions->duplicateFollowingMonths($t, $request->months());
 
         return response()->json([
@@ -83,9 +82,9 @@ class TransactionApiController extends RestrictedController
         ], 201);
     }
 
-    public function destroy(Request $request, int $transaction): JsonResponse
+    public function destroy(Request $request, Transaction $transaction): JsonResponse
     {
-        $t = Transaction::forUser($request->user()->id)->where('id', $transaction)->firstOrFail();
+        $t = $transaction;
         $this->transactions->delete($t);
 
         return response()->json(['ok' => true]);

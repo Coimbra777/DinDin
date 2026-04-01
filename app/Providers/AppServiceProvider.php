@@ -5,9 +5,13 @@ namespace App\Providers;
 use App\Contracts\ModuleAccessContract;
 use App\Services\Saas\SaasModuleAccessService;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +40,24 @@ class AppServiceProvider extends ServiceProvider
                 ->action('Definir nova senha', $url)
                 ->line("Este link expira em {$expire} minutos.")
                 ->line('Se você não pediu isso, ignore este e-mail.');
+        });
+
+        RateLimiter::for('login', function (Request $request) {
+            $throttleKey = Str::transliterate(Str::lower((string) $request->input('username', '')).'|'.$request->ip());
+
+            return Limit::perMinute(5)->by($throttleKey ?: $request->ip());
+        });
+
+        RateLimiter::for('forgot-password', function (Request $request) {
+            return Limit::perMinute(5)->by((string) $request->input('email', '').'|'.$request->ip());
+        });
+
+        RateLimiter::for('reset-password', function (Request $request) {
+            return Limit::perMinute(5)->by((string) $request->input('email', '').'|'.$request->ip());
+        });
+
+        RateLimiter::for('register', function (Request $request) {
+            return Limit::perMinute(6)->by($request->ip());
         });
     }
 

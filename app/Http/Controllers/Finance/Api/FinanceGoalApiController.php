@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Finance\Api;
 
-use App\Http\Controllers\Cms\RestrictedController;
 use App\Http\Requests\Goals\StoreFinanceGoalRequest;
 use App\Http\Requests\Goals\UpdateFinanceGoalRequest;
 use App\Models\Finance\FinanceGoal;
@@ -12,7 +11,7 @@ use App\Services\Finance\FinanceGoalService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class FinanceGoalApiController extends RestrictedController
+class FinanceGoalApiController extends FinanceApiController
 {
     public function __construct(
         private readonly FinanceGoalService $goals,

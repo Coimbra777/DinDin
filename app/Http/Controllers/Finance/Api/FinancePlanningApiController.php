@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Finance\Api;
 
-use App\Http\Controllers\Cms\RestrictedController;
 use App\Http\Requests\Finance\StoreFinanceMonthlyPlanRequest;
 use App\Http\Requests\Finance\UpdateFinanceMonthlyPlanRequest;
 use App\Models\Finance\FinanceMonthlyPlan;
@@ -12,7 +11,7 @@ use App\Services\Finance\FinanceMonthlyPlanService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class FinancePlanningApiController extends RestrictedController
+class FinancePlanningApiController extends FinanceApiController
 {
     public function __construct(
         private readonly FinanceMonthlyPlanService $planning,

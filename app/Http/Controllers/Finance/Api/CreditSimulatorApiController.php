@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Finance\Api;
 
-use App\Http\Controllers\Cms\RestrictedController;
 use App\Http\Requests\Finance\SimulateCreditInstallmentRequest;
 use App\Services\Finance\CreditInstallmentSimulatorService;
 use Illuminate\Http\JsonResponse;
 
-class CreditSimulatorApiController extends RestrictedController
+class CreditSimulatorApiController extends FinanceApiController
 {
     public function __construct(
         private readonly CreditInstallmentSimulatorService $simulator,

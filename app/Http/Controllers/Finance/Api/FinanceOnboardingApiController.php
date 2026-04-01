@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Finance\Api;
 
-use App\Http\Controllers\Cms\RestrictedController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class FinanceOnboardingApiController extends RestrictedController
+class FinanceOnboardingApiController extends FinanceApiController
 {
     public function show(Request $request): JsonResponse
     {

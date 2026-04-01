@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Finance\Api;
 
-use App\Http\Controllers\Cms\RestrictedController;
 use App\Services\Finance\SummaryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class SummaryApiController extends RestrictedController
+class SummaryApiController extends FinanceApiController
 {
     public function __construct(
         private readonly SummaryService $summary,

@@ -18,6 +18,32 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        /*
+         * API JSON (parâmetros {transaction} e {category} só são usados em /cms/finance/api/*).
+         * Garante que implicit binding não expõe IDOR (resolveModel sem scope de user).
+         */
+        Route::bind('transaction', function ($value) {
+            if (! auth()->check()) {
+                abort(403);
+            }
+
+            return Transaction::query()
+                ->where('id', $value)
+                ->where('user_id', auth()->id())
+                ->firstOrFail();
+        });
+
+        Route::bind('category', function ($value) {
+            if (! auth()->check()) {
+                abort(403);
+            }
+
+            return Category::query()
+                ->where('id', $value)
+                ->where('user_id', auth()->id())
+                ->firstOrFail();
+        });
+
         Route::bind('finance_transaction', function ($value) {
             if (! auth()->check()) {
                 abort(403);
