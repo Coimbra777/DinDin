@@ -85,13 +85,13 @@ Route::middleware(['auth'])->group(function () {
             Route::get('transactions', [TransactionApiController::class, 'index'])->name('finance.api.transactions');
             Route::get('transactions/recent', [TransactionApiController::class, 'recent'])->name('finance.api.transactions.recent');
             Route::get('categories', [CategoryApiController::class, 'index'])->name('finance.api.categories');
-            Route::post('categories', [CategoryApiController::class, 'store'])->name('finance.api.categories.store');
-            Route::put('categories/{category}', [CategoryApiController::class, 'update'])->name('finance.api.categories.update');
-            Route::delete('categories/{category}', [CategoryApiController::class, 'destroy'])->name('finance.api.categories.destroy');
-            Route::post('transactions', [TransactionApiController::class, 'store'])->name('finance.api.transactions.store');
-            Route::post('transactions/{transaction}/duplicate', [TransactionApiController::class, 'duplicate'])->name('finance.api.transactions.duplicate');
-            Route::put('transactions/{transaction}', [TransactionApiController::class, 'update'])->name('finance.api.transactions.update');
-            Route::delete('transactions/{transaction}', [TransactionApiController::class, 'destroy'])->name('finance.api.transactions.destroy');
+            Route::post('categories', [CategoryApiController::class, 'store'])->middleware('throttle:finance-api-mutations')->name('finance.api.categories.store');
+            Route::put('categories/{category}', [CategoryApiController::class, 'update'])->middleware('throttle:finance-api-mutations')->name('finance.api.categories.update');
+            Route::delete('categories/{category}', [CategoryApiController::class, 'destroy'])->middleware('throttle:finance-api-mutations')->name('finance.api.categories.destroy');
+            Route::post('transactions', [TransactionApiController::class, 'store'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.store');
+            Route::post('transactions/{transaction}/duplicate', [TransactionApiController::class, 'duplicate'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.duplicate');
+            Route::put('transactions/{transaction}', [TransactionApiController::class, 'update'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.update');
+            Route::delete('transactions/{transaction}', [TransactionApiController::class, 'destroy'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.destroy');
             Route::middleware('module:reports')->group(function () {
                 Route::get('reports/categories', [ReportApiController::class, 'categories'])->name('finance.api.reports.categories');
                 Route::get('reports/trend', [ReportApiController::class, 'trend'])->name('finance.api.reports.trend');

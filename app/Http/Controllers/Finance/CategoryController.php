@@ -6,8 +6,9 @@ namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Cms\RestrictedController;
 use App\Models\Finance\Category;
-use App\Models\Finance\Transaction;
 use App\Services\Finance\CategoryApiService;
+use App\Services\Finance\FinanceReadCache;
+use App\Services\Finance\FinancialSummaryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -18,6 +19,8 @@ class CategoryController extends RestrictedController
 {
     public function __construct(
         private readonly CategoryApiService $categoryApi,
+        private readonly FinancialSummaryService $summaries,
+        private readonly FinanceReadCache $readCache,
     ) {
         parent::__construct();
     }
@@ -25,7 +28,8 @@ class CategoryController extends RestrictedController
     public function index(Request $request): View
     {
         if (config('finance.standalone_ui', true)) {
-            $month = Transaction::normalizeMonth($request->query('month'));
+            $mq = $request->query('month');
+            $month = $this->summaries->normalizeMonth(is_string($mq) ? $mq : null);
             $initialView = 'categories';
 
             return view('cms.finance.spa', compact('initialView', 'month'));
@@ -40,7 +44,7 @@ class CategoryController extends RestrictedController
             ->orderBy('name')
             ->paginate(20);
 
-        $totalsByCategory = Transaction::totalsByCategoryForUser($request->user()->id);
+        $totalsByCategory = $this->summaries->totalsByCategoryForUser((int) $request->user()->id);
 
         return view('cms.finance.categories.index', compact('headers', 'categories', 'totalsByCategory'));
     }
@@ -76,6 +80,7 @@ class CategoryController extends RestrictedController
             'group' => $data['group'] ?? null,
             'color' => $data['color'] ?? null,
         ]);
+        $this->readCache->bump((int) $request->user()->id);
 
         return redirect()
             ->route('finance_categories.index')
@@ -125,7 +130,9 @@ class CategoryController extends RestrictedController
 
     public function destroy(Request $request, Category $finance_category): RedirectResponse
     {
+        $userId = (int) $finance_category->user_id;
         $finance_category->delete();
+        $this->readCache->bump($userId);
 
         return redirect()
             ->route('finance_categories.index')

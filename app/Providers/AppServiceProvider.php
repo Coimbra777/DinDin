@@ -59,6 +59,14 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('register', function (Request $request) {
             return Limit::perMinute(6)->by($request->ip());
         });
+
+        RateLimiter::for('finance-api-mutations', function (Request $request) {
+            $perMinute = max(1, (int) config('finance.api_mutations_per_minute', 60));
+            $user = $request->user();
+            $key = $user !== null ? 'finance-mut:'.$user->id : 'finance-mut:guest:'.$request->ip();
+
+            return Limit::perMinute($perMinute)->by($key);
+        });
     }
 
     /**

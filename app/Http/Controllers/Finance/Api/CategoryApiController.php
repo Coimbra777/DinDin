@@ -35,6 +35,7 @@ class CategoryApiController extends FinanceApiController
 
     public function update(Request $request, Category $category): JsonResponse
     {
+        $this->authorize('update', $category);
         $c = $category;
         $data = $request->validate($this->categories->validationRulesForUpdate());
         if (array_key_exists('type', $data) && $data['type'] === null) {
@@ -47,6 +48,7 @@ class CategoryApiController extends FinanceApiController
 
     public function destroy(Request $request, Category $category): JsonResponse
     {
+        $this->authorize('delete', $category);
         $c = $category;
         $this->categories->delete($c);
 

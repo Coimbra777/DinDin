@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services\Finance;
 
-use App\Models\Finance\Transaction;
 use Carbon\Carbon;
 
 final class SummaryService
 {
     public function __construct(
         private readonly DashboardService $dashboard,
+        private readonly FinancialSummaryService $summaries,
     ) {}
 
     /**
@@ -18,12 +18,11 @@ final class SummaryService
      */
     public function forMonth(int $userId, ?string $monthQuery): array
     {
-        $month = Transaction::normalizeMonth($monthQuery);
-        $filters = ['month' => $month];
-        $period = Transaction::periodSummary($userId, $filters);
-        $acumulado = Transaction::cumulativeStatsThroughMonthEnd($userId, $month);
+        $month = $this->summaries->normalizeMonth($monthQuery);
+        $period = $this->summaries->periodSummary($userId, ['month' => $month]);
+        $acumulado = $this->summaries->cumulativeThroughMonthEnd($userId, $month);
         $mesAnterior = Carbon::parse($month.'-01')->subMonth()->format('Y-m');
-        $ateInicioMes = Transaction::cumulativeStatsThroughMonthEnd($userId, $mesAnterior);
+        $ateInicioMes = $this->summaries->cumulativeThroughMonthEnd($userId, $mesAnterior);
         $forecast = $this->dashboard->getMonthlyForecast($userId, $month);
 
         $saldoAteFimMes = round($acumulado->balance, 2);
@@ -31,7 +30,7 @@ final class SummaryService
         return [
             'forecast_type' => DashboardService::FORECAST_TYPE_REALIZED_ONLY,
             'month' => $month,
-            'balance_all_time' => Transaction::balanceForUser($userId),
+            'balance_all_time' => $this->summaries->balanceForUser($userId),
             'income_month' => $period['income'],
             'expense_month' => $period['expense'],
             'available_this_month' => $period['available'],

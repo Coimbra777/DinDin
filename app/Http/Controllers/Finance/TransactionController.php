@@ -7,6 +7,8 @@ namespace App\Http\Controllers\Finance;
 use App\Http\Controllers\Cms\RestrictedController;
 use App\Models\Finance\Category;
 use App\Models\Finance\Transaction;
+use App\Services\Finance\FinanceReadCache;
+use App\Services\Finance\FinancialSummaryService;
 use App\Services\Finance\TransactionCategoryTypeGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,9 +18,17 @@ use Illuminate\View\View;
 
 class TransactionController extends RestrictedController
 {
+    public function __construct(
+        private readonly FinancialSummaryService $summaries,
+        private readonly FinanceReadCache $readCache,
+    ) {
+        parent::__construct();
+    }
+
     public function index(Request $request): View
     {
-        $month = Transaction::normalizeMonth($request->query('month'));
+        $mq = $request->query('month');
+        $month = $this->summaries->normalizeMonth(is_string($mq) ? $mq : null);
         $initialView = 'transactions';
 
         return view('cms.finance.spa', compact('initialView', 'month'));
@@ -43,7 +53,8 @@ class TransactionController extends RestrictedController
         $data['user_id'] = $request->user()->id;
 
         $record = Transaction::create($data);
-        $m = Transaction::normalizeMonth($record->transaction_date->format('Y-m'));
+        $this->readCache->bump((int) $request->user()->id);
+        $m = $this->summaries->normalizeMonth($record->transaction_date->format('Y-m'));
 
         return redirect()
             ->route('finance_dashboard.index', ['month' => $m])
@@ -67,7 +78,8 @@ class TransactionController extends RestrictedController
     {
         $data = $this->validatedTransaction($request);
         $finance_transaction->update($data);
-        $m = Transaction::normalizeMonth($finance_transaction->transaction_date->format('Y-m'));
+        $this->readCache->bump((int) $request->user()->id);
+        $m = $this->summaries->normalizeMonth($finance_transaction->transaction_date->format('Y-m'));
 
         return redirect()
             ->route('finance_transactions.index', ['month' => $m])
@@ -76,8 +88,9 @@ class TransactionController extends RestrictedController
 
     public function destroy(Request $request, Transaction $finance_transaction): RedirectResponse
     {
-        $m = Transaction::normalizeMonth($finance_transaction->transaction_date->format('Y-m'));
+        $m = $this->summaries->normalizeMonth($finance_transaction->transaction_date->format('Y-m'));
         $finance_transaction->delete();
+        $this->readCache->bump((int) $request->user()->id);
 
         return redirect()
             ->route('finance_transactions.index', ['month' => $m])

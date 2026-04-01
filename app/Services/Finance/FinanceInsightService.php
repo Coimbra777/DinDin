@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Finance;
 
 use App\Models\Finance\Category;
-use App\Models\Finance\Transaction;
 use Carbon\Carbon;
 
 /**
@@ -15,14 +14,18 @@ use Carbon\Carbon;
  */
 final class FinanceInsightService
 {
+    public function __construct(
+        private readonly FinancialSummaryService $summaries,
+    ) {}
+
     /**
      * @return array{month: string, insights: list<InsightItem>, categorias: list<array<string, mixed>>, comparacao_mes_anterior: array<string, float|int|string>}
      */
     public function forUser(int $userId, ?string $monthQuery = null): array
     {
-        $month = Transaction::normalizeMonth($monthQuery);
+        $month = $this->summaries->normalizeMonth($monthQuery);
         $filters = ['month' => $month];
-        $totals = Transaction::totalsByCategoryForUser($userId, $filters);
+        $totals = $this->summaries->totalsByCategoryForUser($userId, $filters);
 
         $totalExpense = 0.0;
         foreach ($totals as $row) {
@@ -73,8 +76,8 @@ final class FinanceInsightService
         }
 
         $prev = Carbon::createFromFormat('Y-m', $month)->startOfMonth()->subMonth()->format('Y-m');
-        $curRow = Transaction::aggregateMonthStats($userId, $month, null);
-        $prevRow = Transaction::aggregateMonthStats($userId, $prev, null);
+        $curRow = $this->summaries->aggregateMonthStats($userId, $month, null);
+        $prevRow = $this->summaries->aggregateMonthStats($userId, $prev, null);
         $curExp = (float) ($curRow->expense_total ?? 0);
         $prevExp = (float) ($prevRow->expense_total ?? 0);
 

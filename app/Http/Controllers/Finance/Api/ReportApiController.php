@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Finance\Api;
 
-use App\Models\Finance\Transaction;
+use App\Services\Finance\FinancialSummaryService;
 use App\Services\Finance\ReportService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +13,7 @@ class ReportApiController extends FinanceApiController
 {
     public function __construct(
         private readonly ReportService $reports,
+        private readonly FinancialSummaryService $summaries,
     ) {
         parent::__construct();
     }
@@ -23,7 +24,7 @@ class ReportApiController extends FinanceApiController
         $userId = (int) $request->user()->id;
 
         return response()->json([
-            'month' => Transaction::normalizeMonth(is_string($month) ? $month : null),
+            'month' => $this->summaries->normalizeMonth(is_string($month) ? $month : null),
             'categories' => $this->reports->categoryBreakdown($userId, is_string($month) ? $month : null),
         ]);
     }

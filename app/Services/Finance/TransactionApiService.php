@@ -11,6 +11,10 @@ use Illuminate\Validation\ValidationException;
 
 final class TransactionApiService
 {
+    public function __construct(
+        private readonly FinanceReadCache $readCache,
+    ) {}
+
     /**
      * Lista paginada (substitui o limite fixo de 200). Ordenação: data desc, id desc.
      *
@@ -74,6 +78,7 @@ final class TransactionApiService
             $transactionData['parent_transaction_id'] = null;
             $t = Transaction::create($transactionData);
             $t->load(['category']);
+            $this->readCache->bump($userId);
 
             return TransactionResource::toArray($t);
         });
@@ -94,6 +99,7 @@ final class TransactionApiService
             $transaction->update($transactionData);
             $t = $transaction->fresh();
             $t->load(['category']);
+            $this->readCache->bump((int) $t->user_id);
 
             return TransactionResource::toArray($t);
         });
@@ -158,7 +164,10 @@ final class TransactionApiService
                 ->orderBy('id')
                 ->get();
 
-            return $fresh->map(fn (Transaction $t) => TransactionResource::toArray($t))->values()->all();
+            $payload = $fresh->map(fn (Transaction $t) => TransactionResource::toArray($t))->values()->all();
+            $this->readCache->bump($userId);
+
+            return $payload;
         });
     }
 
@@ -174,6 +183,8 @@ final class TransactionApiService
 
     public function delete(Transaction $transaction): void
     {
+        $userId = (int) $transaction->user_id;
         $transaction->delete();
+        $this->readCache->bump($userId);
     }
 }

@@ -10,6 +10,10 @@ use Illuminate\Validation\ValidationException;
 
 final class CategoryApiService
 {
+    public function __construct(
+        private readonly FinanceReadCache $readCache,
+    ) {}
+
     /**
      * @return list<array<string, mixed>>
      */
@@ -36,13 +40,16 @@ final class CategoryApiService
             $group = null;
         }
 
-        return Category::create([
+        $category = Category::create([
             'user_id' => $userId,
             'name' => $data['name'],
             'type' => $type,
             'group' => $group,
             'color' => $data['color'] ?? null,
         ]);
+        $this->readCache->bump($userId);
+
+        return $category;
     }
 
     /**
@@ -72,13 +79,16 @@ final class CategoryApiService
         $category->update($data);
         $category->refresh();
         $category->loadCount('transactions');
+        $this->readCache->bump((int) $category->user_id);
 
         return $category;
     }
 
     public function delete(Category $category): void
     {
+        $userId = (int) $category->user_id;
         $category->delete();
+        $this->readCache->bump($userId);
     }
 
     /**

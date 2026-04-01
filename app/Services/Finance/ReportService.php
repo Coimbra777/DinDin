@@ -4,11 +4,20 @@ declare(strict_types=1);
 
 namespace App\Services\Finance;
 
-use App\Models\Finance\Transaction;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 final class ReportService
 {
+    private const CACHE_VERSION = 'v1';
+
+    private const TREND_CACHE_TTL_SECONDS = 300;
+
+    public function __construct(
+        private readonly FinancialSummaryService $summaries,
+        private readonly FinanceReadCache $readCache,
+    ) {}
+
     /**
      * Totais por categoria no mês (análise / gráficos).
      *
@@ -16,9 +25,9 @@ final class ReportService
      */
     public function categoryBreakdown(int $userId, ?string $monthQuery): array
     {
-        $month = Transaction::normalizeMonth($monthQuery);
+        $month = $this->summaries->normalizeMonth($monthQuery);
         $filters = ['month' => $month];
-        $totals = Transaction::totalsByCategoryForUser($userId, $filters);
+        $totals = $this->summaries->totalsByCategoryForUser($userId, $filters);
 
         $out = [];
         foreach ($totals as $key => $row) {
@@ -43,7 +52,21 @@ final class ReportService
     public function monthlyTrend(int $userId, int $months = 6): array
     {
         $months = max(1, min(36, $months));
+        $rev = $this->readCache->revision($userId);
+        $cacheKey = 'finance.trend.'.self::CACHE_VERSION.'.'.$userId.'.'.$rev.'.'.$months;
 
+        return Cache::remember(
+            $cacheKey,
+            self::TREND_CACHE_TTL_SECONDS,
+            fn (): array => $this->computeMonthlyTrend($userId, $months)
+        );
+    }
+
+    /**
+     * @return list<array{month: string, receitas: float, despesas: float, saldo_mes: float, saldo_acumulado: float}>
+     */
+    private function computeMonthlyTrend(int $userId, int $months): array
+    {
         $keysNewestFirst = [];
         $cursor = now()->startOfMonth();
         for ($i = 0; $i < $months; $i++) {
@@ -53,10 +76,10 @@ final class ReportService
 
         $newestYm = $keysNewestFirst[0];
         $oldestYm = $keysNewestFirst[array_key_last($keysNewestFirst)];
-        [, $throughEnd] = Transaction::monthToDateRange($newestYm);
-        [$windowStart] = Transaction::monthToDateRange($oldestYm);
+        [, $throughEnd] = $this->summaries->monthToDateRange($newestYm);
+        [$windowStart] = $this->summaries->monthToDateRange($oldestYm);
 
-        $rows = Transaction::monthlyIncomeExpenseGroupedThroughDate($userId, $throughEnd);
+        $rows = $this->summaries->monthlyIncomeExpenseGroupedThroughDate($userId, $throughEnd);
         $byYm = [];
         foreach ($rows as $row) {
             $byYm[$row->ym] = [
@@ -65,7 +88,7 @@ final class ReportService
             ];
         }
 
-        $prior = Transaction::incomeExpenseTotalsStrictlyBeforeDate($userId, $windowStart);
+        $prior = $this->summaries->incomeExpenseStrictlyBeforeDate($userId, $windowStart);
         $running = (float) $prior->income_total - (float) $prior->expense_total;
 
         $cumulative = [];

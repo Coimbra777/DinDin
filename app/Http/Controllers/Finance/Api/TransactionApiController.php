@@ -8,6 +8,7 @@ use App\Http\Requests\Finance\DuplicateTransactionRequest;
 use App\Http\Requests\Finance\StoreTransactionRequest;
 use App\Http\Requests\Finance\UpdateTransactionRequest;
 use App\Models\Finance\Transaction;
+use App\Services\Finance\FinancialSummaryService;
 use App\Services\Finance\TransactionApiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ class TransactionApiController extends FinanceApiController
 {
     public function __construct(
         private readonly TransactionApiService $transactions,
+        private readonly FinancialSummaryService $summaries,
     ) {
         parent::__construct();
     }
@@ -23,7 +25,7 @@ class TransactionApiController extends FinanceApiController
     public function index(Request $request): JsonResponse
     {
         $filters = [
-            'month' => Transaction::normalizeMonth($request->query('month')),
+            'month' => $this->summaries->normalizeMonth($request->query('month')),
         ];
         if ($request->filled('category_id')) {
             $filters['category_id'] = (int) $request->query('category_id');
@@ -44,7 +46,7 @@ class TransactionApiController extends FinanceApiController
 
     public function recent(Request $request): JsonResponse
     {
-        $month = Transaction::normalizeMonth($request->query('month'));
+        $month = $this->summaries->normalizeMonth($request->query('month'));
         $data = $this->transactions->recentForUser((int) $request->user()->id, $month);
 
         return response()->json(['data' => $data]);
@@ -62,9 +64,9 @@ class TransactionApiController extends FinanceApiController
 
     public function update(UpdateTransactionRequest $request, Transaction $transaction): JsonResponse
     {
-        $t = $transaction;
+        $this->authorize('update', $transaction);
         $payload = $this->transactions->update(
-            $t,
+            $transaction,
             $request->toTransactionAttributes(),
         );
 
@@ -73,8 +75,8 @@ class TransactionApiController extends FinanceApiController
 
     public function duplicate(DuplicateTransactionRequest $request, Transaction $transaction): JsonResponse
     {
-        $t = $transaction;
-        $created = $this->transactions->duplicateFollowingMonths($t, $request->months());
+        $this->authorize('duplicate', $transaction);
+        $created = $this->transactions->duplicateFollowingMonths($transaction, $request->months());
 
         return response()->json([
             'data' => $created,
@@ -84,8 +86,8 @@ class TransactionApiController extends FinanceApiController
 
     public function destroy(Request $request, Transaction $transaction): JsonResponse
     {
-        $t = $transaction;
-        $this->transactions->delete($t);
+        $this->authorize('delete', $transaction);
+        $this->transactions->delete($transaction);
 
         return response()->json(['ok' => true]);
     }

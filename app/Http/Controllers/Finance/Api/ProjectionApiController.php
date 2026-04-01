@@ -10,9 +10,15 @@ use Illuminate\Http\Request;
 
 class ProjectionApiController extends FinanceApiController
 {
+    public function __construct(
+        private readonly FinanceProjectionService $projection,
+    ) {
+        parent::__construct();
+    }
+
     public function show(Request $request): JsonResponse
     {
-        $payload = FinanceProjectionService::project((int) $request->user()->id);
+        $payload = $this->projection->project((int) $request->user()->id);
 
         return response()->json($payload);
     }

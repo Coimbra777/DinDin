@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Cms\RestrictedController;
-use App\Models\Finance\Transaction;
+use App\Services\Finance\FinancialSummaryService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -14,9 +14,16 @@ use Illuminate\View\View;
  */
 class FinanceDashboardController extends RestrictedController
 {
+    public function __construct(
+        private readonly FinancialSummaryService $summaries,
+    ) {
+        parent::__construct();
+    }
+
     public function index(Request $request): View
     {
-        $month = Transaction::normalizeMonth($request->query('month'));
+        $m = $request->query('month');
+        $month = $this->summaries->normalizeMonth(is_string($m) ? $m : null);
         $initialView = 'dashboard';
 
         return view('cms.finance.spa', compact('initialView', 'month'));

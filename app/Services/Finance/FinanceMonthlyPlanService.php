@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Services\Finance;
 
 use App\Models\Finance\FinanceMonthlyPlan;
-use App\Models\Finance\Transaction;
 
 final class FinanceMonthlyPlanService
 {
+    public function __construct(
+        private readonly FinancialSummaryService $summaries,
+    ) {}
+
     /**
      * @return list<array<string, mixed>>
      */
@@ -62,7 +65,7 @@ final class FinanceMonthlyPlanService
     {
         $userId = (int) $plan->user_id;
         $m = $plan->year_month;
-        $row = Transaction::aggregateMonthStats($userId, $m, null);
+        $row = $this->summaries->aggregateMonthStats($userId, $m, null);
         $income = (float) ($row->income_total ?? 0);
         $exp = (float) ($row->expense_total ?? 0);
         $savingActual = $income - $exp;

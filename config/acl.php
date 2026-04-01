@@ -8,10 +8,13 @@
  * testes e código novo — sem nova tabela até ser necessário.
  */
 return [
+    /*
+    | Valores alinhados com \App\Support\GateNames (evitar divergência).
+    */
     'gates' => [
-        'admin.access' => 'Acesso ao painel /cms/admin e APIs de administração.',
-        'saas-module' => 'Um argumento: slug do módulo (ex.: finance, reports, planning, projections).',
-        'finance.use' => 'Entrada na área de finanças (equivalente ao slug finance).',
+        \App\Support\GateNames::ADMIN => 'Acesso ao painel /cms/admin e APIs de administração.',
+        \App\Support\GateNames::SAAS_MODULE => 'Um argumento: slug do módulo (ex.: finance, reports, planning, projections).',
+        \App\Support\GateNames::FINANCE => 'Entrada na área de finanças (equivalente ao slug finance).',
     ],
 
     /*
@@ -20,7 +23,7 @@ return [
     | - user  → autenticado, não admin
     */
     'roles' => [
-        'admin' => 'admin.access',
+        'admin' => \App\Support\GateNames::ADMIN,
         'user' => null,
     ],
 ];

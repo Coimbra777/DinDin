@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Finance;
 
-use App\Models\Finance\Transaction;
 use Carbon\Carbon;
 
 /**
@@ -14,6 +13,10 @@ use Carbon\Carbon;
 final class FinanceMonthMetrics
 {
     public const SPENDING_SPIKE_RATIO = 1.25;
+
+    public function __construct(
+        private readonly FinancialSummaryService $summaries,
+    ) {}
 
     /**
      * @return array{
@@ -30,8 +33,8 @@ final class FinanceMonthMetrics
      */
     public function snapshot(int $userId, ?string $monthQuery = null): array
     {
-        $month = Transaction::normalizeMonth($monthQuery);
-        $row = Transaction::aggregateMonthStats($userId, $month, null);
+        $month = $this->summaries->normalizeMonth($monthQuery);
+        $row = $this->summaries->aggregateMonthStats($userId, $month, null);
         $income = (float) ($row->income_total ?? 0);
         $expense = (float) ($row->expense_total ?? 0);
         $saldo = $income - $expense;
@@ -63,7 +66,7 @@ final class FinanceMonthMetrics
         $n = 0;
         for ($i = 0; $i < $count; $i++) {
             $key = $cursor->format('Y-m');
-            $row = Transaction::aggregateMonthStats($userId, $key, null);
+            $row = $this->summaries->aggregateMonthStats($userId, $key, null);
             $sum += (float) ($row->expense_total ?? 0);
             $n++;
             $cursor = $cursor->copy()->subMonth();

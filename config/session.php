@@ -193,6 +193,10 @@ return [
     |
     | Supported: "lax", "strict"
     |
+    | Produção HTTPS: pode usar SESSION_SAME_SITE=strict para reforçar CSRF.
+    | Se fluxos externos (OAuth, links de e-mail) precisarem enviar cookie cross-site,
+    | use "lax" (ou ajuste TrustProxies + APP_URL).
+    |
     */
 
     'same_site' => env('SESSION_SAME_SITE', 'lax'),

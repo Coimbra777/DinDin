@@ -78,5 +78,11 @@ return [
             'driver' => 'errorlog',
             'level' => 'debug',
         ],
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => env('LOG_SECURITY_LEVEL', 'warning'),
+            'days' => env('LOG_SECURITY_DAYS', 30),
+        ],
     ],
 ];

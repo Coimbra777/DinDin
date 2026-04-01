@@ -6,11 +6,21 @@ namespace App\Services\Finance;
 
 use App\Models\Finance\Transaction;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 final class DashboardService
 {
+    private const CACHE_VERSION = 'v1';
+
+    private const CACHE_TTL_SECONDS = 300;
+
     /** Valor de `forecast_type` na API: apenas dados já lançados no mês (sem modelo preditivo). */
     public const FORECAST_TYPE_REALIZED_ONLY = 'realized_only';
+
+    public function __construct(
+        private readonly FinancialSummaryService $summaries,
+        private readonly FinanceReadCache $readCache,
+    ) {}
 
     /**
      * Painel do mês: saldos, totais e últimas transações (sem recorrência automática).
@@ -19,18 +29,29 @@ final class DashboardService
      */
     public function buildPayload(int $userId, ?string $monthQuery): array
     {
-        $month = Transaction::normalizeMonth($monthQuery);
-        [$start, $end] = Transaction::monthToDateRange($month);
+        $month = $this->summaries->normalizeMonth($monthQuery);
+        $rev = $this->readCache->revision($userId);
+        $cacheKey = 'finance.dashboard.'.self::CACHE_VERSION.'.'.$userId.'.'.$rev.'.'.$month;
 
-        $row = Transaction::aggregateMonthStats($userId, $month, null);
+        return Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, fn (): array => $this->buildPayloadUncached($userId, $month));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildPayloadUncached(int $userId, string $month): array
+    {
+        [$start, $end] = $this->summaries->monthToDateRange($month);
+
+        $row = $this->summaries->aggregateMonthStats($userId, $month, null);
         $receitasMes = (float) ($row->income_total ?? 0);
         $despesasMes = (float) ($row->expense_total ?? 0);
         $saldoMes = $receitasMes - $despesasMes;
         $totalTransacoes = (int) ($row->tx_count ?? 0);
 
-        $acumulado = Transaction::cumulativeStatsThroughMonthEnd($userId, $month);
+        $acumulado = $this->summaries->cumulativeThroughMonthEnd($userId, $month);
         $mesAnterior = Carbon::parse($start)->subMonth()->format('Y-m');
-        $acumuladoAteInicioMes = Transaction::cumulativeStatsThroughMonthEnd($userId, $mesAnterior);
+        $acumuladoAteInicioMes = $this->summaries->cumulativeThroughMonthEnd($userId, $mesAnterior);
 
         $forecast = $this->getMonthlyForecast($userId, $month);
         $saldoPrevistoAcumuladoFimMes = round($acumulado->balance, 2);
@@ -70,7 +91,7 @@ final class DashboardService
      */
     public function getMonthlyForecast(int $userId, string $monthYyyyMm): array
     {
-        $row = Transaction::aggregateMonthStats($userId, $monthYyyyMm, null);
+        $row = $this->summaries->aggregateMonthStats($userId, $monthYyyyMm, null);
         $receitasMes = (float) ($row->income_total ?? 0);
         $despesasMes = (float) ($row->expense_total ?? 0);
         $saldoMes = round($receitasMes - $despesasMes, 2);

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Finance;
 
 use App\Models\Finance\FinanceMonthlyPlan;
-use App\Models\Finance\Transaction;
+use App\Services\Finance\FinancialSummaryService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -52,7 +52,7 @@ class UpdateFinanceMonthlyPlanRequest extends FormRequest
                 return;
             }
             try {
-                Transaction::monthToDateRange($ym);
+                app(FinancialSummaryService::class)->monthToDateRange($ym);
             } catch (\InvalidArgumentException) {
                 $validator->errors()->add('year_month', 'Mês inválido.');
             }

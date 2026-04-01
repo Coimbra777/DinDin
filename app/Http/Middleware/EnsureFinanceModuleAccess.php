@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Support\GateNames;
+use App\Support\UnauthorizedAccessLogger;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -19,7 +21,8 @@ final class EnsureFinanceModuleAccess
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        if ($user === null || ! Gate::forUser($user)->allows('finance.use')) {
+        if ($user === null || ! Gate::forUser($user)->allows(GateNames::FINANCE)) {
+            UnauthorizedAccessLogger::log($request, 'middleware.finance_module', ['gate' => GateNames::FINANCE]);
             if ($request->expectsJson() || $request->is('cms/finance/*')) {
                 return response()->json(['message' => 'Módulo não autorizado'], 403);
             }
