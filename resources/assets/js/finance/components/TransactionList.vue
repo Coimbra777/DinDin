@@ -107,6 +107,16 @@
               >
                 {{ paymentStatusLabel(item) }}
               </v-chip>
+              <v-chip
+                v-if="isExpense(item) && item.is_recurring"
+                x-small
+                outlined
+                color="indigo"
+                class="ml-2 flex-shrink-0"
+                label
+              >
+                Recorrente
+              </v-chip>
             </v-list-item-title>
             <v-list-item-subtitle
               class="tx-list__meta text-caption secondary--text mt-1"

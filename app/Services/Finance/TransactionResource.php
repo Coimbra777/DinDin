@@ -34,6 +34,8 @@ final class TransactionResource
             /** Vínculo com regra antiga em finance_recurring_transactions (recorrência automática removida da app). */
             'recurring_transaction_id' => $t->recurring_transaction_id,
             'is_legacy_recurring' => $legacyRecurring,
+            'is_recurring' => (bool) $t->is_recurring,
+            'recurrence_day' => $t->recurrence_day,
             'category' => $t->category ? [
                 'id' => $t->category->id,
                 'name' => $t->category->name,

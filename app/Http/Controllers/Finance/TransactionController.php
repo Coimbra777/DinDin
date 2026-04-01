@@ -10,6 +10,7 @@ use App\Models\Finance\Transaction;
 use App\Services\Finance\FinanceReadCache;
 use App\Services\Finance\FinancialSummaryService;
 use App\Services\Finance\TransactionCategoryTypeGuard;
+use App\Services\Finance\TransactionExpenseRules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -114,7 +115,11 @@ class TransactionController extends RestrictedController
             'due_date' => ['nullable', 'date'],
             'installment_number' => ['nullable', 'integer', 'min:1', 'max:360'],
             'installment_of' => ['nullable', 'integer', 'min:2', 'max:360'],
+            'is_recurring' => ['nullable', 'boolean'],
+            'recurrence_day' => ['nullable', 'integer', 'min:1', 'max:31'],
         ]);
+
+        $data['is_recurring'] = $request->boolean('is_recurring');
 
         $hasN = array_key_exists('installment_number', $data) && $data['installment_number'] !== null;
         $hasO = array_key_exists('installment_of', $data) && $data['installment_of'] !== null;
@@ -139,6 +144,6 @@ class TransactionController extends RestrictedController
 
         TransactionCategoryTypeGuard::assertCompatible($userId, isset($data['category_id']) ? (int) $data['category_id'] : null, $data['type']);
 
-        return $data;
+        return TransactionExpenseRules::normalizeForPersistence($data);
     }
 }

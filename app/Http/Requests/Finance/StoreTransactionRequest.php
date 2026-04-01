@@ -6,6 +6,7 @@ namespace App\Http\Requests\Finance;
 
 use App\Models\Finance\Transaction;
 use App\Services\Finance\TransactionCategoryTypeGuard;
+use App\Services\Finance\TransactionExpenseRules;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -50,6 +51,8 @@ class StoreTransactionRequest extends FormRequest
             'transaction_date' => 'required|date',
             'payment_status' => ['sometimes', 'nullable', Rule::in([Transaction::STATUS_PENDING, Transaction::STATUS_PAID])],
             'due_date' => ['sometimes', 'nullable', 'date'],
+            'is_recurring' => ['sometimes', 'boolean'],
+            'recurrence_day' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:31'],
             'description' => 'nullable|string|max:5000',
         ];
     }
@@ -63,6 +66,15 @@ class StoreTransactionRequest extends FormRequest
 
             $data = $validator->getData();
             $userId = (int) $this->user()->id;
+
+            if (($data['type'] ?? '') === Transaction::TYPE_INCOME) {
+                if (! empty($data['is_recurring']) && filter_var($data['is_recurring'], FILTER_VALIDATE_BOOLEAN)) {
+                    $validator->errors()->add('is_recurring', 'Recorrência mensal só é permitida para despesas.');
+                }
+                if (isset($data['recurrence_day']) && $data['recurrence_day'] !== null && $data['recurrence_day'] !== '') {
+                    $validator->errors()->add('recurrence_day', 'Dia de recorrência só se aplica a despesas.');
+                }
+            }
 
             $due = $data['due_date'] ?? null;
             $txDate = $data['transaction_date'] ?? null;
@@ -93,6 +105,6 @@ class StoreTransactionRequest extends FormRequest
      */
     public function toTransactionAttributes(): array
     {
-        return $this->validated();
+        return TransactionExpenseRules::normalizeForPersistence($this->validated());
     }
 }

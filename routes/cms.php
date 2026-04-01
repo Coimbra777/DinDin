@@ -21,6 +21,7 @@ use App\Http\Controllers\Finance\Api\CategoryApiController;
 use App\Http\Controllers\Finance\Api\DashboardApiController;
 use App\Http\Controllers\Finance\Api\FinanceOnboardingApiController;
 use App\Http\Controllers\Finance\Api\ProjectionApiController;
+use App\Http\Controllers\Finance\Api\RecurringGenerateApiController;
 use App\Http\Controllers\Finance\Api\ReportApiController;
 use App\Http\Controllers\Finance\Api\SummaryApiController;
 use App\Http\Controllers\Finance\Api\TransactionApiController;
@@ -91,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('transactions', [TransactionApiController::class, 'store'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.store');
             Route::post('transactions/{transaction}/mark-as-paid', [TransactionApiController::class, 'markAsPaid'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.mark_as_paid');
             Route::post('transactions/{transaction}/duplicate', [TransactionApiController::class, 'duplicate'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.duplicate');
+            Route::post('recurring/generate', [RecurringGenerateApiController::class, 'store'])->middleware('throttle:finance-api-mutations')->name('finance.api.recurring.generate');
             Route::put('transactions/{transaction}', [TransactionApiController::class, 'update'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.update');
             Route::delete('transactions/{transaction}', [TransactionApiController::class, 'destroy'])->middleware('throttle:finance-api-mutations')->name('finance.api.transactions.destroy');
             Route::middleware('module:reports')->group(function () {

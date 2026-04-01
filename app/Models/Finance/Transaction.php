@@ -50,12 +50,16 @@ class Transaction extends Model
         'description',
         'installment_number',
         'installment_of',
+        'is_recurring',
+        'recurrence_day',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'transaction_date' => 'date',
         'due_date' => 'date',
+        'is_recurring' => 'boolean',
+        'recurrence_day' => 'integer',
     ];
 
     public function user(): BelongsTo
@@ -100,6 +104,9 @@ class Transaction extends Model
 
     public function isOverdue(?CarbonInterface $asOf = null): bool
     {
+        if ($this->type !== self::TYPE_EXPENSE) {
+            return false;
+        }
         if ($this->payment_status === self::STATUS_PAID) {
             return false;
         }
@@ -117,6 +124,9 @@ class Transaction extends Model
      */
     public function effectivePaymentStatus(): string
     {
+        if ($this->type !== self::TYPE_EXPENSE) {
+            return self::STATUS_PENDING;
+        }
         if ($this->payment_status === self::STATUS_PAID) {
             return self::STATUS_PAID;
         }

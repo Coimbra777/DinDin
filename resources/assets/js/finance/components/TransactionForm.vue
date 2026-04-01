@@ -219,6 +219,38 @@
             hide-details
             class="mt-2"
           />
+
+          <div v-if="form.type === TX_EXPENSE" class="mt-4">
+            <div class="d-flex align-start flex-nowrap">
+              <v-checkbox
+                v-model="form.is_recurring"
+                hide-details
+                class="mt-0 pt-0 flex-shrink-0"
+                label="Despesa recorrente (modelo mensal)"
+                color="primary"
+              />
+              <help-tooltip
+                class="ml-0 mt-1"
+                text="Guarda um modelo para gerar a mesma despesa noutros meses pela API (sem autopilot). O dia de lançamento segue a data ou o campo abaixo."
+                aria-label="Ajuda: recorrência"
+              />
+            </div>
+            <v-text-field
+              v-if="form.is_recurring"
+              v-model.number="recurrenceDayModel"
+              label="Dia do mês para repetir (1–31)"
+              type="number"
+              outlined
+              dense
+              min="1"
+              max="31"
+              hide-details="auto"
+              hint="Opcional: se vazio, usa o dia da data acima."
+              persistent-hint
+              class="mt-2"
+              prepend-inner-icon="mdi-calendar-refresh"
+            />
+          </div>
         </v-form>
       </v-card-text>
       <v-divider />
@@ -264,6 +296,8 @@ const emptyForm = () => ({
   category_id: null,
   transaction_date: todayIsoLocal(),
   description: '',
+  is_recurring: false,
+  recurrence_day: null,
 })
 
 export default {
@@ -352,6 +386,19 @@ export default {
     transactionDateRules() {
       return [() => (toIsoDateOnly(this.form.transaction_date) ? true : 'Informe a data')]
     },
+    recurrenceDayModel: {
+      get() {
+        return this.form.recurrence_day
+      },
+      set(v) {
+        if (v === '' || v === null || v === undefined) {
+          this.form.recurrence_day = null
+          return
+        }
+        const n = parseInt(String(v), 10)
+        this.form.recurrence_day = Number.isFinite(n) ? n : null
+      },
+    },
   },
   watch: {
     value(val) {
@@ -374,6 +421,10 @@ export default {
       const cat = this.categories.find((c) => c.id === prev)
       if (cat && cat.type && cat.type !== t) {
         this.form.category_id = null
+      }
+      if (t === TRANSACTION_TYPE_INCOME) {
+        this.form.is_recurring = false
+        this.form.recurrence_day = null
       }
     },
     clearFieldError(key) {
@@ -410,6 +461,11 @@ export default {
           category_id: this.transaction.category_id,
           transaction_date: toIsoDateOnly(this.transaction.transaction_date) || todayIsoLocal(),
           description: this.transaction.description || '',
+          is_recurring: !!this.transaction.is_recurring,
+          recurrence_day:
+            this.transaction.recurrence_day != null
+              ? Number(this.transaction.recurrence_day)
+              : null,
         }
         this.amountDisplay = this.formatAmountBR(this.transaction.amount)
       } else {
@@ -451,6 +507,14 @@ export default {
         transaction_date: toIsoDateOnly(this.form.transaction_date) || this.form.transaction_date,
         description: this.form.description || null,
         category_id: parseInt(String(this.form.category_id), 10),
+      }
+
+      const typ = normalizeTransactionType(this.form.type)
+      if (typ === TRANSACTION_TYPE_EXPENSE) {
+        payload.is_recurring = !!this.form.is_recurring
+        if (this.form.is_recurring && this.form.recurrence_day != null && this.form.recurrence_day !== '') {
+          payload.recurrence_day = Number(this.form.recurrence_day)
+        }
       }
 
       try {

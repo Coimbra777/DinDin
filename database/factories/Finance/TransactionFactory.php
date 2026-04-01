@@ -56,6 +56,8 @@ class TransactionFactory extends Factory
             'description' => fake()->boolean(40) ? implode(' ', fake()->words(fake()->numberBetween(3, 8))) : null,
             'installment_number' => null,
             'installment_of' => null,
+            'is_recurring' => false,
+            'recurrence_day' => null,
         ];
     }
 

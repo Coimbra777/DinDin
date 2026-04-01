@@ -299,5 +299,20 @@ class TransactionApiTest extends FinanceApiTestCase
             'payment_status' => Transaction::STATUS_PAID,
         ]);
     }
+
+    public function test_mark_as_paid_rejects_income(): void
+    {
+        $user = $this->financeUser();
+        $cat = Category::factory()->income()->create(['user_id' => $user->id]);
+        $tx = Transaction::factory()->forUserId((int) $user->id)->create([
+            'category_id' => $cat->id,
+            'type' => Transaction::TYPE_INCOME,
+            'transaction_date' => '2026-04-01',
+        ]);
+
+        $this->actingAs($user)
+            ->postJson($this->financeApi('transactions/'.$tx->id.'/mark-as-paid'))
+            ->assertStatus(422);
+    }
 }
 

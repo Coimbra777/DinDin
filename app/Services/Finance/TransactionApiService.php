@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Finance;
 
 use App\Models\Finance\Transaction;
+use App\Services\Finance\TransactionExpenseRules;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -160,6 +161,8 @@ final class TransactionApiService
                     'description' => $source->description,
                     'installment_number' => null,
                     'installment_of' => null,
+                    'is_recurring' => false,
+                    'recurrence_day' => null,
                 ]);
                 $ids[] = $row->id;
             }
@@ -202,6 +205,8 @@ final class TransactionApiService
      */
     public function markAsPaid(Transaction $transaction): array
     {
+        TransactionExpenseRules::assertExpenseForPayment($transaction);
+
         return DB::transaction(function () use ($transaction): array {
             $transaction->update(['payment_status' => Transaction::STATUS_PAID]);
             $t = $transaction->fresh();
