@@ -232,17 +232,18 @@
 
 <script>
 import { formatCurrencyBRL } from "../currency";
+import { formatDatePtBR, formatDayMonthPtBR } from "../format";
 import {
-  formatDatePtBR,
-  formatDayMonthPtBR,
-  wholeDaysPastDue,
-} from "../format";
-import {
-  PAYMENT_STATUS_OVERDUE,
-  PAYMENT_STATUS_PAID,
-  PAYMENT_STATUS_PENDING,
-  TRANSACTION_TYPE_EXPENSE,
-} from "../transactionTypes";
+  dueMetaColorForPaymentItem,
+  isExpenseTransaction,
+  isPaidEffectivePayment,
+  overdueDaysHintPt,
+  paymentStatusChipColorVuetify,
+  paymentStatusLabelPt,
+  resolveEffectivePaymentStatus,
+  transactionAvatarColor,
+  transactionTypeIcon,
+} from "../transactionPaymentUi";
 
 export default {
   name: "TransactionList",
@@ -263,55 +264,28 @@ export default {
     },
   },
   methods: {
-    isExpense(item) {
-      return item && item.type === TRANSACTION_TYPE_EXPENSE;
-    },
-    resolvePaymentStatus(item) {
-      if (!this.isExpense(item)) return "";
-      if (item.payment_status) return item.payment_status;
-      if (item.is_overdue) return PAYMENT_STATUS_OVERDUE;
-      return PAYMENT_STATUS_PENDING;
-    },
-    isPaidStatus(item) {
-      if (!this.isExpense(item)) return false;
-      return this.resolvePaymentStatus(item) === PAYMENT_STATUS_PAID;
-    },
+    isExpense: isExpenseTransaction,
+    resolvePaymentStatus: resolveEffectivePaymentStatus,
+    isPaidStatus: isPaidEffectivePayment,
     paymentStatusLabel(item) {
-      if (!this.isExpense(item)) return "";
-      const s = this.resolvePaymentStatus(item);
-      if (s === PAYMENT_STATUS_PAID) return "Pago";
-      if (s === PAYMENT_STATUS_OVERDUE) return "Atrasado";
-      return "Pendente";
+      const s = resolveEffectivePaymentStatus(item);
+      if (!s) return "";
+      return paymentStatusLabelPt(s);
     },
     paymentStatusChipColor(item) {
-      if (!this.isExpense(item)) return "secondary";
-      const s = this.resolvePaymentStatus(item);
-      if (s === PAYMENT_STATUS_PAID) return "success";
-      if (s === PAYMENT_STATUS_OVERDUE) return "error";
-      return "warning";
+      if (!isExpenseTransaction(item)) return "secondary";
+      return paymentStatusChipColorVuetify(resolveEffectivePaymentStatus(item));
     },
-    dueMetaColor(item) {
-      if (!this.isExpense(item)) return "secondary";
-      return this.resolvePaymentStatus(item) === PAYMENT_STATUS_OVERDUE
-        ? "error"
-        : "secondary";
-    },
+    dueMetaColor: dueMetaColorForPaymentItem,
     formatDueDayMonth(iso) {
       return formatDayMonthPtBR(iso);
     },
-    overdueDaysHint(item) {
-      if (!this.isExpense(item) || !item.due_date || this.isPaidStatus(item)) {
-        return "";
-      }
-      const n = wholeDaysPastDue(item.due_date);
-      if (n <= 0) return "";
-      return n === 1 ? "Atrasado há 1 dia" : `Atrasado há ${n} dias`;
-    },
+    overdueDaysHint: overdueDaysHintPt,
     isMarkingPaid(item) {
       return !!(this.markingPaidById && this.markingPaidById[item.id]);
     },
     onMarkPaidClick(item) {
-      if (!this.isExpense(item)) return;
+      if (!isExpenseTransaction(item)) return;
       this.$emit("mark-paid", item);
     },
     onDuplicateClick(transaction) {
@@ -320,14 +294,8 @@ export default {
     formatTxDate(iso) {
       return formatDatePtBR(iso);
     },
-    itemIcon(item) {
-      if (item.type === "income") return "mdi-cash-plus";
-      return "mdi-cash-minus";
-    },
-    avatarColor(item) {
-      if (item.type === "income") return "success";
-      return "error";
-    },
+    itemIcon: transactionTypeIcon,
+    avatarColor: transactionAvatarColor,
     /** Valor sempre em R$ com sinal visível */
     formatAmountLine(item) {
       const base = formatCurrencyBRL(item.amount);

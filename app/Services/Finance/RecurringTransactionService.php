@@ -48,7 +48,7 @@ final class RecurringTransactionService
                     continue;
                 }
 
-                if ($this->hasChildInMonth($userId, (int) $template->id, $y, $mNum)) {
+                if (TransactionDuplicateGuard::existsChildForYearMonth($userId, (int) $template->id, $y, $mNum)) {
                     $skipped++;
 
                     continue;
@@ -91,16 +91,6 @@ final class RecurringTransactionService
                 'skipped' => $skipped,
             ];
         });
-    }
-
-    private function hasChildInMonth(int $userId, int $parentId, int $year, int $month): bool
-    {
-        return Transaction::query()
-            ->forUser($userId)
-            ->where('parent_transaction_id', $parentId)
-            ->whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->exists();
     }
 
     /**

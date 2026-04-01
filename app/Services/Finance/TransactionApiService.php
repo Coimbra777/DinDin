@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Finance;
 
 use App\Models\Finance\Transaction;
-use App\Services\Finance\TransactionExpenseRules;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -131,7 +130,7 @@ final class TransactionApiService
 
             foreach ($datesToCreate as $ymd) {
                 $d = Carbon::parse($ymd)->startOfDay();
-                if ($this->hasDuplicateChildInMonth($userId, $parentId, $d)) {
+                if (TransactionDuplicateGuard::hasChildInCalendarMonth($userId, $parentId, $d)) {
                     throw ValidationException::withMessages([
                         'months' => [
                             'Já existe uma cópia desta transação no mês '.$d->format('m/Y').'. Reduza a quantidade de meses ou remova o duplicado.',
@@ -179,16 +178,6 @@ final class TransactionApiService
 
             return $payload;
         });
-    }
-
-    private function hasDuplicateChildInMonth(int $userId, int $parentId, Carbon $dateInMonth): bool
-    {
-        return Transaction::query()
-            ->forUser($userId)
-            ->where('parent_transaction_id', $parentId)
-            ->whereYear('transaction_date', (int) $dateInMonth->format('Y'))
-            ->whereMonth('transaction_date', (int) $dateInMonth->format('n'))
-            ->exists();
     }
 
     public function delete(Transaction $transaction): void

@@ -219,11 +219,12 @@ final class FinancialSummaryService
     {
         $query = Transaction::query()
             ->forUser($userId)
-            ->select([
-                DB::raw('COALESCE(category_id, 0) as category_key'),
-                DB::raw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income_total"),
-                DB::raw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense_total"),
-            ])
+            ->selectRaw(
+                'COALESCE(category_id, 0) as category_key, '.
+                'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as income_total, '.
+                'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as expense_total',
+                [Transaction::TYPE_INCOME, Transaction::TYPE_EXPENSE]
+            )
             ->groupBy(DB::raw('COALESCE(category_id, 0)'));
 
         if ($filters) {

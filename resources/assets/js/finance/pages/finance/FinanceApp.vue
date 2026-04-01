@@ -500,7 +500,7 @@
                           >{{ categoryTypeLabel(c) }}</span
                         >
                         <span
-                          v-if="c.type === 'expense' && c.group"
+                          v-if="c.type === TX_EXPENSE && c.group"
                           class="text--secondary"
                         >
                           · {{ c.group }}</span
@@ -900,6 +900,12 @@ import {
   toIsoDateOnly,
 } from "../../format";
 import { applyBodyThemeClass, getStoredTheme } from "../../financeTheme";
+import {
+  PAYMENT_STATUS_OVERDUE,
+  PAYMENT_STATUS_PAID,
+  PAYMENT_STATUS_PENDING,
+  TRANSACTION_TYPE_EXPENSE,
+} from "../../transactionTypes";
 
 const VALID_VIEWS = [
   "dashboard",
@@ -1056,6 +1062,7 @@ export default {
       editCategory: null,
       deleteCatDialog: { open: false, loading: false, item: null },
       helpDialog: false,
+      TX_EXPENSE: TRANSACTION_TYPE_EXPENSE,
     };
   },
   computed: {
@@ -1074,9 +1081,9 @@ export default {
     paymentStatusFilterItems() {
       return [
         { text: "Todos os status", value: null },
-        { text: "Pendente", value: "pending" },
-        { text: "Pago", value: "paid" },
-        { text: "Atrasado", value: "overdue" },
+        { text: "Pendente", value: PAYMENT_STATUS_PENDING },
+        { text: "Pago", value: PAYMENT_STATUS_PAID },
+        { text: "Atrasado", value: PAYMENT_STATUS_OVERDUE },
       ];
     },
     monthLabelPt() {
@@ -1396,7 +1403,7 @@ export default {
         if (this.filterCategoryId) params.category_id = this.filterCategoryId;
         if (this.filterPaymentStatus) {
           params.payment_status = this.filterPaymentStatus;
-          params.type = "expense";
+          params.type = TRANSACTION_TYPE_EXPENSE;
         }
         const [txOut, sumOut] = await Promise.allSettled([
           axios.get(`${this.apiBase}/transactions`, { params }),
@@ -1437,7 +1444,7 @@ export default {
     async markTransactionPaid(item) {
       const id = item && item.id;
       if (id == null || this.markingPaidById[id]) return;
-      if (!item || item.type !== "expense") return;
+      if (!item || item.type !== TRANSACTION_TYPE_EXPENSE) return;
 
       const idx = this.transactions.findIndex((t) => t.id === id);
       if (idx === -1) return;
@@ -1449,7 +1456,10 @@ export default {
         due_date: row.due_date,
       };
 
-      Object.assign(row, { payment_status: "paid", is_overdue: false });
+      Object.assign(row, {
+        payment_status: PAYMENT_STATUS_PAID,
+        is_overdue: false,
+      });
       this.$set(this.markingPaidById, id, true);
 
       try {
@@ -1458,9 +1468,9 @@ export default {
         );
         const leavesFilteredList =
           data &&
-          data.payment_status === "paid" &&
-          (this.filterPaymentStatus === "overdue" ||
-            this.filterPaymentStatus === "pending");
+          data.payment_status === PAYMENT_STATUS_PAID &&
+          (this.filterPaymentStatus === PAYMENT_STATUS_OVERDUE ||
+            this.filterPaymentStatus === PAYMENT_STATUS_PENDING);
 
         if (leavesFilteredList) {
           this.transactions = this.transactions.filter((t) => t.id !== id);
